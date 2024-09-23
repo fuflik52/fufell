@@ -13,7 +13,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            background: linear-gradient(to bottom, #000022, #001a33 50%, #003366);
+            background: linear-gradient(to bottom, #000022, #001a33 50%, #003366); /* Ночной фон */
             transition: background 1s;
         }
         .northern-lights {
@@ -32,17 +32,19 @@
             0% { transform: translateY(-20px); }
             100% { transform: translateY(20px); }
         }
-        .moon {
+        .moon, .sun {
             position: absolute;
             top: 10%;
             right: 5%;
             width: 80px;
             height: 80px;
-            background: radial-gradient(circle, #FFF, #999);
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
             cursor: pointer;
             transition: background 1s, box-shadow 1s;
+        }
+        .moon {
+            background: radial-gradient(circle, #FFF, #999);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
         }
         .sun {
             background: radial-gradient(circle, #FFFF00, #FFA500);
@@ -68,7 +70,7 @@
             z-index: 2;
             width: 400px;
             height: 500px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.6); /* Темный фон */
             border-radius: 25px;
             box-shadow: 0 0 20px rgba(0, 204, 255, 0.5);
             border: 2px solid #00CCFF;
@@ -96,7 +98,7 @@
         }
         .status {
             font-family: 'Arial', sans-serif;
-            color: #ff0000;
+            color: #ff0000; /* Красный цвет текста */
             font-size: 18px;
             margin-bottom: 10px;
         }
@@ -124,9 +126,28 @@
             color: #00CCFF;
             font-size: 16px;
         }
+        .nav-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s;
+        }
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
     </style>
 </head>
 <body>
+
+    <button class="nav-button" id="homeButton">Home</button>
+    <button class="nav-button" id="gptButton" style="top: 60px;">Gpt</button>
 
     <div class="northern-lights"></div>
 
@@ -151,10 +172,10 @@
         let activeElements = 0;
 
         const userData = {
-            username: "Фуфлик52",
+            username: "Фуфлик",
             avatarUrl: "https://i.postimg.cc/nrzwz7pT/Untitled-2.png",
-            status: "Не беспокоить123",
-            description: "🇷🇺 Russia "
+            status: "Не беспокоить",
+            description: "🇷🇺 Russia"
         };
 
         document.getElementById("username").textContent = userData.username;
@@ -201,26 +222,21 @@
             isDay = !isDay;
 
             if (isDay) {
-                document.body.style.background = 'linear-gradient(to bottom, #87CEEB, #FFFFFF)';
-                document.querySelector('.northern-lights').style.opacity = '0';
-                document.getElementById('moon').classList.add('sun');
-                document.querySelector('.snowy-box').style.background = 'rgba(255, 255, 255, 0.8)';
+                document.body.style.background = 'linear-gradient(to bottom, #87CEEB, #FFFAF0)'; // Весна
+                document.querySelector('.northern-lights').style.opacity = '0'; // Убираем северное сияние
+                document.getElementById('moon').classList.add('sun'); // Меняем луну на солнце
+                document.querySelector('.snowy-box').style.background = 'rgba(255, 255, 255, 0.8)'; // Светлый фон
                 document.querySelector('.snowy-box').style.boxShadow = '0 0 20px rgba(255, 165, 0, 0.5)';
-                document.querySelector('.snowy-box').style.border = '2px solid #FFA500';
-                document.querySelector('h1').style.color = '#0000FF';
-            } else {
-                document.body.style.background = 'linear-gradient(to bottom, #000022, #001a33 50%, #003366)';
-                document.querySelector('.northern-lights').style.opacity = '0.7';
-                document.getElementById('moon').classList.remove('sun');
-                document.querySelector('.snowy-box').style.background = 'rgba(0, 0, 0, 0.6)';
-                document.querySelector('.snowy-box').style.boxShadow = '0 0 20px rgba(0, 204, 255, 0.5)';
-                document.querySelector('.snowy-box').style.border = '2px solid #00CCFF';
-                document.querySelector('h1').style.color = '#00CCFF';
-            }
-        });
+                document.querySelector('.snowy-box').style.border = '2px solid #FFA500'; // Оранжевый контур
+                document.querySelector('h1').style.color = '#0000FF'; // Голубой текст при дневном режиме } else { document.body.style.background = 'linear-gradient(to bottom, #000022, #001a33 50%, #003366)'; // Ночь document.querySelector('.northern-lights').style.opacity = '0.7'; // Возвращаем северное сияние document.getElementById('moon').classList.remove('sun'); // Возвращаем солнце на луну document.querySelector('.snowy-box').style.background = 'rgba(0, 0, 0, 0.6)'; // Темный фон document.querySelector('.snowy-box').style.boxShadow = '0 0 20px rgba(0, 204, 255, 0.5)'; document.querySelector('.snowy-box').style.border = '2px solid #00CCFF'; // Синий контур document.querySelector('h1').style.color = '#00CCFF'; // Синий текст при ночном режиме } });
+                document.getElementById('homeButton').addEventListener('click', () => {
+        location.reload();
+    });
 
-        setInterval(createSnowflakeOrLeaf, 1000);
-    </script>
+    document.getElementById('gptButton').addEventListener('click', () => {
+        window.open('https://your-ai-service-url.com', '_blank'); // Открыть страницу с ИИ
+    });
 
-</body>
-</html>
+    setInterval(createSnowflakeOrLeaf, 1000);
+</script>
+</body> </html> ```
