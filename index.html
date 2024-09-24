@@ -3,125 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Осенний Сайт с Регистрацией</title>
+    <title>Регистрация и Профиль Discord</title>
     <style>
         body {
-            background-color: #ffebc2; /* Теплый фон осени */
-            overflow: hidden;
-            position: relative;
-            height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        .menu {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 100vh;
             display: flex;
-            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(to bottom, #000022, #001a33 50%, #003366);
+            transition: background 1s;
         }
 
-        .leaf {
+        .northern-lights {
             position: absolute;
-            top: -50px;
-            width: 40px; /* Размер листа */
-            height: 40px;
-            background-image: url('https://example.com/autumn_leaf.png'); /* Замените на ссылку на ваше изображение осеннего листа */
-            background-size: cover;
-            animation: fall linear infinite;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(144, 238, 144, 0.2), transparent 70%),
+                        radial-gradient(circle at 30% 40%, rgba(173, 216, 230, 0.3), transparent 80%),
+                        radial-gradient(circle at 70% 30%, rgba(138, 43, 226, 0.2), transparent 90%);
+            opacity: 0.7;
+            animation: shimmer 5s ease-in-out infinite alternate;
         }
 
-        @keyframes fall {
-            0% {
-                transform: translateX(0);
-                top: -50px;
-            }
-            100% {
-                transform: translateX(calc(100vw - 50px));
-                top: 100vh;
-            }
+        @keyframes shimmer {
+            0% { transform: translateY(-20px); }
+            100% { transform: translateY(20px); }
         }
 
-        .registration {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
+        .form-container {
+            position: relative;
+            z-index: 2;
+            width: 400px;
+            height: auto;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 25px;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.5);
+            border: 2px solid #00CCFF;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
-        .registration input {
-            width: 100%;
-            padding: 10px;
+        h1 {
+            color: #00CCFF;
+            margin-bottom: 10px;
+        }
+
+        input {
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
         }
 
-        .registration button {
-            width: 100%;
+        button {
             padding: 10px;
-            background-color: #ffa500; /* Оранжевая кнопка */
-            border: none;
-            border-radius: 4px;
+            background-color: #00CCFF;
             color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
 
-        .registration button:hover {
-            background-color: #ff8c00; /* Более темный оттенок при наведении */
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid #00CCFF;
+            margin-bottom: 20px;
         }
 
-        .icon {
-            width: 24px;
-            height: 24px;
+        .status, .description {
+            color: #FFFFFF;
+        }
+
+        .views-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #00CCFF;
         }
     </style>
 </head>
 <body>
 
-<div class="menu">
-    <a href="https://funpay.com" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/FunPay_logo.png" class="icon" alt="FunPay">
-    </a>
-    <a href="https://telegram.org" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Telegram_logo.svg" class="icon" alt="Telegram">
-    </a>
-</div>
+    <div class="northern-lights"></div>
 
-<div class="registration">
-    <h2>Регистрация</h2>
-    <input type="text" placeholder="Имя" required>
-    <input type="email" placeholder="Email" required>
-    <input type="password" placeholder="Пароль" required>
-    <button type="submit">Зарегистрироваться</button>
-</div>
+    <div class="form-container" id="formContainer">
+        <h1>Регистрация</h1>
+        <input type="text" id="username" placeholder="Никнейм" required>
+        <input type="password" id="password" placeholder="Пароль" required>
+        <button id="registerButton">Создать аккаунт</button>
+    </div>
 
-<script>
-    function createLeaf() {
-        const leaf = document.createElement('div');
-        leaf.className = 'leaf';
-        leaf.style.left = Math.random() * 100 + 'vw';
-        leaf.style.animationDuration = Math.random() * 3 + 2 + 's';
-        document.body.appendChild(leaf);
+    <div class="avatar" id="avatar" style="background-image: url('https://cdn.discordapp.com/avatars/your_user_id/your_avatar_hash.png'); display: none;"></div>
+    <div class="status" id="status" style="display: none;">Не беспокоить</div>
+    <div class="description" id="description" style="display: none;">Привет! Я разработчик и любитель игр.</div>
+    <div class="views-counter" id="viewsCounter">Просмотры: 0</div>
 
-        leaf.addEventListener('animationend', () => {
-            leaf.remove();
+    <script>
+        const viewsCounter = document.getElementById("viewsCounter");
+        let views = localStorage.getItem('pageViews') || 0;
+        views++;
+        localStorage.setItem('pageViews', views);
+        viewsCounter.textContent = `Просмотры: ${views}`;
+
+        document.getElementById("registerButton").addEventListener("click", () => {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (username && password) {
+                // Здесь можно добавить логику для сохранения данных пользователя
+                // Например, отправить данные на сервер
+
+                // Скрыть форму и показать профиль
+                document.getElementById("formContainer").style.display = "none";
+                document.getElementById("avatar").style.display = "block";
+                document.getElementById("status").style.display = "block";
+                document.getElementById("description").style.display = "block";
+                
+                document.getElementById("avatar").style.backgroundImage = `url('https://i.postimg.cc/nrzwz7pT/Untitled-2.png')`;
+                document.getElementById("status").textContent = "Не беспокоить";
+                document.getElementById("description").textContent = `Добро пожаловать, ${username}!`;
+
+                // Перенаправление на другую страницу через 2 секунды
+                setTimeout(() => {
+                    window.location.href = "другая_страница.html"; // Укажите адрес страницы
+                }, 2000);
+            } else {
+                alert("Пожалуйста, заполните все поля.");
+            }
         });
-    }
-
-    setInterval(createLeaf, 500);
-</script>
+    </script>
 
 </body>
 </html>
