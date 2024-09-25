@@ -1,186 +1,306 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Andev Web</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Open Sans", sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <title>Andev Web</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
 
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      width: 100%;
-      padding: 0 10px;
-      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-    }
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
 
-    body::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: url("https://i.postimg.cc/0jv27Qvw/20008380-645221846.jpg"), #000;
-      background-position: center;
-      background-size: cover;
-      z-index: -1;
-    }
+        body,
+        input,
+        button {
+            font-size: 1rem;
+            font-family: "Poppins", sans-serif;
+        }
 
-    .wrapper {
-      width: 400px;
-      border-radius: 15px;
-      padding: 40px;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-      transition: all 0.3s ease;
-    }
+        body {
+            color: hsl(0, 0%, 100%);
+        }
 
-    .wrapper:hover {
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
-    }
+        input,
+        button {
+            border: none;
+            outline: none;
+        }
 
-    form {
-      display: flex;
-      flex-direction: column;
-    }
+        a {
+            text-decoration: none;
+        }
 
-    h2 {
-      font-size: 2.2rem;
-      margin-bottom: 25px;
-      color: #ffffff;
-      letter-spacing: 1px;
-    }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
 
-    .input-field {
-      position: relative;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-      margin: 20px 0;
-    }
+        /*=============== LOGIN ===============*/
+        .login {
+            position: relative;
+            height: 100vh;
+            display: grid;
+            align-items: center;
+        }
 
-    .input-field label {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      color: #ffffff;
-      font-size: 16px;
-      pointer-events: none;
-      transition: 0.3s ease;
-    }
+        .login__img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
 
-    .input-field input {
-      width: 100%;
-      height: 40px;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-size: 16px;
-      color: #ffffff;
-      padding: 0 10px;
-    }
+        .container {
+            position: relative;
+            background-color: hsla(0, 0%, 10%, 0.1);
+            border: 2px solid white;
+            margin-inline: 1.5rem;
+            padding: 2.5rem 1.5rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
 
-    .input-field input:focus~label,
-    .input-field input:valid~label {
-      font-size: 0.9rem;
-      top: 10px;
-      transform: translateY(-150%);
-      color: #ffdde1;
-    }
+        .login__title {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
 
-    .forget {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 25px 0 35px 0;
-      color: #ffffff;
-    }
+        .login__content,
+        .login__box {
+            display: grid;
+        }
 
-    #remember {
-      accent-color: #ffdde1;
-    }
+        .login__content {
+            row-gap: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .forget label {
-      display: flex;
-      align-items: center;
-    }
+        .login__box {
+            grid-template-columns: max-content 1fr;
+            align-items: center;
+            column-gap: 0.75rem;
+            border-bottom: 2px solid hsl(0, 0%, 100%);
+        }
 
-    .forget label p {
-      margin-left: 8px;
-    }
+        .login__icon,
+        .login__eye {
+            font-size: 1.25rem;
+        }
 
-    .wrapper a {
-      color: #ffdde1;
-      text-decoration: none;
-    }
+        .login__input {
+            width: 100%;
+            padding-block: 0.8rem;
+            background: none;
+            color: hsl(0, 0%, 100%);
+            position: relative;
+            z-index: 1;
+        }
 
-    .wrapper a:hover {
-      text-decoration: underline;
-    }
+        .login__box-input {
+            position: relative;
+        }
 
-    button {
-      background-color: #271930;
-      color: #ffffff;
-      font-weight: 600;
-      border: none;
-      padding: 15px 20px;
-      cursor: pointer;
-      border-radius: 25px;
-      font-size: 16px;
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-    }
+        .login__label {
+            position: absolute;
+            left: 0;
+            top: 13px;
+            font-weight: 500;
+            transition: top 0.3s, font-size 0.3s;
+        }
 
-    button:hover {
-      color: #000000;
-      background: rgba(255, 255, 255, 0.2);
-      border-color: #ffffff;
-    }
+        .login__eye {
+            position: absolute;
+            right: 0;
+            top: 18px;
+            z-index: 10;
+            cursor: pointer;
+        }
 
-    .register {
-      text-align: center;
-      margin-top: 30px;
-      color: #ffffff;
-    }
-  </style>
+        .login__box:nth-child(2) input {
+            padding-right: 1.8rem;
+        }
+
+        .login__check,
+        .login__check-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .login__check {
+            margin-bottom: 1.5rem;
+        }
+
+        .login__check-label,
+        .login__forgot,
+        .login__register {
+            font-size: 0.813rem;
+        }
+
+        .login__check-group {
+            column-gap: 0.5rem;
+        }
+
+        .login__check-input {
+            width: 16px;
+            height: 16px;
+        }
+
+        .login__forgot {
+            color: hsl(0, 0%, 100%);
+        }
+
+        .login__forgot:hover {
+            text-decoration: underline;
+        }
+
+        .login__button {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: hsl(0, 0%, 100%);
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .login__register {
+            text-align: center;
+        }
+
+        .login__register a {
+            color: hsl(0, 0%, 100%);
+            font-weight: 500;
+        }
+
+        .login__register a:hover {
+            text-decoration: underline;
+        }
+
+        /* Input focus move up label */
+        .login__input:focus + .login__label {
+            top: -12px;
+            font-size: 0.813rem;
+        }
+
+        /* Input focus sticky top label */
+        .login__input:not(:placeholder-shown).login__input:not(:focus) + .login__label {
+            top: -12px;
+            font-size: 0.813rem;
+        }
+
+        /*=============== BREAKPOINTS ===============*/
+        @media screen and (min-width: 576px) {
+            .login {
+                justify-content: center;
+            }
+
+            .container {
+                width: 400px;
+                padding: 4rem 3rem 3.5rem;
+                border-radius: 1.5rem;
+            }
+
+            .login__title {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div class="wrapper">
-    <form action="https://fuflik52.github.io/Login2/" method="GET">
-      <h2>Login Form</h2>
-      <div class="input-field">
-        <input type="text" required>
-        <label>Enter your email</label>
-      </div>
-      <div class="input-field">
-        <input type="password" required>
-        <label>Enter your password</label>
-      </div>
-      <div class="forget">
-        <label for="remember">
-          <input type="checkbox" id="remember">
-          <p>Remember me</p>
-        </label>
-        <a href="#">Forgot password?</a>
-      </div>
-      <button type="submit">Log In</button>
-      <div class="register">
-        <p>Don't have an account? <a href="#">Register</a></p>
-      </div>
-    </form>
-  </div>
-</body>
+    <div class="login">
+        <img src="https://i.postimg.cc/MGfsBfGv/login-bg.png" alt="login image" class="login__img">
 
+        <form id="loginForm" class="container">
+            <h1 class="login__title">Login</h1>
+
+            <div class="login__content">
+                <div class="login__box">
+                    <i class="ri-user-3-line login__icon"></i>
+                    <div class="login__box-input">
+                        <input type="email" required class="login__input" id="login-email" placeholder=" ">
+                        <label for="login-email" class="login__label">Email</label>
+                    </div>
+                </div>
+
+                <div class="login__box">
+                    <i class="ri-lock-2-line login__icon"></i>
+                    <div class="login__box-input">
+                        <input type="password" required class="login__input" id="login-pass" placeholder=" ">
+                        <label for="login-pass" class="login__label">Пароль</label>
+                        <i class="ri-eye-off-line login__eye" id="login-eye"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="login__check">
+                <div class="login__check-group">
+                    <input type="checkbox" class="login__check-input" id="login-check">
+                    <label for="login-check" class="login__check-label">Запомнить меня</label>
+                </div>
+                <a href="#" class="login__forgot">Забыли пароль?</a>
+            </div>
+
+            <button type="button" class="login__button" id="loginButton">Войти</button>
+            <button type="button" class="login__button" id="registerButton">Создать аккаунт</button>
+
+            <p class="login__register">
+                У вас нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-pass');
+
+        // Функция для регистрации пользователя
+        registerButton.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (email && password) {
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const existingUser = users.find(user => user.email === email);
+
+                if (existingUser) {
+                    alert('Пользователь с таким email уже существует.');
+                } else {
+                    users.push({ email, password });
+                    localStorage.setItem('users', JSON.stringify(users));
+                    alert('Аккаунт успешно создан!');
+                    window.location.href = 'http://u174280.test-handyhost.ru/#';
+                }
+            } else {
+                alert('Пожалуйста, введите email и пароль.');
+            }
+        });
+
+        // Функция для входа в аккаунт
+        loginButton.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const existingUser = users.find(user => user.email === email && user.password === password);
+
+            if (existingUser) {
+                alert('Вход выполнен успешно!');
+                window.location.href = 'http://u174280.test-handyhost.ru/#';
+            } else {
+                alert('Неверный email или пароль.');
+            }
+        });
+    </script>
+</body>
 </html>
