@@ -3,304 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-    <title>Andev Web</title>
+    <title>City Builder & Wheel of Fortune</title>
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
-
-        * {
-            box-sizing: border-box;
-            padding: 0;
-            margin: 0;
-        }
-
-        body,
-        input,
-        button {
-            font-size: 1rem;
-            font-family: "Poppins", sans-serif;
-        }
-
         body {
-            color: hsl(0, 0%, 100%);
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa; /* Голубой фон */
+            text-align: center;
+            padding: 20px;
         }
 
-        input,
+        #game-container {
+            width: 100%; /* Позволить растянуть на всю ширину */
+            max-width: 600px; /* Максимальная ширина */
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
         button {
+            padding: 10px 20px;
+            margin: 10px 0;
             border: none;
-            outline: none;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /*=============== LOGIN ===============*/
-        .login {
-            position: relative;
-            height: 100vh;
-            display: grid;
-            align-items: center;
-        }
-
-        .login__img {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-        }
-
-        .container {
-            position: relative;
-            background-color: hsla(0, 0%, 10%, 0.1);
-            border: 2px solid white;
-            margin-inline: 1.5rem;
-            padding: 2.5rem 1.5rem;
-            border-radius: 1rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .login__title {
-            text-align: center;
-            font-size: 1.75rem;
-            font-weight: 500;
-            margin-bottom: 2rem;
-        }
-
-        .login__content,
-        .login__box {
-            display: grid;
-        }
-
-        .login__content {
-            row-gap: 1.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .login__box {
-            grid-template-columns: max-content 1fr;
-            align-items: center;
-            column-gap: 0.75rem;
-            border-bottom: 2px solid hsl(0, 0%, 100%);
-        }
-
-        .login__icon,
-        .login__eye {
-            font-size: 1.25rem;
-        }
-
-        .login__input {
-            width: 100%;
-            padding-block: 0.8rem;
-            background: none;
-            color: hsl(0, 0%, 100%);
-            position: relative;
-            z-index: 1;
-        }
-
-        .login__box-input {
-            position: relative;
-        }
-
-        .login__label {
-            position: absolute;
-            left: 0;
-            top: 13px;
-            font-weight: 500;
-            transition: top 0.3s, font-size 0.3s;
-        }
-
-        .login__eye {
-            position: absolute;
-            right: 0;
-            top: 18px;
-            z-index: 10;
+            border-radius: 5px;
+            background-color: #4CAF50; /* Зеленый цвет */
+            color: white;
+            font-size: 14px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        .login__box:nth-child(2) input {
-            padding-right: 1.8rem;
+        button:hover {
+            background-color: #45a049; /* Темнее при наведении */
         }
 
-        .login__check,
-        .login__check-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        #city-info {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
         }
 
-        .login__check {
-            margin-bottom: 1.5rem;
+        /* Стили для колеса фортуны */
+        .component {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 10px solid #333; /* Граница колеса */
+            background: conic-gradient(green 50%, red 50%); /* Зеленая и красная стороны */
         }
 
-        .login__check-label,
-        .login__forgot,
-        .login__register {
-            font-size: 0.813rem;
+        #wheel-pointer {
+            width: 10px;
+            height: 20px;
+            background-color: yellow; /* Цвет указателя */
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg); /* Указатель под 180 градусов */
+            border-radius: 5px; /* Скругленные края */
         }
 
-        .login__check-group {
-            column-gap: 0.5rem;
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
         }
 
-        .login__check-input {
-            width: 16px;
-            height: 16px;
+        #chat-container {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #b3e5fc; /* Светло-голубая граница */
+            padding: 10px;
+            background-color: #e1f5fe; /* Светло-голубой фон */
+            border-radius: 10px; /* Закругленные края */
+            resize: both; /* Позволить изменять размер */
+            overflow: auto; /* Включить прокрутку при необходимости */
+            max-width: 100%; /* Максимальная ширина */
         }
 
-        .login__forgot {
-            color: hsl(0, 0%, 100%);
+        .chat-message {
+            margin: 5px 0;
+            position: relative; /* Позволить позиционирование для крестика */
+            padding-right: 25px; /* Отступ для крестика */
         }
 
-        .login__forgot:hover {
-            text-decoration: underline;
+        .user-message {
+            text-align: right;
+            color: blue;
         }
 
-        .login__button {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: hsl(0, 0%, 100%);
-            font-weight: 500;
+        .bot-message {
+            text-align: left;
+            color: green;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 0;
+            right: 5px; /* Смещение для правильного позиционирования */
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
-            margin-bottom: 2rem;
+            font-size: 14px;
+            line-height: 20px; /* Центрирование текста */
+            display: none; /* Скрыть по умолчанию */
         }
 
-        .login__register {
-            text-align: center;
-        }
-
-        .login__register a {
-            color: hsl(0, 0%, 100%);
-            font-weight: 500;
-        }
-
-        .login__register a:hover {
-            text-decoration: underline;
-        }
-
-        /* Input focus move up label */
-        .login__input:focus + .login__label {
-            top: -12px;
-            font-size: 0.813rem;
-        }
-
-        /* Input focus sticky top label */
-        .login__input:not(:placeholder-shown).login__input:not(:focus) + .login__label {
-            top: -12px;
-            font-size: 0.813rem;
-        }
-
-        /*=============== BREAKPOINTS ===============*/
-        @media screen and (min-width: 576px) {
-            .login {
-                justify-content: center;
-            }
-
-            .container {
-                width: 400px;
-                padding: 4rem 3rem 3.5rem;
-                border-radius: 1.5rem;
-            }
-
-            .login__title {
-                font-size: 2rem;
-            }
+        .chat-message:hover .delete-button {
+            display: block; /* Показать крестик при наведении */
         }
     </style>
 </head>
 <body>
-    <div class="login">
-        <img src="https://i.postimg.cc/MGfsBfGv/login-bg.png" alt="login image" class="login__img">
+    <div id="game-container">
+        <h1>City Builder & Wheel of Fortune</h1>
+        <div id="create-city">
+            <p>Введите название города:</p>
+            <input type="text" id="city-name-input" placeholder="Название города" />
+            <button onclick="createCity()">Создать город</button>
+        </div>
 
-        <form id="loginForm" class="container">
-            <h1 class="login__title">Login</h1>
+        <div id="city-info" style="display: none;">
+            <p>🏙️ Город: <span id="city-name">---</span></p>
+            <p>💰 Баланс: <span id="balance">1000</span></p>
+            <p>🏗️ Материалы: <span id="materials">500</span></p>
+            <p>⚡ Энергия: <span id="energy">100</span></p>
+            <p>👥 Популяция: <span id="population">10</span></p>
+        </div>
 
-            <div class="login__content">
-                <div class="login__box">
-                    <i class="ri-user-3-line login__icon"></i>
-                    <div class="login__box-input">
-                        <input type="email" required class="login__input" id="login-email" placeholder=" ">
-                        <label for="login-email" class="login__label">Email</label>
-                    </div>
-                </div>
+        <div id="controls" style="display: none;">
+            <button onclick="buildHouse()">🏠 Построить дом</button>
+            <div id="house-response" class="bot-response"></div>
+            <button onclick="buildFactory()">🏭 Построить фабрику</button>
+            <div id="factory-response" class="bot-response"></div>
+            <button onclick="buildCommercial()">🏢 Построить магазин</button>
+            <div id="commercial-response" class="bot-response"></div>
+            <button onclick="showStats()">🔍 Статистика</button>
+            <div id="stats-response" class="bot-response"></div>
+            <button onclick="openCasino()">🎰 Казино</button>
+            <div id="casino-response" class="bot-response"></div>
+        </div>
 
-                <div class="login__box">
-                    <i class="ri-lock-2-line login__icon"></i>
-                    <div class="login__box-input">
-                        <input type="password" required class="login__input" id="login-pass" placeholder=" ">
-                        <label for="login-pass" class="login__label">Пароль</label>
-                        <i class="ri-eye-off-line login__eye" id="login-eye"></i>
-                    </div>
-                </div>
-            </div>
+        <!-- Колесо фортуны -->
+        <div id="wheel-container" style="display: none;">
+            <h3>Колесо Фортуны</h3>
+            <div class="component" id="wheel"></div>
+            <div id="wheel-pointer"></div>
+            <button onclick="spinWheel(1)">1/3 Баланса</button>
+            <button onclick="spinWheel(2)">2/3 Баланса</button>
+            <button onclick="spinWheel(3)">Ва-Банк</button>
+            <div class="result" id="spin-result"></div>
+        </div>
 
-            <div class="login__check">
-                <div class="login__check-group">
-                    <input type="checkbox" class="login__check-input" id="login-check">
-                    <label for="login-check" class="login__check-label">Запомнить меня</label>
-                </div>
-                <a href="#" class="login__forgot">Забыли пароль?</a>
-            </div>
-
-            <button type="button" class="login__button" id="loginButton">Войти</button>
-            <button type="button" class="login__button" id="registerButton">Создать аккаунт</button>
-
-            <p class="login__register">
-                У вас нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a>
-            </p>
-        </form>
+        <div id="chat-container"></div>
+        
+        <div id="chat-input" style="display: none;">
+            <input type="text" id="chat-box" placeholder="Напишите сообщение..." onkeypress="sendMessage(event)">
+        </div>
     </div>
 
     <script>
-        const loginButton = document.getElementById('loginButton');
-        const registerButton = document.getElementById('registerButton');
-        const emailInput = document.getElementById('login-email');
-        const passwordInput = document.getElementById('login-pass');
+        let city = {
+            name: "",
+            balance: 1000,
+            materials: 500,
+            energy: 100,
+            population: 10,
+            buildings: {
+                house: 1,
+                factory: 0,
+                commercial: 0
+            },
+            bank_balance: 0
+        };
 
-        // Функция для регистрации пользователя
-        registerButton.addEventListener('click', () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
+        // Функция создания города
+        function createCity() {
+            let cityNameInput = document.getElementById("city-name-input").value;
+            if (cityNameInput) {
+                city.name = cityNameInput;
+                document.getElementById("city-name").innerText = city.name;
+                document.getElementById("create-city").style.display = "none";
+                document.getElementById("city-info").style.display = "block";
+                document.getElementById("controls").style.display = "block";
+                document.getElementById("chat-input").style.display = "block"; // Показать чат
+                addBotMessage(`Город '${city.name}' успешно создан!`);
+            }
+        }
 
-            if (email && password) {
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                const existingUser = users.find(user => user.email === email);
+        // Функция для отображения колеса фортуны
+        function openCasino() {
+            document.getElementById("wheel-container").style.display = "block";
+        }
 
-                if (existingUser) {
-                    alert('Пользователь с таким email уже существует.');
+        // Вращение колеса фортуны
+        function spinWheel(type) {
+            let stake = 0;
+            if (type === 1) {
+                stake = Math.floor(city.balance / 3);
+            } else if (type === 2) {
+                stake = Math.floor(city.balance / 3 * 2);
+            } else if (type === 3) {
+                stake = city.balance;
+            }
+
+            if (stake > city.balance) {
+                addBotMessage("Недостаточно средств для ставки.");
+                return;
+            }
+
+            city.balance -= stake;
+
+            // Вращение колеса
+            let spinAngle = Math.floor(Math.random() * 360) + 1440;  // От 1440 до 1800 градусов (4-5 полных оборотов)
+            document.getElementById("wheel").style.transition = "transform 3s ease-out";
+            document.getElementById("wheel").style.transform = `rotate(${spinAngle}deg)`;
+
+            setTimeout(() => {
+                let result = spinAngle % 360 < 180; // Если угол меньше 180, это победа
+
+                if (result) {
+                    city.balance += stake * 2;
+                    addBotMessage(`Вы выиграли! Ваш выигрыш: ${stake * 2} 💰.`);
                 } else {
-                    users.push({ email, password });
-                    localStorage.setItem('users', JSON.stringify(users));
-                    alert('Аккаунт успешно создан!');
-                    window.location.href = 'http://u174280.test-handyhost.ru/#';
+                    addBotMessage(`Вы проиграли. Потеряно: ${stake} 💰.`);
                 }
-            } else {
-                alert('Пожалуйста, введите email и пароль.');
+
+                // Теперь обновляем UI только после нажатия на кнопку
+                updateUI();
+                document.getElementById("wheel").style.transition = "";
+                document.getElementById("wheel").style.transform = "";  // Сброс колеса после завершения
+            }, 3000);
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            document.getElementById("balance").innerText = city.balance;
+            document.getElementById("materials").innerText = city.materials;
+            document.getElementById("energy").innerText = city.energy;
+            document.getElementById("population").innerText = city.population;
+        }
+
+        // Обработка отправки сообщений
+        function sendMessage(event) {
+            if (event.key === "Enter") {
+                let chatBox = document.getElementById("chat-box");
+                let message = chatBox.value.trim();
+
+                if (message !== "") {
+                    addUserMessage(message);
+                    chatBox.value = "";
+
+                    // Обработка промокодов
+                    if (message.startsWith("/promo ")) {
+                        let code = message.split(" ")[1];
+                        applyPromo(code);
+                    }
+                }
             }
-        });
+        }
 
-        // Функция для входа в аккаунт
-        loginButton.addEventListener('click', () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
+        // Добавление сообщения от пользователя
+        function addUserMessage(text) {
+            let chatContainer = document.getElementById("chat-container");
+            let message = document.createElement("div");
+            message.className = "chat-message user-message";
+            message.innerText = text;
 
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const existingUser = users.find(user => user.email === email && user.password === password);
+            // Кнопка удаления сообщения
+            let deleteButton = document.createElement("button");
+            deleteButton.innerText = "✖";
+            deleteButton.className = "delete-button";
+            deleteButton.onclick = function() {
+                chatContainer.removeChild(message);
+            };
 
-            if (existingUser) {
-                alert('Вход выполнен успешно!');
-                window.location.href = 'http://u174280.test-handyhost.ru/#';
+            message.appendChild(deleteButton);
+            chatContainer.appendChild(message);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Автопрокрутка
+        }
+
+        // Добавление сообщения от бота
+        function addBotMessage(text) {
+            let chatContainer = document.getElementById("chat-container");
+            let message = document.createElement("div");
+            message.className = "chat-message bot-message";
+            message.innerText = text;
+
+            // Кнопка удаления сообщения
+            let deleteButton = document.createElement("button");
+            deleteButton.innerText = "✖";
+            deleteButton.className = "delete-button";
+            deleteButton.onclick = function() {
+                chatContainer.removeChild(message);
+            };
+
+            message.appendChild(deleteButton);
+            chatContainer.appendChild(message);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Автопрокрутка
+        }
+
+        // Применение промокода
+        function applyPromo(code) {
+            if (code === "1kk") {
+                city.balance += 1000000;
+                city.materials += 1000000;
+                addBotMessage("Промокод активирован! Вы получили 1,000,000 💰 и 1,000,000 🏗️.");
+                updateUI();
             } else {
-                alert('Неверный email или пароль.');
+                addBotMessage("Неверный промокод.");
             }
-        });
+        }
+
+        // Функции для построек
+        function buildHouse() {
+            city.buildings.house++;
+            addBotMessage(`Построен дом! Общее количество домов: ${city.buildings.house}`);
+        }
+
+        function buildFactory() {
+            city.buildings.factory++;
+            addBotMessage(`Построена фабрика! Общее количество фабрик: ${city.buildings.factory}`);
+        }
+
+        function buildCommercial() {
+            city.buildings.commercial++;
+            addBotMessage(`Построен магазин! Общее количество магазинов: ${city.buildings.commercial}`);
+        }
+
+        function showStats() {
+            addBotMessage(`Статистика города: 
+            Баланс: ${city.balance} 💰, 
+            Материалы: ${city.materials} 🏗️, 
+            Энергия: ${city.energy} ⚡, 
+            Популяция: ${city.population} 👥.`);
+        }
+
+        // Инициализация интерфейса
+        updateUI();
     </script>
 </body>
 </html>
