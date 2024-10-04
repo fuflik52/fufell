@@ -1,7 +1,9 @@
-<html><head><base href="https://example.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Вход</title><style>
+<html><head><base href="https://example.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Вход и администрирование</title><style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #000;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             color: #fff;
             display: flex;
             justify-content: center;
@@ -10,7 +12,7 @@
             margin: 0;
         }
         .container {
-            background-color: #111;
+            background-color: rgba(17, 17, 17, 0.8);
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
@@ -56,7 +58,7 @@
             cursor: pointer;
             margin-left: 5px;
         }
-        #loginForm, #userTypeChoice, #userData, #adminPanel, #userManagement, #siteSettings, #analytics, #logs, #globalSettings {
+        #loginForm, #userTypeChoice, #userData, #adminPanel, #userManagement, #siteSettings, #analytics, #logs, #globalSettings, #supportTickets, #supportTicketForm {
             display: none;
         }
         #notification {
@@ -121,6 +123,38 @@
         }
         th {
             background-color: #222;
+        }
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .chart {
+            width: 45%;
+            margin-bottom: 20px;
+        }
+        .support-ticket {
+            background-color: #222;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .support-ticket-response {
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #333;
+            border-radius: 3px;
+        }
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
         }
         #chart {
             width: 100%;
@@ -194,6 +228,15 @@
             <h2>Данные пользователя</h2>
             <p id="userInfo"></p>
             <button onclick="backToLogin()">Назад</button>
+            <button onclick="showSupportTicketForm()">Техподдержка</button>
+        </div>
+
+        <div id="supportTicketForm" style="display: none;">
+            <h2>Отправить запрос в техподдержку</h2>
+            <input type="text" id="ticketSubject" placeholder="Тема">
+            <textarea id="ticketMessage" placeholder="Сообщение"></textarea>
+            <button onclick="submitSupportTicket()">Отправить</button>
+            <button onclick="document.getElementById('supportTicketForm').style.display='none'; document.getElementById('userData').style.display='block';">Отмена</button>
         </div>
 
         <div id="adminPanel">
@@ -211,6 +254,9 @@
                 <button onclick="showLogs()">Журналы</button>
             </div>
             <div class="admin-option">
+                <button onclick="showSupportTickets()">Запросы техподдержки</button>
+            </div>
+            <div class="admin-option">
                 <button onclick="showGlobalSettings()">Глобальные настройки</button>
             </div>
             <button onclick="backToLogin()">Назад</button>
@@ -221,6 +267,10 @@
             <input type="text" id="newUsername" placeholder="Имя пользователя">
             <input type="password" id="newPassword" placeholder="Пароль">
             <input type="text" id="newEmail" placeholder="Email">
+            <select id="newUserType">
+                <option value="user">Обычный пользователь</option>
+                <option value="admin">Администратор</option>
+            </select>
             <button onclick="addUser()">Добавить пользователя</button>
             <input type="text" placeholder="Поиск пользователей" oninput="searchUser(this.value)">
             <button onclick="saveAllUsers()">Сохранить все</button>
@@ -256,7 +306,7 @@
 
         <div id="analytics">
             <h2>Аналитика</h2>
-            <canvas id="chart"></canvas>
+            <div class="chart-container"></div>
             <button onclick="backToAdminPanel()">Назад</button>
         </div>
 
@@ -274,6 +324,23 @@
                 <input type="checkbox" id="showGlobalCredentials"> Показывать Email и пароль всем пользователям
             </label>
             <button onclick="saveGlobalSettings()">Сохранить настройки</button>
+            <button onclick="backToAdminPanel()">Назад</button>
+        </div>
+
+        <div id="supportTickets" style="display: none;">
+            <h2>Запросы техподдержки</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Пользователь</th>
+                        <th>Тема</th>
+                        <th>Сообщение</th>
+                        <th>Статус</th>
+                        <th>Ответ</th>
+                    </tr>
+                </thead>
+                <tbody id="supportTicketsBody"></tbody>
+            </table>
             <button onclick="backToAdminPanel()">Назад</button>
         </div>
     </div>
@@ -302,10 +369,30 @@
             showCredentials: false
         };
 
-        let logs = [];
+        let logs = JSON.parse(localStorage.getItem('logs') || '[]');
+        let supportTickets = [];
+
+        function loadLogsFromLocalStorage() {
+            const savedLogs = localStorage.getItem('logs');
+            if (savedLogs) {
+                logs = JSON.parse(savedLogs);
+            }
+        }
+
+        function loadSupportTickets() {
+            supportTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+        }
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleString();
+            logs.push(`[${timestamp}] ${message}`);
+            localStorage.setItem('logs', JSON.stringify(logs));
+            updateLogs();
+        }
 
         function saveAllUsers() {
             localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('logs', JSON.stringify(logs));
             showNotification('Все пользователи сохранены');
         }
 
@@ -330,6 +417,7 @@
             document.getElementById('analytics').style.display = 'none';
             document.getElementById('logs').style.display = 'none';
             document.getElementById('globalSettings').style.display = 'none';
+            document.getElementById('supportTickets').style.display = 'none';
         }
 
         function login() {
@@ -426,54 +514,106 @@
         function showAnalytics() {
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('analytics').style.display = 'block';
-            
-            const ctx = document.getElementById('chart').getContext('2d');
 
-            if (analyticsChart) {
-                analyticsChart.destroy();
-            }
+            const logData = analyzeLogData();
 
-            analyticsChart = new Chart(ctx, {
-                type: 'bar',
+            document.getElementById('analytics').innerHTML = '<h2>Аналитика</h2><div class="chart-container"></div>';
+            const chartContainer = document.querySelector('.chart-container');
+
+            createChart(chartContainer, 'bar', 'Действия по дням', Object.keys(logData.actionsPerDay), Object.values(logData.actionsPerDay));
+            createChart(chartContainer, 'pie', 'Действия по пользователям', Object.keys(logData.actionsPerUser), Object.values(logData.actionsPerUser));
+
+            const topActions = Object.entries(logData.actionCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            createChart(chartContainer, 'doughnut', 'Самые частые действия', topActions.map(a => a[0]), topActions.map(a => a[1]));
+
+            createChart(chartContainer, 'line', 'Активность пользователей', Object.keys(logData.userActivityOverTime), Object.values(logData.userActivityOverTime));
+
+            const analyticsInfo = document.createElement('div');
+            analyticsInfo.innerHTML = `
+                <h3>Статистика по логам:</h3>
+                <p>Всего действий: ${logData.totalActions}</p>
+                <p>Уникальных пользователей: ${logData.uniqueUsers.size}</p>
+                <p>Самое частое действие: ${logData.mostCommonAction}</p>
+            `;
+            document.getElementById('analytics').appendChild(analyticsInfo);
+        }
+
+        function createChart(container, type, label, labels, data) {
+            const chartDiv = document.createElement('div');
+            chartDiv.className = 'chart';
+            const canvas = document.createElement('canvas');
+            chartDiv.appendChild(canvas);
+            container.appendChild(chartDiv);
+
+            new Chart(canvas.getContext('2d'), {
+                type: type,
                 data: {
-                    labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Количество посещений',
-                        data: [65, 59, 80, 81, 56, 55, 40],
+                        label: label,
+                        data: data,
                         backgroundColor: [
                             'rgba(255, 99, 132, 0.2)',
                             'rgba(54, 162, 235, 0.2)',
                             'rgba(255, 206, 86, 0.2)',
                             'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(255, 159, 64, 0.2)',
-                            'rgba(199, 199, 199, 0.2)'
+                            'rgba(153, 102, 255, 0.2)'
                         ],
                         borderColor: [
                             'rgba(255, 99, 132, 1)',
                             'rgba(54, 162, 235, 1)',
                             'rgba(255, 206, 86, 1)',
                             'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)',
-                            'rgba(199, 199, 199, 1)'
+                            'rgba(153, 102, 255, 1)'
                         ],
                         borderWidth: 1
                     }]
                 },
                 options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    },
                     responsive: true,
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeOutBounce'
-                    }
+                    maintainAspectRatio: false
                 }
             });
+        }
+
+        function analyzeLogData() {
+            const actionsPerDay = {};
+            const uniqueUsers = new Set();
+            const actionCounts = {};
+            const actionsPerUser = {};
+            const userActivityOverTime = {};
+            let totalActions = 0;
+
+            logs.forEach(log => {
+                const date = log.split(']')[0].slice(1);
+                const action = log.split('] ')[1];
+                const user = action.split(' ')[1];
+
+                const day = date.split(',')[0];
+                actionsPerDay[day] = (actionsPerDay[day] || 0) + 1;
+
+                uniqueUsers.add(user);
+
+                actionCounts[action] = (actionCounts[action] || 0) + 1;
+                actionsPerUser[user] = (actionsPerUser[user] || 0) + 1;
+
+                const timestamp = new Date(date).getTime();
+                userActivityOverTime[timestamp] = (userActivityOverTime[timestamp] || 0) + 1;
+
+                totalActions++;
+            });
+
+            const mostCommonAction = Object.keys(actionCounts).reduce((a, b) => actionCounts[a] > actionCounts[b] ? a : b);
+
+            return {
+                actionsPerDay,
+                uniqueUsers,
+                actionCounts,
+                actionsPerUser,
+                userActivityOverTime,
+                totalActions,
+                mostCommonAction
+            };
         }
 
         function showLogs() {
@@ -491,13 +631,14 @@
             const username = document.getElementById('newUsername').value;
             const password = document.getElementById('newPassword').value;
             const email = document.getElementById('newEmail').value;
+            const isAdmin = document.getElementById('newUserType').value === 'admin';
 
             if (users.some(user => user.username === username)) {
                 showNotification('Пользователь с таким именем уже существует', true);
                 return;
             }
 
-            users.push({ username, password, email, phone: '', isAdmin: false });
+            users.push({ username, password, email, phone: '', isAdmin });
             saveAllUsers();
             updateUserTable();
             clearNewUserForm();
@@ -505,33 +646,45 @@
             addLog(`Администратор добавил нового пользователя: ${username}`);
         }
 
-        function updateUserTable() {
+        function updateUserTable(usersToShow = users) {
             const tableBody = document.getElementById('userTableBody');
             tableBody.innerHTML = '';
-            users.forEach(user => {
+            usersToShow.forEach(user => {
                 const row = tableBody.insertRow();
                 row.insertCell(0).textContent = user.username;
                 row.insertCell(1).innerHTML = `${globalSettings.showCredentials ? globalSettings.email : user.email} <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.email : user.email}')">Копировать</button>`;
                 row.insertCell(2).innerHTML = `${globalSettings.showCredentials ? globalSettings.password : user.password} <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.password : user.password}')">Копировать</button>`;
                 const actionsCell = row.insertCell(3);
                 if (user.username !== 'Fufel') {
-                    actionsCell.innerHTML = `<button onclick="deleteUser('${user.username}')">Удалить</button>`;
+                    actionsCell.innerHTML = `
+                        <button onclick="deleteUser('${user.username}')">Удалить</button>
+                        <button onclick="toggleUserAdmin('${user.username}')">${user.isAdmin ? 'Убрать админа' : 'Сделать админом'}</button>
+                    `;
                 }
             });
         }
 
-        function deleteUser(username) {
-            users = users.filter(user => user.username !== username);
-            saveAllUsers();
-            updateUserTable();
-            showNotification('Пользователь удален');
-            addLog(`Администратор удалил пользователя: ${username}`);
+        function searchUser(query) {
+            const filteredUsers = users.filter(user => user.username.toLowerCase().includes(query.toLowerCase()));
+            updateUserTable(filteredUsers);
+        }
+
+        function toggleUserAdmin(username) {
+            const user = users.find(u => u.username === username);
+            if (user) {
+                user.isAdmin = !user.isAdmin;
+                saveAllUsers();
+                updateUserTable();
+                showNotification(`Пользователь ${username} ${user.isAdmin ? 'теперь администратор' : 'больше не администратор'}`);
+                addLog(`Администратор изменил права пользователя ${username}`);
+            }
         }
 
         function clearNewUserForm() {
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('newEmail').value = '';
+            document.getElementById('newUserType').value = 'user';
         }
 
         function saveSiteSettings() {
@@ -541,7 +694,7 @@
             siteSettings.fontSize = document.getElementById('fontSize').value;
             siteSettings.headerColor = document.getElementById('headerColor').value;
             siteSettings.buttonColor = document.getElementById('buttonColor').value;
-            
+
             applySettings();
             localStorage.setItem('siteSettings', JSON.stringify(siteSettings));
             showNotification('Настройки сохранены');
@@ -563,6 +716,7 @@
             document.getElementById('analytics').style.display = 'none';
             document.getElementById('logs').style.display = 'none';
             document.getElementById('globalSettings').style.display = 'none';
+            document.getElementById('supportTickets').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
         }
 
@@ -581,7 +735,7 @@
         function togglePasswordVisibility(elementId, password) {
             const passwordDisplay = document.getElementById(elementId);
             const passwordToggle = passwordDisplay.nextElementSibling.nextElementSibling;
-            
+
             if (passwordDisplay.textContent === '*******') {
                 passwordDisplay.textContent = password;
                 passwordToggle.textContent = '👁️';
@@ -618,6 +772,8 @@
 
         function init() {
             loadUsersFromLocalStorage();
+            loadLogsFromLocalStorage();
+            loadSupportTickets();
             const savedSettings = localStorage.getItem('siteSettings');
             if (savedSettings) {
                 siteSettings = JSON.parse(savedSettings);
