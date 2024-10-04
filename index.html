@@ -195,6 +195,31 @@
             letter-spacing: 5px;
             margin: 10px 0;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .modal-buttons {
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            margin: 0 10px;
+        }
     </style><script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head><body>
     <div class="dot-menu">
         <span class="dot"></span>
@@ -263,7 +288,6 @@
         <div id="userManagement">
             <h2>Управление пользователями</h2>
             <input type="text" id="userSearch" placeholder="Поиск пользователей" oninput="searchUsers()">
-            <button onclick="exportLogs()">Экспорт журналов</button>
             <input type="text" id="newUsername" placeholder="Имя пользователя">
             <input type="password" id="newPassword" placeholder="Пароль">
             <input type="text" id="newEmail" placeholder="Email">
@@ -343,6 +367,16 @@
             </table>
             <button onclick="backToAdminPanel()">Назад</button>
         </div>
+        
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <p>Вы уверены, что хотите удалить этого пользователя?</p>
+                <div class="modal-buttons">
+                    <button onclick="confirmDeleteUser()">Да</button>
+                    <button onclick="closeDeleteModal()">Нет</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -375,6 +409,7 @@
 
         let logs = JSON.parse(localStorage.getItem('logs') || '[]');
         let supportTickets = [];
+        let userToDeleteIndex = -1;
 
         function loadLogsFromLocalStorage() {
             const savedLogs = localStorage.getItem('logs');
@@ -408,6 +443,26 @@
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('logs').style.display = 'block';
             updateLogs();
+        }
+
+        function deleteUser(index) {
+            userToDeleteIndex = index;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function confirmDeleteUser() {
+            if (userToDeleteIndex !== -1) {
+                users.splice(userToDeleteIndex, 1);
+                saveUsersToLocalStorage();
+                updateUserTable();
+                showNotification('Пользователь удален');
+                closeDeleteModal();
+            }
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            userToDeleteIndex = -1;
         }
 
         function exportLogs() {
@@ -564,15 +619,6 @@
         function editUser(index) {
             // Implement user editing functionality
             console.log('Editing user:', users[index]);
-        }
-
-        function deleteUser(index) {
-            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
-                users.splice(index, 1);
-                saveUsersToLocalStorage();
-                updateUserTable();
-                showNotification('Пользователь удален');
-            }
         }
 
         function showSiteSettings() {
@@ -772,6 +818,37 @@
         function showSupportTicketForm() {
             document.getElementById('userData').style.display = 'none';
             document.getElementById('supportTicketForm').style.display = 'block';
+        }
+
+        function addUser() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const email = document.getElementById('newEmail').value;
+            const userType = document.getElementById('newUserType').value;
+
+            if (username && password && email) {
+                const newUser = {
+                    username: username,
+                    password: password,
+                    email: email,
+                    isAdmin: userType === 'admin'
+                };
+
+                users.push(newUser);
+                saveUsersToLocalStorage();
+                updateUserTable();
+                showNotification('Пользователь добавлен');
+
+                // Clear input fields
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('newUserType').value = 'user';
+
+                addLog(`Администратор добавил нового пользователя: ${username}`);
+            } else {
+                showNotification('Пожалуйста, заполните все поля', true);
+            }
         }
     </script>
 </body></html>
