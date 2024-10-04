@@ -1,355 +1,652 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City Builder & Wheel of Fortune</title>
-    <style>
+<html><head><base href="https://example.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Вход</title><style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #e0f7fa; /* Голубой фон */
-            text-align: center;
-            padding: 20px;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-
-        #game-container {
-            width: 100%; /* Позволить растянуть на всю ширину */
-            max-width: 600px; /* Максимальная ширина */
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
+        .container {
+            background-color: #111;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
         }
-
+        h1, h2 {
+            margin-bottom: 1rem;
+        }
+        input, select {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            background-color: #222;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            box-sizing: border-box;
+        }
         button {
-            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 0.5rem auto;
+            display: block;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .copy-btn {
+            background-color: #444;
+            color: #fff;
+            border: none;
+            padding: 2px 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        #loginForm, #userTypeChoice, #userData, #adminPanel, #userManagement, #siteSettings, #analytics, #logs, #globalSettings {
+            display: none;
+        }
+        #notification {
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            transition: top 0.5s;
+        }
+        .error-notification {
+            background-color: #FF4136;
+            color: white;
+        }
+        .dot-menu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: dotPulse 1.5s infinite;
+        }
+        .dot:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        .dot:nth-child(3) {
+            animation-delay: 1s;
+        }
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+        }
+        #settings-panel {
+            display: none;
+            position: fixed;
+            top: 40px;
+            right: 10px;
+            background-color: #222;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        th {
+            background-color: #222;
+        }
+        #chart {
+            width: 100%;
+            height: 300px;
+        }
+        .funpay-btn, .chatgpt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
             margin: 10px 0;
             border: none;
             border-radius: 5px;
-            background-color: #4CAF50; /* Зеленый цвет */
-            color: white;
-            font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #45a049; /* Темнее при наведении */
-        }
-
-        #city-info {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        /* Стили для колеса фортуны */
-        .component {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            position: relative;
-            margin: 0 auto;
-            overflow: hidden;
-            border: 10px solid #333; /* Граница колеса */
-            background: conic-gradient(green 50%, red 50%); /* Зеленая и красная стороны */
-        }
-
-        #wheel-pointer {
-            width: 10px;
-            height: 20px;
-            background-color: yellow; /* Цвет указателя */
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%) rotate(180deg); /* Указатель под 180 градусов */
-            border-radius: 5px; /* Скругленные края */
-        }
-
-        .result {
-            margin-top: 20px;
-            font-size: 20px;
             font-weight: bold;
         }
-
-        #chat-container {
-            margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #b3e5fc; /* Светло-голубая граница */
-            padding: 10px;
-            background-color: #e1f5fe; /* Светло-голубой фон */
-            border-radius: 10px; /* Закругленные края */
-            resize: both; /* Позволить изменять размер */
-            overflow: auto; /* Включить прокрутку при необходимости */
-            max-width: 100%; /* Максимальная ширина */
-        }
-
-        .chat-message {
-            margin: 5px 0;
-            position: relative; /* Позволить позиционирование для крестика */
-            padding-right: 25px; /* Отступ для крестика */
-        }
-
-        .user-message {
-            text-align: right;
-            color: blue;
-        }
-
-        .bot-message {
-            text-align: left;
-            color: green;
-        }
-
-        .delete-button {
-            position: absolute;
-            top: 0;
-            right: 5px; /* Смещение для правильного позиционирования */
-            background: red;
+        .funpay-btn {
+            background-color: #4CAF50;
             color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
+        }
+        .chatgpt-btn {
+            background-color: white;
+            color: black;
+        }
+        .btn-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .password-container {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             cursor: pointer;
-            font-size: 14px;
-            line-height: 20px; /* Центрирование текста */
-            display: none; /* Скрыть по умолчанию */
+            user-select: none;
+            margin-left: 5px;
         }
+    </style><script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head><body>
+    <div class="dot-menu">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+    </div>
+    <div id="settings-panel">
+        <button onclick="toggleTheme()">Сменить тему</button>
+    </div>
+    <div id="notification"></div>
+    <div class="container">
+        <h1>Вход и администрирование</h1>
 
-        .chat-message:hover .delete-button {
-            display: block; /* Показать крестик при наведении */
-        }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <h1>City Builder & Wheel of Fortune</h1>
-        <div id="create-city">
-            <p>Введите название города:</p>
-            <input type="text" id="city-name-input" placeholder="Название города" />
-            <button onclick="createCity()">Создать город</button>
+        <div id="loginForm">
+            <h2>Вход</h2>
+            <input type="text" id="username" placeholder="Имя пользователя">
+            <div class="password-container">
+                <input type="password" id="password" placeholder="Пароль">
+                <span class="password-toggle" onclick="togglePasswordVisibility()">👁️</span>
+            </div>
+            <button onclick="login()">Войти</button>
         </div>
 
-        <div id="city-info" style="display: none;">
-            <p>🏙️ Город: <span id="city-name">---</span></p>
-            <p>💰 Баланс: <span id="balance">1000</span></p>
-            <p>🏗️ Материалы: <span id="materials">500</span></p>
-            <p>⚡ Энергия: <span id="energy">100</span></p>
-            <p>👥 Популяция: <span id="population">10</span></p>
+        <div id="userTypeChoice">
+            <h2>Выберите тип входа</h2>
+            <button onclick="chooseUserType('admin')">Администратор</button>
         </div>
 
-        <div id="controls" style="display: none;">
-            <button onclick="buildHouse()">🏠 Построить дом</button>
-            <div id="house-response" class="bot-response"></div>
-            <button onclick="buildFactory()">🏭 Построить фабрику</button>
-            <div id="factory-response" class="bot-response"></div>
-            <button onclick="buildCommercial()">🏢 Построить магазин</button>
-            <div id="commercial-response" class="bot-response"></div>
-            <button onclick="showStats()">🔍 Статистика</button>
-            <div id="stats-response" class="bot-response"></div>
-            <button onclick="openCasino()">🎰 Казино</button>
-            <div id="casino-response" class="bot-response"></div>
+        <div id="userData">
+            <h2>Данные пользователя</h2>
+            <p id="userInfo"></p>
+            <button onclick="backToLogin()">Назад</button>
         </div>
 
-        <!-- Колесо фортуны -->
-        <div id="wheel-container" style="display: none;">
-            <h3>Колесо Фортуны</h3>
-            <div class="component" id="wheel"></div>
-            <div id="wheel-pointer"></div>
-            <button onclick="spinWheel(1)">1/3 Баланса</button>
-            <button onclick="spinWheel(2)">2/3 Баланса</button>
-            <button onclick="spinWheel(3)">Ва-Банк</button>
-            <div class="result" id="spin-result"></div>
+        <div id="adminPanel">
+            <h2>Панель администратора</h2>
+            <div class="admin-option">
+                <button onclick="showUserManagement()">Управление пользователями</button>
+            </div>
+            <div class="admin-option">
+                <button onclick="showSiteSettings()">Настройки сайта</button>
+            </div>
+            <div class="admin-option">
+                <button onclick="showAnalytics()">Аналитика</button>
+            </div>
+            <div class="admin-option">
+                <button onclick="showLogs()">Журналы</button>
+            </div>
+            <div class="admin-option">
+                <button onclick="showGlobalSettings()">Глобальные настройки</button>
+            </div>
+            <button onclick="backToLogin()">Назад</button>
         </div>
 
-        <div id="chat-container"></div>
-        
-        <div id="chat-input" style="display: none;">
-            <input type="text" id="chat-box" placeholder="Напишите сообщение..." onkeypress="sendMessage(event)">
+        <div id="userManagement">
+            <h2>Управление пользователями</h2>
+            <input type="text" id="newUsername" placeholder="Имя пользователя">
+            <input type="password" id="newPassword" placeholder="Пароль">
+            <input type="text" id="newEmail" placeholder="Email">
+            <button onclick="addUser()">Добавить пользователя</button>
+            <input type="text" placeholder="Поиск пользователей" oninput="searchUser(this.value)">
+            <button onclick="saveAllUsers()">Сохранить все</button>
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Email</th>
+                        <th>Пароль</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+            <button onclick="backToAdminPanel()">Назад</button>
+        </div>
+
+        <div id="siteSettings">
+            <h2>Настройки сайта</h2>
+            <input type="text" id="siteName" placeholder="Название сайта">
+            <input type="color" id="siteColor" value="#000000">
+            <select id="fontStyle">
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Times New Roman, serif">Times New Roman</option>
+                <option value="Courier New, monospace">Courier New</option>
+            </select>
+            <input type="number" id="fontSize" min="12" max="24" value="16">
+            <input type="text" id="headerColor" placeholder="Цвет заголовка">
+            <input type="text" id="buttonColor" placeholder="Цвет кнопок">
+            <button onclick="saveSiteSettings()">Сохранить настройки</button>
+            <button onclick="backToAdminPanel()">Назад</button>
+        </div>
+
+        <div id="analytics">
+            <h2>Аналитика</h2>
+            <canvas id="chart"></canvas>
+            <button onclick="backToAdminPanel()">Назад</button>
+        </div>
+
+        <div id="logs" style="display: none;">
+            <h2>Журналы</h2>
+            <textarea id="logArea" readonly rows="10" cols="50"></textarea>
+            <button onclick="backToAdminPanel()">Назад</button>
+        </div>
+
+        <div id="globalSettings" style="display: none;">
+            <h2>Глобальные настройки</h2>
+            <input type="text" id="globalEmail" placeholder="Общий Email">
+            <input type="password" id="globalPassword" placeholder="Общий пароль">
+            <label>
+                <input type="checkbox" id="showGlobalCredentials"> Показывать Email и пароль всем пользователям
+            </label>
+            <button onclick="saveGlobalSettings()">Сохранить настройки</button>
+            <button onclick="backToAdminPanel()">Назад</button>
         </div>
     </div>
 
     <script>
-        let city = {
-            name: "",
-            balance: 1000,
-            materials: 500,
-            energy: 100,
-            population: 10,
-            buildings: {
-                house: 1,
-                factory: 0,
-                commercial: 0
-            },
-            bank_balance: 0
+        let users = [
+            { username: 'Fufel', password: 'fufel52', email: 'fufel@example.com', phone: '123456789', isAdmin: true }
+        ];
+
+        let siteSettings = {
+            name: 'Мой сайт',
+            color: '#000000',
+            fontStyle: 'Arial, sans-serif',
+            fontSize: '16'
         };
 
-        // Функция создания города
-        function createCity() {
-            let cityNameInput = document.getElementById("city-name-input").value;
-            if (cityNameInput) {
-                city.name = cityNameInput;
-                document.getElementById("city-name").innerText = city.name;
-                document.getElementById("create-city").style.display = "none";
-                document.getElementById("city-info").style.display = "block";
-                document.getElementById("controls").style.display = "block";
-                document.getElementById("chat-input").style.display = "block"; // Показать чат
-                addBotMessage(`Город '${city.name}' успешно создан!`);
+        let analytics = {
+            lastLogin: '-'
+        };
+
+        let analyticsChart = null;
+
+        let globalSettings = {
+            email: '',
+            password: '',
+            showCredentials: false
+        };
+
+        let logs = [];
+
+        function saveAllUsers() {
+            localStorage.setItem('users', JSON.stringify(users));
+            showNotification('Все пользователи сохранены');
+        }
+
+        function loadUsersFromLocalStorage() {
+            const savedUsers = localStorage.getItem('users');
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
             }
         }
 
-        // Функция для отображения колеса фортуны
-        function openCasino() {
-            document.getElementById("wheel-container").style.display = "block";
+        function saveUsersToLocalStorage() {
+            localStorage.setItem('users', JSON.stringify(users));
         }
 
-        // Вращение колеса фортуны
-        function spinWheel(type) {
-            let stake = 0;
-            if (type === 1) {
-                stake = Math.floor(city.balance / 3);
-            } else if (type === 2) {
-                stake = Math.floor(city.balance / 3 * 2);
-            } else if (type === 3) {
-                stake = city.balance;
-            }
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('userTypeChoice').style.display = 'none';
+            document.getElementById('userData').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('userManagement').style.display = 'none';
+            document.getElementById('siteSettings').style.display = 'none';
+            document.getElementById('analytics').style.display = 'none';
+            document.getElementById('logs').style.display = 'none';
+            document.getElementById('globalSettings').style.display = 'none';
+        }
 
-            if (stake > city.balance) {
-                addBotMessage("Недостаточно средств для ставки.");
-                return;
-            }
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const user = users.find(u => u.username === username && u.password === password);
 
-            city.balance -= stake;
-
-            // Вращение колеса
-            let spinAngle = Math.floor(Math.random() * 360) + 1440;  // От 1440 до 1800 градусов (4-5 полных оборотов)
-            document.getElementById("wheel").style.transition = "transform 3s ease-out";
-            document.getElementById("wheel").style.transform = `rotate(${spinAngle}deg)`;
-
-            setTimeout(() => {
-                let result = spinAngle % 360 < 180; // Если угол меньше 180, это победа
-
-                if (result) {
-                    city.balance += stake * 2;
-                    addBotMessage(`Вы выиграли! Ваш выигрыш: ${stake * 2} 💰.`);
+            if (user) {
+                showNotification('Успешная авторизация');
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                addLog(`Пользователь ${username} вошел в систему`);
+                if (user.username === 'Fufel') {
+                    showUserTypeChoice();
                 } else {
-                    addBotMessage(`Вы проиграли. Потеряно: ${stake} 💰.`);
+                    showUserData(user);
                 }
+            } else {
+                showNotification('Неверное имя пользователя или пароль', true);
+            }
+        }
 
-                // Теперь обновляем UI только после нажатия на кнопку
-                updateUI();
-                document.getElementById("wheel").style.transition = "";
-                document.getElementById("wheel").style.transform = "";  // Сброс колеса после завершения
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = isError ? 'error-notification' : '';
+            notification.style.top = '10px';
+            setTimeout(() => {
+                notification.style.top = '-50px';
             }, 3000);
         }
 
-        // Обновление интерфейса
-        function updateUI() {
-            document.getElementById("balance").innerText = city.balance;
-            document.getElementById("materials").innerText = city.materials;
-            document.getElementById("energy").innerText = city.energy;
-            document.getElementById("population").innerText = city.population;
+        function showUserTypeChoice() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('userTypeChoice').style.display = 'block';
         }
 
-        // Обработка отправки сообщений
-        function sendMessage(event) {
-            if (event.key === "Enter") {
-                let chatBox = document.getElementById("chat-box");
-                let message = chatBox.value.trim();
+        function chooseUserType(type) {
+            if (type === 'admin') {
+                showAdminPanel();
+            } else {
+                const user = users.find(u => u.username === 'Fufel');
+                showUserData(user);
+            }
+        }
 
-                if (message !== "") {
-                    addUserMessage(message);
-                    chatBox.value = "";
+        function showUserData(user) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('userTypeChoice').style.display = 'none';
+            document.getElementById('userData').style.display = 'block';
+            document.getElementById('userInfo').innerHTML = `
+                <p>Имя пользователя: ${user.username}</p>
+                <p>Email: <span class="user-email">${globalSettings.showCredentials ? globalSettings.email : user.email}</span> <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.email : user.email}')">Копировать</button></p>
+                <p>Пароль: <span id="passwordDisplay" class="user-password">${globalSettings.showCredentials ? globalSettings.password : '*******'}</span> <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.password : user.password}')">Копировать</button> <span class="password-toggle" onclick="togglePasswordVisibility('passwordDisplay', '${globalSettings.showCredentials ? globalSettings.password : user.password}')">👁️</span></p>
+                <button class="funpay-btn" onclick="window.open('https://funpay.com/users/10889536/', '_blank')">
+                    FunPay
+                    <img src="https://funpay.com/favicon.ico" alt="FunPay logo" class="btn-icon">
+                </button>
+                <button class="chatgpt-btn" onclick="window.open('https://chat.openai.com/', '_blank')">
+                    ChatGPT
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMdM9MEQ0ExL1PmInT3U5I8v63YXBEdoIT0Q&s" alt="ChatGPT logo" class="btn-icon">
+                </button>
+            `;
+            addLog(`Пользователь ${user.username} просмотрел свои данные`);
+        }
 
-                    // Обработка промокодов
-                    if (message.startsWith("/promo ")) {
-                        let code = message.split(" ")[1];
-                        applyPromo(code);
+        function backToLogin() {
+            localStorage.removeItem('currentUser');
+            showLoginForm();
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('userTypeChoice').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        function showUserManagement() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('userManagement').style.display = 'block';
+            updateUserTable();
+        }
+
+        function showSiteSettings() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('siteSettings').style.display = 'block';
+            document.getElementById('siteName').value = siteSettings.name;
+            document.getElementById('siteColor').value = siteSettings.color;
+            document.getElementById('fontStyle').value = siteSettings.fontStyle;
+            document.getElementById('fontSize').value = siteSettings.fontSize;
+            document.getElementById('headerColor').value = siteSettings.headerColor || '#ffffff';
+            document.getElementById('buttonColor').value = siteSettings.buttonColor || '#333333';
+        }
+
+        function showAnalytics() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('analytics').style.display = 'block';
+            
+            const ctx = document.getElementById('chart').getContext('2d');
+
+            if (analyticsChart) {
+                analyticsChart.destroy();
+            }
+
+            analyticsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+                    datasets: [{
+                        label: 'Количество посещений',
+                        data: [65, 59, 80, 81, 56, 55, 40],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                            'rgba(199, 199, 199, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    responsive: true,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutBounce'
                     }
                 }
+            });
+        }
+
+        function showLogs() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('logs').style.display = 'block';
+            updateLogs();
+        }
+
+        function updateLogs() {
+            const logArea = document.getElementById('logArea');
+            logArea.value = logs.join('\n');
+        }
+
+        function addUser() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const email = document.getElementById('newEmail').value;
+
+            if (users.some(user => user.username === username)) {
+                showNotification('Пользователь с таким именем уже существует', true);
+                return;
             }
+
+            users.push({ username, password, email, phone: '', isAdmin: false });
+            saveAllUsers();
+            updateUserTable();
+            clearNewUserForm();
+            showNotification('Пользователь успешно добавлен');
+            addLog(`Администратор добавил нового пользователя: ${username}`);
         }
 
-        // Добавление сообщения от пользователя
-        function addUserMessage(text) {
-            let chatContainer = document.getElementById("chat-container");
-            let message = document.createElement("div");
-            message.className = "chat-message user-message";
-            message.innerText = text;
-
-            // Кнопка удаления сообщения
-            let deleteButton = document.createElement("button");
-            deleteButton.innerText = "✖";
-            deleteButton.className = "delete-button";
-            deleteButton.onclick = function() {
-                chatContainer.removeChild(message);
-            };
-
-            message.appendChild(deleteButton);
-            chatContainer.appendChild(message);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // Автопрокрутка
+        function updateUserTable() {
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = user.username;
+                row.insertCell(1).innerHTML = `${globalSettings.showCredentials ? globalSettings.email : user.email} <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.email : user.email}')">Копировать</button>`;
+                row.insertCell(2).innerHTML = `${globalSettings.showCredentials ? globalSettings.password : user.password} <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.password : user.password}')">Копировать</button>`;
+                const actionsCell = row.insertCell(3);
+                if (user.username !== 'Fufel') {
+                    actionsCell.innerHTML = `<button onclick="deleteUser('${user.username}')">Удалить</button>`;
+                }
+            });
         }
 
-        // Добавление сообщения от бота
-        function addBotMessage(text) {
-            let chatContainer = document.getElementById("chat-container");
-            let message = document.createElement("div");
-            message.className = "chat-message bot-message";
-            message.innerText = text;
-
-            // Кнопка удаления сообщения
-            let deleteButton = document.createElement("button");
-            deleteButton.innerText = "✖";
-            deleteButton.className = "delete-button";
-            deleteButton.onclick = function() {
-                chatContainer.removeChild(message);
-            };
-
-            message.appendChild(deleteButton);
-            chatContainer.appendChild(message);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // Автопрокрутка
+        function deleteUser(username) {
+            users = users.filter(user => user.username !== username);
+            saveAllUsers();
+            updateUserTable();
+            showNotification('Пользователь удален');
+            addLog(`Администратор удалил пользователя: ${username}`);
         }
 
-        // Применение промокода
-        function applyPromo(code) {
-            if (code === "1kk") {
-                city.balance += 1000000;
-                city.materials += 1000000;
-                addBotMessage("Промокод активирован! Вы получили 1,000,000 💰 и 1,000,000 🏗️.");
-                updateUI();
+        function clearNewUserForm() {
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newEmail').value = '';
+        }
+
+        function saveSiteSettings() {
+            siteSettings.name = document.getElementById('siteName').value;
+            siteSettings.color = document.getElementById('siteColor').value;
+            siteSettings.fontStyle = document.getElementById('fontStyle').value;
+            siteSettings.fontSize = document.getElementById('fontSize').value;
+            siteSettings.headerColor = document.getElementById('headerColor').value;
+            siteSettings.buttonColor = document.getElementById('buttonColor').value;
+            
+            applySettings();
+            localStorage.setItem('siteSettings', JSON.stringify(siteSettings));
+            showNotification('Настройки сохранены');
+            addLog('Администратор изменил настройки сайта');
+        }
+
+        function applySettings() {
+            document.body.style.backgroundColor = siteSettings.color;
+            document.body.style.fontFamily = siteSettings.fontStyle;
+            document.body.style.fontSize = siteSettings.fontSize + 'px';
+            document.title = siteSettings.name;
+            document.querySelectorAll('h1, h2').forEach(h => h.style.color = siteSettings.headerColor);
+            document.querySelectorAll('button').forEach(btn => btn.style.backgroundColor = siteSettings.buttonColor);
+        }
+
+        function backToAdminPanel() {
+            document.getElementById('userManagement').style.display = 'none';
+            document.getElementById('siteSettings').style.display = 'none';
+            document.getElementById('analytics').style.display = 'none';
+            document.getElementById('logs').style.display = 'none';
+            document.getElementById('globalSettings').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Скопировано в буфер обмена');
+            });
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.style.backgroundColor === 'rgb(0, 0, 0)';
+            document.body.style.backgroundColor = isDark ? '#ffffff' : '#000000';
+            document.body.style.color = isDark ? '#000000' : '#ffffff';
+        }
+
+        function togglePasswordVisibility(elementId, password) {
+            const passwordDisplay = document.getElementById(elementId);
+            const passwordToggle = passwordDisplay.nextElementSibling.nextElementSibling;
+            
+            if (passwordDisplay.textContent === '*******') {
+                passwordDisplay.textContent = password;
+                passwordToggle.textContent = '👁️';
             } else {
-                addBotMessage("Неверный промокод.");
+                passwordDisplay.textContent = '*******';
+                passwordToggle.textContent = '😑';
             }
         }
 
-        // Функции для построек
-        function buildHouse() {
-            city.buildings.house++;
-            addBotMessage(`Построен дом! Общее количество домов: ${city.buildings.house}`);
+        function showGlobalSettings() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('globalSettings').style.display = 'block';
+            document.getElementById('globalEmail').value = globalSettings.email;
+            document.getElementById('globalPassword').value = globalSettings.password;
+            document.getElementById('showGlobalCredentials').checked = globalSettings.showCredentials;
         }
 
-        function buildFactory() {
-            city.buildings.factory++;
-            addBotMessage(`Построена фабрика! Общее количество фабрик: ${city.buildings.factory}`);
+        function saveGlobalSettings() {
+            globalSettings.email = document.getElementById('globalEmail').value;
+            globalSettings.password = document.getElementById('globalPassword').value;
+            globalSettings.showCredentials = document.getElementById('showGlobalCredentials').checked;
+            localStorage.setItem('globalSettings', JSON.stringify(globalSettings));
+            showNotification('Глобальные настройки сохранены');
+            applyGlobalSettings();
+            addLog('Администратор изменил глобальные настройки');
         }
 
-        function buildCommercial() {
-            city.buildings.commercial++;
-            addBotMessage(`Построен магазин! Общее количество магазинов: ${city.buildings.commercial}`);
+        function applyGlobalSettings() {
+            if (globalSettings.showCredentials) {
+                document.querySelectorAll('.user-email').forEach(el => el.textContent = globalSettings.email);
+                document.querySelectorAll('.user-password').forEach(el => el.textContent = globalSettings.password);
+            }
         }
 
-        function showStats() {
-            addBotMessage(`Статистика города: 
-            Баланс: ${city.balance} 💰, 
-            Материалы: ${city.materials} 🏗️, 
-            Энергия: ${city.energy} ⚡, 
-            Популяция: ${city.population} 👥.`);
+        function init() {
+            loadUsersFromLocalStorage();
+            const savedSettings = localStorage.getItem('siteSettings');
+            if (savedSettings) {
+                siteSettings = JSON.parse(savedSettings);
+            }
+            const savedGlobalSettings = localStorage.getItem('globalSettings');
+            if (savedGlobalSettings) {
+                globalSettings = JSON.parse(savedGlobalSettings);
+            }
+            applySettings();
+            applyGlobalSettings();
+
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                if (user.username === 'Fufel') {
+                    showUserTypeChoice();
+                } else {
+                    showUserData(user);
+                }
+            } else {
+                showLoginForm(); 
+            }
         }
 
-        // Инициализация интерфейса
-        updateUI();
+        window.onload = init;
+
+        document.querySelector('.dot-menu').addEventListener('click', function() {
+            const settingsPanel = document.getElementById('settings-panel');
+            settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+        });
     </script>
-</body>
-</html>
+</body></html>
