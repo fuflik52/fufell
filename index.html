@@ -1,6 +1,6 @@
-<html><head><base href="https://example.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Вход и администрирование</title><style>
+<html><head><base href="https://example.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Вход и администрирование</title><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet"><style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -10,56 +10,71 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            background-attachment: fixed;
         }
         .container {
-            background-color: rgba(17, 17, 17, 0.8);
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            background-color: rgba(17, 17, 17, 0.9);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             text-align: center;
-            max-width: 400px;
+            max-width: 675px;
             width: 100%;
         }
         h1, h2 {
             margin-bottom: 1rem;
         }
-        input, select {
+        input, select, textarea {
             display: block;
             width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            background-color: #222;
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            background-color: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 5px;
             color: #fff;
             box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            outline: none;
+            transform: scale(1.05);
         }
         button {
-            background-color: #333;
+            background-color: #4CAF50;
             color: #fff;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 5px;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin: 0.5rem auto;
+            transition: background-color 0.3s, transform 0.3s;
+            margin: 0.75rem auto;
             display: block;
+            font-weight: bold;
         }
         button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .copy-btn {
-            background-color: #444;
-            color: #fff;
-            border: none;
-            padding: 2px 5px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-left: 5px;
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
-        #loginForm, #userTypeChoice, #userData, #adminPanel, #userManagement, #siteSettings, #analytics, #logs, #globalSettings, #supportTickets, #supportTicketForm {
-            display: none;
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            font-weight: bold;
         }
         #notification {
             position: fixed;
@@ -68,13 +83,14 @@
             transform: translateX(-50%);
             background-color: #4CAF50;
             color: white;
-            padding: 15px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 30px;
             transition: top 0.5s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .error-notification {
             background-color: #FF4136;
-            color: white;
         }
         .dot-menu {
             position: fixed;
@@ -111,19 +127,6 @@
             padding: 10px;
             border-radius: 5px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        th, td {
-            border: 1px solid #444;
-            padding: 0.5rem;
-            text-align: left;
-        }
-        th {
-            background-color: #222;
-        }
         .chart-container {
             display: flex;
             flex-wrap: wrap;
@@ -146,6 +149,53 @@
             padding: 5px;
             background-color: #333;
             border-radius: 3px;
+        }
+        .ticket-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .ticket-item {
+            background-color: #333;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .ticket-item h3 {
+            margin-top: 0;
+        }
+        .ticket-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #2a5298;
+            text-align: right;
+        }
+        .support-message {
+            background-color: #4CAF50;
+            text-align: left;
+        }
+        #newMessage {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        #ticketView button {
+            margin-top: 10px;
         }
         @keyframes gradientBG {
             0% {
@@ -188,6 +238,9 @@
         }
         .password-container {
             position: relative;
+            border: 1px solid #4CAF50;
+            border-radius: 5px;
+            margin-bottom: 1.25rem;
         }
         .twofa-code {
             font-size: 24px;
@@ -228,10 +281,9 @@
             overflow-y: auto;
             margin-bottom: 15px;
         }
-        #userManagement {
+        #userManagement, #supportTickets {
             max-height: 80vh;
             overflow-y: auto;
-            padding: 20px;
         }
         #userManagement input,
         #userManagement select,
@@ -247,7 +299,28 @@
             background-color: #222;
             z-index: 10;
         }
-    </style><script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head><body>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style><<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head><body>
     <div class="dot-menu">
         <span class="dot"></span>
         <span class="dot"></span>
@@ -412,7 +485,8 @@
 
     <script>
         let users = [
-            { username: 'Fufel', password: 'fufel52', email: 'fufel@example.com', phone: '123456789', isAdmin: true }
+            { username: 'Fufel', password: 'fufel52', email: 'fufel@example.com', phone: '123456789', isAdmin: true },
+                            { username: 'Fufel', password: 'fufel52', email: 'fufel@example.com', phone: '123456789', isAdmin: true }
         ];
 
         let siteSettings = {
