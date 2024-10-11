@@ -1,959 +1,399 @@
-<html><head><base href="https://example.com/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Вход и администрирование</title><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кликер с корги</title>
+    <style>
         body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-attachment: fixed;
-        }
-        .container {
-            background-color: rgba(17, 17, 17, 0.9);
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 675px;
-            width: 100%;
-        }
-        h1, h2 {
-            margin-bottom: 1rem;
-        }
-        input, select, textarea {
-            display: block;
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1.25rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 5px;
-            color: #fff;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-        input:focus, select:focus, textarea:focus {
-            background-color: rgba(255, 255, 255, 0.2);
-            outline: none;
-            transform: scale(1.05);
-        }
-        button {
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-            margin: 0.75rem auto;
-            display: block;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 1.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        th {
-            background-color: rgba(0, 0, 0, 0.2);
-            font-weight: bold;
-        }
-        #notification {
-            position: fixed;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #4CAF50;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('images/hallowen_background.jpg'); /* Фон */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
             color: white;
-            padding: 15px 30px;
-            border-radius: 30px;
-            transition: top 0.5s;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .error-notification {
-            background-color: #FF4136;
+
+        .energy-bar {
+            width: 80%;
+            background-color: #333;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-        .dot-menu {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
+
+        .energy-bar-inner {
+            height: 20px;
+            background-color: #1e90ff;
+            width: 100%; /* Начальное значение энергии 100% */
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .balance-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
             font-size: 24px;
         }
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #fff;
-            border-radius: 50%;
-            margin: 0 2px;
-            animation: dotPulse 1.5s infinite;
-        }
-        .dot:nth-child(2) {
-            animation-delay: 0.5s;
-        }
-        .dot:nth-child(3) {
-            animation-delay: 1s;
-        }
-        @keyframes dotPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.5); }
-        }
-        #settings-panel {
-            display: none;
-            position: fixed;
-            top: 40px;
-            right: 10px;
-            background-color: #222;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .chart-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .chart {
-            width: 48%;
-            margin-bottom: 20px;
-            height: 300px;
-        }
-        .support-ticket {
-            background-color: #222;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        .support-ticket-response {
-            margin-top: 10px;
-            padding: 5px;
-            background-color: #333;
-            border-radius: 3px;
-        }
-        .ticket-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-        .ticket-item {
-            background-color: #333;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .ticket-item h3 {
-            margin-top: 0;
-        }
-        .ticket-messages {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-        }
-        .message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .user-message {
-            background-color: #2a5298;
-            text-align: right;
-        }
-        .support-message {
-            background-color: #4CAF50;
-            text-align: left;
-        }
-        #newMessage {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-        #ticketView button {
-            margin-top: 10px;
-        }
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-        #chart {
-            width: 100%;
-            height: 300px;
-        }
-        .funpay-btn, .chatgpt-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .funpay-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .chatgpt-btn {
-            background-color: white;
-            color: black;
-        }
-        .btn-icon {
+
+        .balance-icon {
             width: 24px;
             height: 24px;
+            margin-right: 10px;
         }
-        .password-container {
-            position: relative;
-            border: 1px solid #4CAF50;
-            border-radius: 5px;
-            margin-bottom: 1.25rem;
+
+        .corgi-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 50px;
+            cursor: pointer;
         }
-        .twofa-code {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            margin: 10px 0;
+
+        .corgi-image {
+            width: 150px;
+            height: auto;
         }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: #1c1c1c; /* Цвет панели */
+            padding: 15px 0;
+            border-top: 1px solid #333;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .nav-item img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+        }
+
+        /* Стиль для модального окна */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
         }
+
         .modal-content {
-            background-color: #222;
-            margin: 15% auto;
+            background-color: #1a1a1a;
             padding: 20px;
-            border: 1px solid #888;
-            width: 300px;
+            border-radius: 10px;
+            width: 80%;
+            max-height: 90%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-btn {
+            color: white;
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* Стили для содержимого магазина */
+        .section-title {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 20px;
             text-align: center;
-            border-radius: 5px;
         }
-        .modal-buttons {
-            margin-top: 20px;
+
+        .upgrade-menu {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        .modal-buttons button {
-            margin: 0 10px;
+
+        .upgrade-card {
+            width: 150px;
+            background-color: #2b2b2b;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            position: relative;
         }
-        .user-management-controls {
-            margin-bottom: 15px;
-        }
-        .user-table-container {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-        #userManagement, #supportTickets {
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        #userManagement input,
-        #userManagement select,
-        #userManagement button {
+
+        .upgrade-image {
+            width: 100%;
+            border-radius: 10px;
             margin-bottom: 10px;
         }
-        #userTable {
+
+        .upgrade-name {
+            margin: 0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .upgrade-price {
+            margin-top: 10px;
+            font-size: 14px;
+            background-color: #444;
+            padding: 5px 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
+            cursor: pointer;
         }
-        #userTable th {
-            position: sticky;
-            top: 0;
-            background-color: #222;
-            z-index: 10;
+
+        .upgrade-price:hover {
+            background-color: #555;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
+
+        .usage-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 6px;
             border-radius: 10px;
+            font-size: 12px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
+
+        .menu {
+            width: 100%;
+            max-width: 400px;
+            background-color: #2b2b2b;
+            padding: 15px;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 0 auto;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
+
+        .item {
+            background-color: #3b3b3b;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            align-items: center;
+            color: white;
+            margin-bottom: 15px;
+            position: relative;
         }
-    </style><<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head><body>
-    <div class="dot-menu">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+
+        .item-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+        }
+
+        .price {
+            color: #1e90ff;
+            font-size: 16px;
+            background-color: #444;
+            border-radius: 15px;
+            padding: 5px 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .price:hover {
+            background-color: #555;
+        }
+
+        .timer {
+            color: #ffd700;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer img {
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="energy-bar">
+        <div class="energy-bar-inner" id="energyBar"></div>
     </div>
-    <div id="settings-panel">
-        <button onclick="toggleTheme()">Сменить тему</button>
+
+    <div class="balance-container">
+        <img src="images/coin.png" alt="Монета" class="balance-icon">
+        <span id="balance">0</span>
     </div>
-    <div id="notification"></div>
-    <div class="container">
-        <h1>Вход и администрирование</h1>
 
-        <div id="loginForm">
-            <h2>Вход</h2>
-            <input type="text" id="username" placeholder="Имя пользователя">
-            <div class="password-container">
-                <input type="password" id="password" placeholder="Пароль">
-            </div>
-            <button onclick="login()">Войти</button>
-        </div>
+    <div class="corgi-container" onclick="clickCorgi()">
+        <img src="images/corgi.png" alt="Корги" class="corgi-image">
+    </div>
 
-        <div id="userTypeChoice">
-            <h2>Выберите тип входа</h2>
-            <button onclick="chooseUserType('admin')">Администратор</button>
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="goBack()">
+            <img src="https://i.postimg.cc/jD7r3kZ8/gav.png" alt="Icon Gav">
+            <span>Гав</span>
         </div>
+        <div class="nav-item" onclick="openShop()">
+            <img src="https://i.postimg.cc/mzbfDZRq/booster.png" alt="Icon Shop">
+            <span>Магазин</span>
+        </div>
+        <div class="nav-item">
+            <img src="https://i.postimg.cc/PCk6h3dV/tasks.png" alt="Icon Tasks">
+            <span>Задания</span>
+        </div>
+        <div class="nav-item">
+            <img src="https://i.postimg.cc/v4L0mrBY/prizes.png" alt="Icon Prizes">
+            <span>Призы</span>
+        </div>
+    </div>
 
-        <div id="userData">
-            <h2>Данные пользователя</h2>
-            <p id="userInfo"></p>
-            <button onclick="backToLogin()">Назад</button>
-            <button onclick="showSupportTicketForm()">Техподдержка</button>
-        </div>
-
-        <div id="supportTicketForm" style="display: none;">
-            <h2>Отправить запрос в техподдержку</h2>
-            <input type="text" id="ticketSubject" placeholder="Тема">
-            <textarea id="ticketMessage" placeholder="Сообщение"></textarea>
-            <button onclick="submitSupportTicket()">Отправить</button>
-            <button onclick="document.getElementById('supportTicketForm').style.display='none'; document.getElementById('userData').style.display='block';">Отмена</button>
-        </div>
-
-        <div id="adminPanel">
-            <h2>Панель администратора</h2>
-            <div class="admin-option">
-                <button onclick="showUserManagement()">Управление пользователями</button>
-            </div>
-            <div class="admin-option">
-                <button onclick="showSiteSettings()">Настройки сайта</button>
-            </div>
-            <div class="admin-option">
-                <button onclick="showAnalytics()">Аналитика</button>
-            </div>
-            <div class="admin-option">
-                <button onclick="showLogs()">Журналы</button>
-            </div>
-            <div class="admin-option">
-                <button onclick="showSupportTickets()">Запросы техподдержки</button>
-            </div>
-            <div class="admin-option">
-                <button onclick="showGlobalSettings()">Глобальные настройки</button>
-            </div>
-            <button onclick="backToLogin()">Назад</button>
-        </div>
-
-        <div id="userManagement">
-            <h2>Управление пользователями</h2>
-            <input type="text" id="userSearch" placeholder="Поиск пользователей" oninput="searchUsers()">
-            <div class="user-management-controls">
-                <input type="text" id="newUsername" placeholder="Имя пользователя">
-                <input type="password" id="newPassword" placeholder="Пароль">
-                <input type="text" id="newEmail" placeholder="Email">
-                <select id="newUserType">
-                    <option value="user">Обычный пользователь</option>
-                    <option value="admin">Администратор</option>
-                </select>
-                <button onclick="addUser()">Добавить пользователя</button>
-            </div>
-            <div class="user-table-container">
-                <table id="userTable">
-                    <thead>
-                        <tr>
-                            <th>Имя</th>
-                            <th>Email</th>
-                            <th>Пароль</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody"></tbody>
-                </table>
-            </div>
-            <button onclick="backToAdminPanel()">Назад</button>
-        </div>
-
-        <div id="siteSettings">
-            <h2>Настройки сайта</h2>
-            <input type="text" id="siteName" placeholder="Название сайта">
-            <input type="color" id="siteColor" value="#000000">
-            <select id="fontStyle">
-                <option value="Arial, sans-serif">Arial</option>
-                <option value="Times New Roman, serif">Times New Roman</option>
-                <option value="Courier New, monospace">Courier New</option>
-            </select>
-            <input type="number" id="fontSize" min="12" max="24" value="16">
-            <input type="text" id="headerColor" placeholder="Цвет заголовка">
-            <input type="text" id="buttonColor" placeholder="Цвет кнопок">
-            <textarea id="customCss" placeholder="Пользовательский CSS"></textarea>
-            <input type="text" id="twoFACode" placeholder="Код 2FA">
-            <button onclick="saveSiteSettings()">Сохранить настройки</button>
-            <button onclick="backToAdminPanel()">Назад</button>
-        </div>
-
-        <div id="analytics">
-            <h2>Аналитика</h2>
-            <div class="chart-container"></div>
-            <button onclick="backToAdminPanel()">Назад</button>
-        </div>
-
-        <div id="logs" style="display: none;">
-            <h2>Журналы</h2>
-            <textarea id="logArea" readonly rows="10" cols="50"></textarea>
-            <button onclick="backToAdminPanel()">Назад</button>
-        </div>
-
-        <div id="globalSettings" style="display: none;">
-            <h2>Глобальные настройки</h2>
-            <input type="text" id="globalEmail" placeholder="Общий Email">
-            <input type="password" id="globalPassword" placeholder="Общий пароль">
-            <label>
-                <input type="checkbox" id="showGlobalCredentials"> Показывать Email и пароль всем пользователям
-            </label>
-            <button onclick="saveGlobalSettings()">Сохранить настройки</button>
-            <button onclick="backToAdminPanel()">Назад</button>
-        </div>
-
-        <div id="supportTickets" style="display: none;">
-            <h2>Запросы техподдержки</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Пользователь</th>
-                        <th>Тема</th>
-                        <th>Сообщение</th>
-                        <th>Статус</th>
-                        <th>Ответ</th>
-                    </tr>
-                </thead>
-                <tbody id="supportTicketsBody"></tbody>
-            </table>
-            <button onclick="backToAdminPanel()">Назад</button>
-        </div>
-        
-        <div id="deleteModal" class="modal">
-            <div class="modal-content">
-                <p>Вы уверены, что хотите удалить этого пользователя?</p>
-                <div class="modal-buttons">
-                    <button onclick="confirmDeleteUser()">Да</button>
-                    <button onclick="closeDeleteModal()">Нет</button>
+    <!-- Модальное окно -->
+    <div class="modal" id="shopModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div>
+                <h2 class="section-title">Прокачайся</h2>
+                <div class="upgrade-menu">
+                    <div class="upgrade-card">
+                        <img src="https://i.postimg.cc/w33kDKWs/energy.png" alt="Запас энергии" class="upgrade-image">
+                        <p class="upgrade-name">Запас энергии</p>
+                        <div class="upgrade-price" id="price-1" onclick="buyItem(1)">
+                            <span id="price-text-1">64,000</span>
+                        </div>
+                        <span id="timer-1" style="display: none;" class="timer">
+                            <img src="https://i.postimg.cc/ZvmKbxgP/timer.png" alt="Таймер">
+                            <span class="timer-text"></span>
+                        </span>
+                    </div>
+                    <div class="upgrade-card">
+                        <img src="https://i.postimg.cc/DmDPgCDp/multiclick.png" alt="Кибертап" class="upgrade-image">
+                        <p class="upgrade-name">Кибертап</p>
+                        <div class="upgrade-price" id="price-2" onclick="buyItem(2)">
+                            <span id="price-text-2">128,000</span>
+                        </div>
+                        <span id="timer-2" style="display: none;" class="timer">
+                            <img src="https://i.postimg.cc/ZvmKbxgP/timer.png" alt="Таймер">
+                            <span class="timer-text"></span>
+                        </span>
+                    </div>
+                    <div class="upgrade-card">
+                        <img src="https://i.postimg.cc/LYQBGvsX/reload.png" alt="Перезагрузка" class="upgrade-image">
+                        <p class="upgrade-name">Перезагрузка</p>
+                        <span class="usage-indicator" id="usage-indicator">1/4</span>
+                        <div class="upgrade-price" id="price-3" onclick="useFreeItem(3)">Бесплатно</div>
+                        <span id="timer-3" style="display: none;" class="timer">
+                            <img src="https://i.postimg.cc/ZvmKbxgP/timer.png" alt="Таймер">
+                            <span class="timer-text"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="menu">
+                    <div class="item" id="item-4">
+                        <img src="https://i.postimg.cc/Wtc4ws3D/prizes-button.png" alt="Фото" class="item-image">
+                        <div class="item-info">
+                            <p class="name">Космобатут</p>
+                            <p class="level">Ур. 9</p>
+                        </div>
+                        <p class="price" id="price-4" onclick="buyItem(4)">33,700</p>
+                        <span id="timer-4" style="display: none;" class="timer">
+                            <img src="https://i.postimg.cc/ZvmKbxgP/timer.png" alt="Таймер">
+                            <span class="timer-text"></span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let users = [
-            { username: 'Fufel', password: 'fufel52', email: 'fufel@example.com', phone: '123456789', isAdmin: true },
-                            { username: 'Fufel', password: 'fufel52', email: 'fufel@example.com', phone: '123456789', isAdmin: true }
-        ];
+        let balance = 0;
+        let energy = 500;
 
-        let siteSettings = {
-            name: 'ChatGPT by fufel52525',
-            color: '#000000',
-            fontStyle: 'Arial, sans-serif',
-            fontSize: '16',
-            headerColor: '#ffffff',
-            buttonColor: '#333333',
-            customCss: '',
-            twoFACode: ''
-        };
-
-        let analytics = {
-            lastLogin: '-'
-        };
-
-        let analyticsChart = null;
-
-        let globalSettings = {
-            email: '',
-            password: '',
-            showCredentials: false
-        };
-
-        let logs = JSON.parse(localStorage.getItem('logs') || '[]');
-        let supportTickets = [];
-        let userToDeleteIndex = -1;
-
-        function loadLogsFromLocalStorage() {
-            const savedLogs = localStorage.getItem('logs');
-            if (savedLogs) {
-                logs = JSON.parse(savedLogs);
-            }
-        }
-
-        function loadSupportTickets() {
-            supportTickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
-        }
-
-        function saveSupportTickets() {
-            localStorage.setItem('supportTickets', JSON.stringify(supportTickets));
-        }
-
-        function addLog(message) {
-            const timestamp = new Date().toLocaleString();
-            logs.push(`[${timestamp}] ${message}`);
-            localStorage.setItem('logs', JSON.stringify(logs));
-            updateLogs();
-        }
-
-        function updateLogs() {
-            const logArea = document.getElementById('logArea');
-            logArea.value = logs.join('\n');
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-
-        function showLogs() {
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('logs').style.display = 'block';
-            updateLogs();
-        }
-
-        function deleteUser(index) {
-            userToDeleteIndex = index;
-            document.getElementById('deleteModal').style.display = 'block';
-        }
-
-        function confirmDeleteUser() {
-            if (userToDeleteIndex !== -1) {
-                users.splice(userToDeleteIndex, 1);
-                saveUsersToLocalStorage();
-                updateUserTable();
-                showNotification('Пользователь удален');
-                closeDeleteModal();
-            }
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
-            userToDeleteIndex = -1;
-        }
-
-        function exportLogs() {
-            const logContent = logs.join('\n');
-            const blob = new Blob([logContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'admin_logs.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            addLog('Администратор экспортировал логи');
-            showNotification('Логи экспортированы');
-        }
-
-        function saveAllUsers() {
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('logs', JSON.stringify(logs));
-            showNotification('Все пользователи сохранены');
-        }
-
-        function loadUsersFromLocalStorage() {
-            const savedUsers = localStorage.getItem('users');
-            if (savedUsers) {
-                users = JSON.parse(savedUsers);
-            }
-        }
-
-        function saveUsersToLocalStorage() {
-            localStorage.setItem('users', JSON.stringify(users));
-        }
-
-        function showLoginForm() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('userTypeChoice').style.display = 'none';
-            document.getElementById('userData').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('userManagement').style.display = 'none';
-            document.getElementById('siteSettings').style.display = 'none';
-            document.getElementById('analytics').style.display = 'none';
-            document.getElementById('logs').style.display = 'none';
-            document.getElementById('globalSettings').style.display = 'none';
-            document.getElementById('supportTickets').style.display = 'none';
-        }
-
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const user = users.find(u => u.username === username && u.password === password);
-
-            if (user) {
-                showNotification('Успешная авторизация');
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                addLog(`Пользователь ${username} вошел в систему`);
-                if (user.username === 'Fufel') {
-                    showUserTypeChoice();
-                } else {
-                    showUserData(user);
-                }
+        function clickCorgi() {
+            if (energy > 0) {
+                balance += 1;
+                energy -= 1;
+                updateUI();
             } else {
-                showNotification('Неверное имя пользователя или пароль', true);
+                alert('Недостаточно энергии!');
             }
         }
 
-        function showNotification(message, isError = false) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = isError ? 'error-notification' : '';
-            notification.style.top = '10px';
-            setTimeout(() => {
-                notification.style.top = '-50px';
-            }, 3000);
+        function updateUI() {
+            document.getElementById('balance').textContent = balance;
+            const energyPercentage = (energy / 500) * 100;
+            document.getElementById('energyBar').style.width = energyPercentage + '%';
         }
 
-        function showUserTypeChoice() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('userTypeChoice').style.display = 'block';
+        function openShop() {
+            const modal = document.getElementById("shopModal");
+            modal.style.display = "flex";
         }
 
-        function chooseUserType(type) {
-            if (type === 'admin') {
-                showAdminPanel();
-            } else {
-                const user = users.find(u => u.username === 'Fuflik1');
-                showUserData(user);
+        function closeModal() {
+            const modal = document.getElementById("shopModal");
+            modal.style.display = "none";
+        }
+
+        function goBack() {
+            const modal = document.getElementById("shopModal");
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("shopModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
             }
         }
 
-        function showUserData(user) {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('userTypeChoice').style.display = 'none';
-            document.getElementById('userData').style.display = 'block';
-            document.getElementById('userInfo').innerHTML = `
-                <p>Имя пользователя: ${user.username}</p>
-                <p>Email: <span class="user-email">${globalSettings.showCredentials ? globalSettings.email : user.email}</span> <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.email : user.email}')">Копировать</button></p>
-                <p>Пароль: <span id="passwordDisplay" class="user-password">${globalSettings.showCredentials ? globalSettings.password : '*******'}</span> <button class="copy-btn" onclick="copyToClipboard('${globalSettings.showCredentials ? globalSettings.password : user.password}')">Копировать</button></p>
-                <p>Код 2FA: <span class="twofa-code">${siteSettings.twoFACode}</span></p>
-                <button class="funpay-btn" onclick="window.open('https://funpay.com/users/10889536/', '_blank')">
-                    FunPay
-                    <img src="https://funpay.com/favicon.ico" alt="FunPay logo" class="btn-icon">
-                </button>
-                <button class="chatgpt-btn" onclick="window.open('https://chat.openai.com/', '_blank')">
-                    ChatGPT
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMdM9MEQ0ExL1PmInT3U5I8v63YXBEdoIT0Q&s" alt="ChatGPT logo" class="btn-icon">
-                </button>
-            `;
-            addLog(`Пользователь ${user.username} просмотрел свои данные`);
-        }
-
-        function backToLogin() {
-            localStorage.removeItem('currentUser');
-            showLoginForm();
-        }
-
-        function showAdminPanel() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('userTypeChoice').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-        }
-
-        function showUserManagement() {
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('userManagement').style.display = 'block';
-            updateUserTable();
-        }
-
-        function searchUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            const filteredUsers = users.filter(user => 
-                user.username.toLowerCase().includes(searchTerm) || 
-                user.email.toLowerCase().includes(searchTerm)
-            );
-            updateUserTable(filteredUsers);
-        }
-
-        function updateUserTable(usersToDisplay = users) {
-            const tableBody = document.getElementById('userTableBody');
-            tableBody.innerHTML = '';
-            usersToDisplay.forEach((user, index) => {
-                const row = tableBody.insertRow();
-                row.insertCell(0).textContent = user.username;
-                row.insertCell(1).textContent = user.email;
-                row.insertCell(2).textContent = '*'.repeat(user.password.length);
-                const actionsCell = row.insertCell(3);
-                actionsCell.innerHTML = `
-                    <button onclick="editUser(${index})">Редактировать</button>
-                    <button onclick="deleteUser(${index})">Удалить</button>
-                `;
-            });
-        }
-
-        function editUser(index) {
-            // Implement user editing functionality
-            console.log('Editing user:', users[index]);
-        }
-
-        function showSiteSettings() {
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('siteSettings').style.display = 'block';
-            document.getElementById('siteName').value = siteSettings.name;
-            document.getElementById('siteColor').value = siteSettings.color;
-            document.getElementById('fontStyle').value = siteSettings.fontStyle;
-            document.getElementById('fontSize').value = siteSettings.fontSize;
-            document.getElementById('headerColor').value = siteSettings.headerColor || '#ffffff';
-            document.getElementById('buttonColor').value = siteSettings.buttonColor || '#333333';
-            document.getElementById('customCss').value = siteSettings.customCss || '';
-            document.getElementById('twoFACode').value = siteSettings.twoFACode || '000000';
-        }
-
-        function saveSiteSettings() {
-            siteSettings.name = document.getElementById('siteName').value;
-            siteSettings.color = document.getElementById('siteColor').value;
-            siteSettings.fontStyle = document.getElementById('fontStyle').value;
-            siteSettings.fontSize = document.getElementById('fontSize').value;
-            siteSettings.headerColor = document.getElementById('headerColor').value;
-            siteSettings.buttonColor = document.getElementById('buttonColor').value;
-            siteSettings.customCss = document.getElementById('customCss').value;
-            siteSettings.twoFACode = document.getElementById('twoFACode').value;
-
-            applySettings();
-            localStorage.setItem('siteSettings', JSON.stringify(siteSettings));
-            showNotification('Настройки сохранены');
-            addLog('Администратор изменил настройки сайта');
-        }
-
-        function applySettings() {
-            document.body.style.backgroundColor = siteSettings.color;
-            document.body.style.fontFamily = siteSettings.fontStyle;
-            document.body.style.fontSize = siteSettings.fontSize + 'px';
-            document.title = siteSettings.name;
-            document.querySelectorAll('h1, h2').forEach(h => h.style.color = siteSettings.headerColor);
-            document.querySelectorAll('button').forEach(btn => btn.style.backgroundColor = siteSettings.buttonColor);
-            
-            if (siteSettings.customCss) {
-                const customStyle = document.createElement('style');
-                customStyle.textContent = siteSettings.customCss;
-                document.head.appendChild(customStyle);
-            }
-        }
-
-        function backToAdminPanel() {
-            document.getElementById('userManagement').style.display = 'none';
-            document.getElementById('siteSettings').style.display = 'none';
-            document.getElementById('analytics').style.display = 'none';
-            document.getElementById('logs').style.display = 'none';
-            document.getElementById('globalSettings').style.display = 'none';
-            document.getElementById('supportTickets').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('Скопировано в буфер обмена');
-            });
-        }
-
-        function toggleTheme() {
-            const isDark = document.body.style.backgroundColor === 'rgb(0, 0, 0)';
-            document.body.style.backgroundColor = isDark ? '#ffffff' : '#000000';
-            document.body.style.color = isDark ? '#000000' : '#ffffff';
-        }
-
-        function showGlobalSettings() {
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('globalSettings').style.display = 'block';
-            document.getElementById('globalEmail').value = globalSettings.email;
-            document.getElementById('globalPassword').value = globalSettings.password;
-            document.getElementById('showGlobalCredentials').checked = globalSettings.showCredentials;
-        }
-
-        function saveGlobalSettings() {
-            globalSettings.email = document.getElementById('globalEmail').value;
-            globalSettings.password = document.getElementById('globalPassword').value;
-            globalSettings.showCredentials = document.getElementById('showGlobalCredentials').checked;
-            localStorage.setItem('globalSettings', JSON.stringify(globalSettings));
-            showNotification('Глобальные настройки сохранены');
-            applyGlobalSettings();
-            addLog('Администратор изменил глобальные настройки');
-        }
-
-        function applyGlobalSettings() {
-            if (globalSettings.showCredentials) {
-                document.querySelectorAll('.user-email').forEach(el => el.textContent = globalSettings.email);
-                document.querySelectorAll('.user-password').forEach(el => el.textContent = globalSettings.password);
-            }
-        }
-
-        function init() {
-            loadUsersFromLocalStorage();
-            loadLogsFromLocalStorage();
-            loadSupportTickets();
-            const savedSettings = localStorage.getItem('siteSettings');
-            if (savedSettings) {
-                siteSettings = JSON.parse(savedSettings);
-            } else {
-                siteSettings = {
-                    name: 'Мой сайт',
-                    color: '#000000',
-                    fontStyle: 'Arial, sans-serif',
-                    fontSize: '16',
-                    headerColor: '#ffffff',
-                    buttonColor: '#333333',
-                    customCss: '',
-                    twoFACode: 'HAQX2JCMK52VEKCXIBTW6SKBOBMEMKJG'
-                };
-            }
-            const savedGlobalSettings = localStorage.getItem('globalSettings');
-            if (savedGlobalSettings) {
-                globalSettings = JSON.parse(savedGlobalSettings);
-            }
-            applySettings();
-            applyGlobalSettings();
-            updateLogs();
-
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                const user = JSON.parse(savedUser);
-                if (user.username === 'Fufel') {
-                    showUserTypeChoice();
-                } else {
-                    showUserData(user);
-                }
-            } else {
-                showLoginForm(); 
-            }
-        }
-
-        window.onload = init;
-
-        document.querySelector('.dot-menu').addEventListener('click', function() {
-            const settingsPanel = document.getElementById('settings-panel');
-            settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
-        });
-
-        function showSupportTickets() {
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('supportTickets').style.display = 'block';
-            updateSupportTicketsTable();
-        }
-
-        function updateSupportTicketsTable() {
-            const tableBody = document.getElementById('supportTicketsBody');
-            tableBody.innerHTML = '';
-            supportTickets.forEach((ticket, index) => {
-                const row = tableBody.insertRow();
-                row.insertCell(0).textContent = ticket.username;
-                row.insertCell(1).textContent = ticket.subject;
-                row.insertCell(2).textContent = ticket.message;
-                row.insertCell(3).textContent = ticket.status;
-                const responseCell = row.insertCell(4);
-                responseCell.innerHTML = `
-                    <input type="text" id="response-${index}" placeholder="Ответ">
-                    <button onclick="respondToTicket(${index})">Ответить</button>
-                `;
-            });
-        }
-
-        function respondToTicket(index) {
-            const response = document.getElementById(`response-${index}`).value;
-            supportTickets[index].response = response;
-            supportTickets[index].status = 'Отвечено';
-            saveSupportTickets();
-            updateSupportTicketsTable();
-            showNotification('Ответ отправлен');
-        }
-
-        function submitSupportTicket() {
-            const subject = document.getElementById('ticketSubject').value;
-            const message = document.getElementById('ticketMessage').value;
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            
-            if (subject && message) {
-                supportTickets.push({
-                    username: currentUser.username,
-                    subject: subject,
-                    message: message,
-                    status: 'Открыт',
-                    response: ''
-                });
-                saveSupportTickets();
-                showNotification('Запрос отправлен в техподдержку');
-                document.getElementById('ticketSubject').value = '';
-                document.getElementById('ticketMessage').value = '';
-                document.getElementById('supportTicketForm').style.display = 'none';
-                document.getElementById('userData').style.display = 'block';
-            } else {
-                showNotification('Пожалуйста, заполните все поля', true);
-            }
-        }
-
-        function showSupportTicketForm() {
-            document.getElementById('userData').style.display = 'none';
-            document.getElementById('supportTicketForm').style.display = 'block';
-        }
-
-        function addUser() {
-            const username = document.getElementById('newUsername').value;
-            const password = document.getElementById('newPassword').value;
-            const email = document.getElementById('newEmail').value;
-            const userType = document.getElementById('newUserType').value;
-
-            if (username && password && email) {
-                const newUser = {
-                    username: username,
-                    password: password,
-                    email: email,
-                    isAdmin: userType === 'admin'
-                };
-
-                users.push(newUser);
-                saveUsersToLocalStorage();
-                updateUserTable();
-                showNotification('Пользователь добавлен');
-
-                // Clear input fields
-                document.getElementById('newUsername').value = '';
-                document.getElementById('newPassword').value = '';
-                document.getElementById('newEmail').value = '';
-                document.getElementById('newUserType').value = 'user';
-
-                addLog(`Администратор добавил нового пользователя: ${username}`);
-            } else {
-                showNotification('Пожалуйста, заполните все поля', true);
-            }
-        }
+        // Начальная инициализация
+        updateUI();
     </script>
-</body></html>
+</body>
+</html>
