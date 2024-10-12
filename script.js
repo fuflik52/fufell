@@ -439,7 +439,7 @@ function wearSkin(skinName) {
 // Получение URL для изображения скина
 function getSkinImage(skinName) {
     switch(skinName) {
-        case 'skin1': return 'https://i.postimg.cc/YCP0Xn7N/skin1-corgi.png';
+        case 'skin1': return 'https://i.postimg.cc/ns1FhD4q/corgi-image.jpg';
         case 'skin2': return 'https://i.postimg.cc/YCP0Xn7N/skin2-corgi.png';
         case 'skin3': return 'https://i.postimg.cc/YCP0Xn7N/skin3-corgi.png';
         case 'skin4': return 'https://i.postimg.cc/YCP0Xn7N/skin4-corgi.png';
