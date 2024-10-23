@@ -81,13 +81,13 @@
                 const assignedRoles = this.users.map(user => user.role);
                 for (const role of this.roles) {
                     if (!assignedRoles.includes(role)) {
-                        const newUser = { id: this.users.length + 1, role: role };
+                        const newUser = { id: this.users.length + 1, role: role, deviceId: this.deviceId };
                         this.users.push(newUser);
                         return newUser;
                     }
                 }
                 // Если все роли заняты, назначаем роль "Гость"
-                const guestUser = { id: this.users.length + 1, role: 'Гость' };
+                const guestUser = { id: this.users.length + 1, role: 'Гость', deviceId: this.deviceId };
                 this.users.push(guestUser);
                 return guestUser;
             }
