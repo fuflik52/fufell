@@ -1,258 +1,987 @@
-<!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Красивый анонимный чат</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+<base href="https://cookie-clicker-adventure.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Clicker Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1c2c 0%, #2b2e4a 100%);
+        font-family: 'Press Start 2P', cursive;
+        color: #fff;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .game-container {
+        max-width: 1200px;
+        width: 100%;
+        display: flex;
+        gap: 40px;
+        padding: 20px;
+    }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .game-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        .chat-container {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            width: 90%;
-            max-width: 1000px;
-            height: 80vh;
-            display: flex;
-            overflow: hidden;
-        }
+    .game-right {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+    }
 
-        .chat-messages {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-        }
+    .orbit-container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-        .chat-header {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
+    #cookie {
+        width: 200px;
+        height: 200px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        filter: drop-shadow(0 0 10px #ffd700);
+        animation: float 3s ease-in-out infinite;
+        transform-origin: center;
+    }
 
-        .chat-header h1 {
-            color: #4a5568;
-            font-size: 24px;
-            font-weight: 700;
-        }
+    .orbiting-item {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        animation: orbit linear infinite;
+        transform-origin: 150px;
+    }
 
-        #chat {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
+    .orbiting-item img {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 0 2px #ffd700);
+    }
 
-        #chat::-webkit-scrollbar {
-            width: 6px;
-        }
+    @keyframes orbit {
+        from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+    }
 
-        #chat::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 3px;
-        }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
 
-        #chat::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
+    /* Add new click animation */
+    @keyframes clickPulse {
+        0% { transform: scale(0.95); filter: brightness(1.5) drop-shadow(0 0 15px #ffd700); }
+        50% { transform: scale(0.97); filter: brightness(1.2) drop-shadow(0 0 12px #ffd700); }
+        100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 10px #ffd700); }
+    }
 
-        .message {
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 18px;
-            max-width: 70%;
-            word-wrap: break-word;
-            position: relative;
-            animation: fadeIn 0.3s ease-out;
-        }
+    #cookie:active {
+        transform: scale(0.95);
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .click-effect {
+        position: absolute;
+        pointer-events: none;
+        animation: clickEffect 0.5s ease-out forwards;
+    }
 
-        .message.user {
-            background-color: #4299e1;
-            color: white;
-            align-self: flex-end;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-        }
+    @keyframes clickEffect {
+        0% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(0.8); opacity: 0; }
+    }
 
-        .message.support {
-            background-color: #48bb78;
-            color: white;
-            border-bottom-left-radius: 4px;
-        }
+    .stats {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border: 2px solid #ffd700;
+        text-align: center;
+        width: 100%;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
 
-        .message.system {
-            background-color: #ecc94b;
-            color: #4a5568;
-            text-align: center;
-            max-width: 100%;
-            border-radius: 8px;
-        }
+    #score {
+        font-size: 1.5em;
+        color: #ffd700;
+        margin: 10px 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
-        .message::before {
-            content: attr(data-user);
-            display: block;
-            font-size: 0.8em;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+    #cps {
+        font-size: 0.8em;
+        color: #a0a0a0;
+    }
 
-        #message-form {
-            display: flex;
-            margin-top: 20px;
-        }
+    .shop-title {
+        text-align: center;
+        color: #ffd700;
+        margin-bottom: 20px;
+    }
 
-        #message-input {
-            flex-grow: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 24px;
-            font-size: 16px;
-            background-color: rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s;
-        }
+    .shop-items {
+        display: grid;
+        gap: 15px;
+    }
 
-        #message-input:focus {
-            outline: none;
-            background-color: rgba(0, 0, 0, 0.1);
-        }
+    .item {
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #4a4a4a;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-        #send-button {
-            margin-left: 10px;
-            padding: 12px 24px;
-            background-color: #4299e1;
-            color: white;
-            border: none;
-            border-radius: 24px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
+    .item:hover {
+        border-color: #ffd700;
+        transform: translateX(5px);
+    }
 
-        #send-button:hover {
-            background-color: #3182ce;
-        }
+    .item img {
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+    }
 
-        .user-list {
-            width: 200px;
-            background-color: rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            border-left: 1px solid rgba(0, 0, 0, 0.1);
-        }
+    .item-info {
+        flex-grow: 1;
+    }
 
-        .user-list h2 {
-            color: #4a5568;
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
+    .item-name {
+        font-size: 0.8em;
+        color: #ffd700;
+        margin-bottom: 5px;
+    }
 
-        .user-item {
-            margin-bottom: 10px;
-            color: #4a5568;
-            font-size: 14px;
-            padding: 5px 10px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
+    .item-cost {
+        font-size: 0.6em;
+        color: #a0a0a0;
+    }
 
-        .user-item:hover {
-            background-color: rgba(255, 255, 255, 0.8);
+    .item-owned {
+        font-size: 0.7em;
+        color: #4CAF50;
+    }
+
+    .particles {
+        position: fixed;
+        pointer-events: none;
+    }
+
+    @keyframes shine {
+        0% { filter: brightness(1); }
+        50% { filter: brightness(1.5); }
+        100% { filter: brightness(1); }
+    }
+
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 215, 0, 0.2);
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: 1px solid #ffd700;
+        animation: fadeOut 2s forwards;
+        pointer-events: none;
+    }
+
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
         }
-    </style>
+    }
+
+    .chat-container {
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #ffd700;
+        border-radius: 10px;
+        width: 100%;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .chat-header {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-bottom: 2px solid #ffd700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-title {
+        color: #ffd700;
+        font-size: 0.8em;
+    }
+
+    .minimize-btn {
+        background: none;
+        border: none;
+        color: #ffd700;
+        cursor: pointer;
+        font-size: 1.2em;
+    }
+
+    .chat-messages {
+        height: 200px;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .chat-input {
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        border-top: 2px solid #ffd700;
+    }
+
+    .chat-input input {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid #ffd700;
+        border-radius: 5px;
+        padding: 5px 10px;
+        color: white;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7em;
+    }
+
+    #send-btn {
+        background: #ffd700;
+        border: none;
+        border-radius: 5px;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    #send-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: #000;
+    }
+
+    .message {
+        margin: 5px 0;
+        padding: 5px;
+        border-radius: 5px;
+        font-size: 0.7em;
+        word-break: break-word;
+    }
+
+    .message.user {
+        background: rgba(255, 215, 0, 0.2);
+        margin-left: auto;
+        border-radius: 5px 5px 0 5px;
+    }
+
+    .message.receiver {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px 5px 5px 0;
+    }
+
+    .message-header {
+        color: #ffd700;
+        font-size: 0.8em;
+        margin-bottom: 3px;
+    }
+
+    #participant-list {
+        padding: 5px 10px;
+        font-size: 0.6em;
+        color: #a0a0a0;
+        background: rgba(0, 0, 0, 0.7);
+        border-top: 2px solid #ffd700;
+    }
+
+    .chat-minimized {
+        height: 40px;
+        overflow: hidden;
+    }
+
+    .language-selector {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .flag {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        filter: saturate(0.7);
+        padding: 5px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .flag:hover {
+        transform: scale(1.1);
+        filter: saturate(1.2);
+        background: rgba(255, 215, 0, 0.2);
+    }
+
+    .flag.active {
+        background: rgba(255, 215, 0, 0.3);
+        filter: saturate(1.2);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    /* Add this to the existing CSS */
+    .cookie-stage-1 {
+        filter: grayscale(0.8) brightness(0.8) drop-shadow(0 0 10px #ffd700);
+    }
+
+    .cookie-stage-2 {
+        filter: grayscale(0.5) brightness(0.9) drop-shadow(0 0 12px #ffd700);
+    }
+
+    .cookie-stage-3 {
+        filter: grayscale(0.2) brightness(1) drop-shadow(0 0 15px #ffd700);
+    }
+
+    .cookie-stage-4 {
+        filter: grayscale(0) brightness(1.1) saturate(1.2) drop-shadow(0 0 20px #ffd700);
+    }
+
+    .cookie-stage-5 {
+        filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ffd700);
+        animation: rainbow-glow 5s infinite;
+    }
+
+    @keyframes rainbow-glow {
+        0% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ffd700); }
+        25% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ff7000); }
+        50% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ff0000); }
+        75% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ff7000); }
+        100% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ffd700); }
+    }
+</style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-messages">
-            <div class="chat-header">
-                <h1>Красивый анонимный чат</h1>
-            </div>
-            <div id="chat"></div>
-            <form id="message-form">
-                <input type="text" id="message-input" placeholder="Введите сообщение..." required>
-                <button type="submit" id="send-button">Отправить</button>
-            </form>
+    <h1 style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Aventure Cookie Clicker</h1>
+    
+    <div class="language-selector">
+        <div class="flag" onclick="changeLanguage('pt-BR')">
+            <img src="https://api.iconify.design/emojione:flag-for-brazil.svg" alt="Português" width="32" height="32">
         </div>
-        <div class="user-list">
-            <h2>Пользователи</h2>
-            <div id="users"></div>
+        <div class="flag" onclick="changeLanguage('en')">
+            <img src="https://api.iconify.design/emojione:flag-for-united-states.svg" alt="English" width="32" height="32">
+        </div>
+        <div class="flag" onclick="changeLanguage('es')">
+            <img src="https://api.iconify.design/emojione:flag-for-spain.svg" alt="Español" width="32" height="32">
+        </div>
+        <div class="flag" onclick="changeLanguage('fr')">
+            <img src="https://api.iconify.design/emojione:flag-for-france.svg" alt="Français" width="32" height="32">  
+        </div>
+        <div class="flag" onclick="changeLanguage('ru')">
+            <img src="https://api.iconify.design/emojione:flag-for-russia.svg" alt="Русский" width="32" height="32">
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="game-left">
+            <div class="orbit-container">
+                <img id="cookie" class="cookie-stage-1" src="https://api.iconify.design/noto:cookie.svg" alt="Cookie" onclick="clickCookie()">
+                <div id="orbiting-items"></div>
+            </div>
+            <div class="stats">
+                <div id="score">Cookies: 0</div>
+                <div id="cps">Par seconde: 0</div>
+            </div>
+            <div id="chat-box" class="chat-container">
+                <div class="chat-header">
+                    <span class="chat-title">Chat Multijoueur</span>
+                    <button class="minimize-btn" id="minimize-chat">−</button>
+                </div>
+                <div id="messages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Tapez un message...">
+                    <button id="send-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="participant-list"></div>
+            </div>
+        </div>
+        
+        <div class="game-right">
+            <h2 class="shop-title">🏪 Boutique de Cookies</h2>
+            <div class="shop-items">
+                <div class="item" onclick="purchaseItem(0)">
+                    <img src="https://api.iconify.design/emojione:computer-mouse.svg" alt="Cursor">
+                    <div class="item-info">
+                        <div class="item-name">Curseur Automatique</div>
+                        <div class="item-cost">Coût: <span id="cursor-cost">15</span> cookies</div>
+                        <div class="item-owned" id="cursor-count">Possédés: 0</div>
+                    </div>
+                </div>
+
+                <div class="item" onclick="purchaseItem(1)">
+                    <img src="https://api.iconify.design/noto:factory.svg" alt="Factory">
+                    <div class="item-info">
+                        <div class="item-name">Mini Usine</div>
+                        <div class="item-cost">Coût: <span id="factory-cost">100</span> cookies</div>
+                        <div class="item-owned" id="factory-count">Possédés: 0</div>
+                    </div>
+                </div>
+
+                <div class="item" onclick="purchaseItem(2)">
+                    <img src="https://api.iconify.design/noto:magic-wand.svg" alt="Magic Wand">
+                    <div class="item-info">
+                        <div class="item-name">Baguette Magique</div>
+                        <div class="item-cost">Coût: <span id="wand-cost">500</span> cookies</div>
+                        <div class="item-owned" id="wand-count">Possédés: 0</div>
+                    </div>
+                </div>
+
+                <div class="item" onclick="purchaseItem(3)">
+                    <img src="https://api.iconify.design/emojione:older-woman.svg" alt="Grandma">
+                    <div class="item-info">
+                        <div class="item-name">Grand-mère à Cookies</div>
+                        <div class="item-cost">Coût: <span id="grandma-cost">1000</span> cookies</div>
+                        <div class="item-owned" id="grandma-count">Possédés: 0</div>
+                    </div>
+                </div>
+
+                <div class="item" onclick="purchaseItem(4)">
+                    <img src="https://api.iconify.design/emojione:bread.svg" alt="Bakery">
+                    <div class="item-info">
+                        <div class="item-name">Boulangerie</div>
+                        <div class="item-cost">Coût: <span id="bakery-cost">5000</span> cookies</div>
+                        <div class="item-owned" id="bakery-count">Possédés: 0</div>
+                    </div>
+                </div>
+
+                <div class="item" onclick="purchaseItem(5)">
+                    <img src="https://api.iconify.design/noto:doughnut.svg" alt="Robot">
+                    <div class="item-info">
+                        <div class="item-name">Robot à Cookies</div>
+                        <div class="item-cost">Coût: <span id="robot-cost">20000</span> cookies</div>
+                        <div class="item-owned" id="robot-count">Possédés: 0</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const chat = document.getElementById('chat');
-        const messageForm = document.getElementById('message-form');
-        const messageInput = document.getElementById('message-input');
-        const usersContainer = document.getElementById('users');
+        let cookies = 0;
+        let cps = 0;
+        const items = [
+            { name: 'cursor', cost: 15, cps: 0.1, owned: 0 },
+            { name: 'factory', cost: 100, cps: 1, owned: 0 },
+            { name: 'wand', cost: 500, cps: 5, owned: 0 },
+            { name: 'grandma', cost: 1000, cps: 10, owned: 0 },
+            { name: 'bakery', cost: 5000, cps: 50, owned: 0 },
+            { name: 'robot', cost: 20000, cps: 200, owned: 0 }
+        ];
 
-        let currentUser = `User ${Math.floor(Math.random() * 1000) + 1}`;
-        let users = [currentUser, 'User 1', 'User 2', 'Тех. поддержка'];
+        const cookieStages = [
+            { threshold: 0, class: 'cookie-stage-1' },
+            { threshold: 1000, class: 'cookie-stage-2' },
+            { threshold: 10000, class: 'cookie-stage-3' },
+            { threshold: 100000, class: 'cookie-stage-4' },
+            { threshold: 1000000, class: 'cookie-stage-5' }
+        ];
 
-        function updateUserList() {
-            usersContainer.innerHTML = '';
-            users.forEach(user => {
-                const userElement = document.createElement('div');
-                userElement.className = 'user-item';
-                userElement.textContent = user;
-                usersContainer.appendChild(userElement);
+        const translations = {
+            'pt-BR': {
+                title: 'Cookie Clicker Adventure',
+                cookies: 'Cookies',
+                perSecond: 'Por segundo',
+                shop: '🏪 Loja de Cookies',
+                items: {
+                    cursor: {
+                        name: 'Cursor Automático',
+                        owned: 'Possuídos'
+                    },
+                    factory: {
+                        name: 'Mini Fábrica',
+                        owned: 'Possuídos'
+                    },
+                    wand: {
+                        name: 'Varinha Mágica',
+                        owned: 'Possuídos'
+                    },
+                    grandma: {
+                        name: 'Vovó Faz Cookies',
+                        owned: 'Possuídos'
+                    },
+                    bakery: {
+                        name: 'Panificadora',
+                        owned: 'Possuídos'
+                    },
+                    robot: {
+                        name: 'Robô Fazedor de Cookies',
+                        owned: 'Possuídos'
+                    }
+                },
+                cost: 'Custo',
+                insufficientCookies: 'Cookies insuficientes!',
+                purchased: 'Comprou {item} por {cost} cookies!'
+            },
+            'en': {
+                title: 'Cookie Clicker Adventure',
+                cookies: 'Cookies',
+                perSecond: 'Per second',
+                shop: '🏪 Cookie Shop',
+                items: {
+                    cursor: {
+                        name: 'Auto Cursor',
+                        owned: 'Owned'
+                    },
+                    factory: {
+                        name: 'Mini Factory',
+                        owned: 'Owned'
+                    },
+                    wand: {
+                        name: 'Magic Wand',
+                        owned: 'Owned'
+                    },
+                    grandma: {
+                        name: 'Cookie Grandma',
+                        owned: 'Owned'
+                    },
+                    bakery: {
+                        name: 'Bakery',
+                        owned: 'Owned'
+                    },
+                    robot: {
+                        name: 'Cookie Robot',
+                        owned: 'Owned'
+                    }
+                },
+                cost: 'Cost',
+                insufficientCookies: 'Not enough cookies!',
+                purchased: 'Purchased {item} for {cost} cookies!'
+            },
+            'es': {
+                title: 'Aventura Cookie Clicker',
+                cookies: 'Galletas',
+                perSecond: 'Por segundo',
+                shop: '🏪 Tienda de Galletas',
+                items: {
+                    cursor: {
+                        name: 'Cursor Automático',
+                        owned: 'Obtenido'
+                    },
+                    factory: {
+                        name: 'Mini Fábrica',
+                        owned: 'Obtenido'
+                    },
+                    wand: {
+                        name: 'Varita Mágica',
+                        owned: 'Obtenido'
+                    },
+                    grandma: {
+                        name: 'Abuela de Galletas',
+                        owned: 'Obtenido'
+                    },
+                    bakery: {
+                        name: 'Panadería',
+                        owned: 'Obtenido'
+                    },
+                    robot: {
+                        name: 'Robot de Galletas',
+                        owned: 'Obtenido'
+                    }
+                },
+                cost: 'Costo',
+                insufficientCookies: '¡Galletas insuficientes!',
+                purchased: '¡Compraste {item} por {cost} galletas!'
+            },
+            'fr': {
+                title: 'Aventure Cookie Clicker',
+                cookies: 'Cookies',
+                perSecond: 'Par seconde',
+                shop: '🏪 Boutique de Cookies',
+                items: {
+                    cursor: {
+                        name: 'Curseur Automatique',
+                        owned: 'Possédés'
+                    },
+                    factory: {
+                        name: 'Mini Usine',
+                        owned: 'Possédés'
+                    },
+                    wand: {
+                        name: 'Baguette Magique',
+                        owned: 'Possédés'
+                    },
+                    grandma: {
+                        name: 'Grand-mère à Cookies',
+                        owned: 'Possédés'
+                    },
+                    bakery: {
+                        name: 'Boulangerie',
+                        owned: 'Possédés'
+                    },
+                    robot: {
+                        name: 'Robot à Cookies',
+                        owned: 'Possédés'
+                    }
+                },
+                cost: 'Coût',
+                insufficientCookies: 'Pas assez de cookies !',
+                purchased: '{item} acheté pour {cost} cookies !'
+            },
+            'ru': {
+                title: 'Приключение Cookie Clicker',
+                cookies: 'Печенье',
+                perSecond: 'В секунду',
+                shop: '🏪 Магазин печенья',
+                items: {
+                    cursor: {
+                        name: 'Авто-курсор',
+                        owned: 'Куплено'
+                    },
+                    factory: {
+                        name: 'Мини-фабрика',
+                        owned: 'Куплено'
+                    },
+                    wand: {
+                        name: 'Волшебная палочка',
+                        owned: 'Куплено'
+                    },
+                    grandma: {
+                        name: 'Бабушка-пекарь',
+                        owned: 'Куплено'
+                    },
+                    bakery: {
+                        name: 'Пекарня',
+                        owned: 'Куплено'
+                    },
+                    robot: {
+                        name: 'Робот-пекарь',
+                        owned: 'Куплено'
+                    }
+                },
+                cost: 'Цена',
+                insufficientCookies: 'Недостаточно печенья!',
+                purchased: 'Куплено {item} за {cost} печенья!'
+            }
+        };
+
+        let currentLanguage = 'fr'; 
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.flag').forEach(flag => flag.classList.remove('active'));
+            document.querySelector(`.flag[onclick*="${lang}"]`).classList.add('active');
+            document.title = translations[lang].title;
+            document.querySelector('h1').textContent = translations[lang].title;
+            document.querySelector('#score').textContent = `${translations[lang].cookies}: ${formatNumber(cookies)}`;
+            document.querySelector('#cps').textContent = `${translations[lang].perSecond}: ${cps.toFixed(1)}`;
+            document.querySelector('.shop-title').textContent = translations[lang].shop;
+
+            updateDisplay();
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num/1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num/1000).toFixed(1) + 'K';
+            }
+            return Math.floor(num);
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = `${translations[currentLanguage].cookies}: ${formatNumber(cookies)}`;
+            document.getElementById('cps').textContent = `${translations[currentLanguage].perSecond}: ${cps.toFixed(1)}`;
+            
+            const itemNames = ['cursor', 'factory', 'wand', 'grandma', 'bakery', 'robot'];
+            itemNames.forEach((item, index) => {
+                document.getElementById(`${item}-count`).textContent = 
+                    `${translations[currentLanguage].items[item].owned}: ${items[index].owned}`;
+                document.querySelector(`.item:nth-child(${index + 1}) .item-name`).textContent = 
+                    translations[currentLanguage].items[item].name;
+                document.querySelector(`.item:nth-child(${index + 1}) .item-cost`).textContent = 
+                    `${translations[currentLanguage].cost}: ${items[index].cost}`;
             });
         }
 
-        updateUserList();
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remove notification after animation completes
+            notification.addEventListener('animationend', () => {
+                notification.remove();
+            });
+        }
 
-        messageForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+        function updateCookieAppearance() {
+            const cookie = document.getElementById('cookie');
+            const currentStage = cookieStages
+                .slice()
+                .reverse()
+                .find(stage => cookies >= stage.threshold);
+                
+            // Remove all stage classes
+            cookieStages.forEach(stage => {
+                cookie.classList.remove(stage.class);
+            });
+            
+            // Add current stage class
+            if (currentStage) {
+                cookie.classList.add(currentStage.class);
+            }
+        }
+
+        function createParticle(x, y) {
+            for (let i = 0; i < 3; i++) { // Create multiple particles
+                const particle = document.createElement('div');
+                particle.className = 'particles';
+                // Random position offset
+                const offsetX = (Math.random() - 0.5) * 40;
+                const offsetY = (Math.random() - 0.5) * 40;
+                particle.style.left = (x + offsetX) + 'px';
+                particle.style.top = (y + offsetY) + 'px';
+                particle.style.fontSize = '20px';
+                particle.textContent = '+1';
+                particle.style.color = '#ffd700';
+                document.body.appendChild(particle);
+
+                const animation = particle.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(-${50 + Math.random() * 50}px) rotate(${(Math.random() - 0.5) * 90}deg)`, opacity: 0 }
+                ], {
+                    duration: 1000 + Math.random() * 500,
+                    iterations: 1,
+                    easing: 'ease-out'
+                });
+
+                animation.onfinish = () => particle.remove();
+            }
+        }
+
+        const orbitingItems = {
+            cursor: { duration: 5, delay: 0, clickInterval: 2000 },
+            factory: { duration: 7, delay: 0.5, clickInterval: 1000 },
+            wand: { duration: 6, delay: 1, clickInterval: 800 },
+            grandma: { duration: 8, delay: 1.5, clickInterval: 1200 },
+            bakery: { duration: 9, delay: 2, clickInterval: 600 },
+            robot: { duration: 4, delay: 2.5, clickInterval: 400 }
+        };
+
+        function addOrbitingItem(type) {
+            const container = document.getElementById('orbiting-items');
+            const item = document.createElement('div');
+            item.className = 'orbiting-item';
+            item.innerHTML = `<img src="https://api.iconify.design/${getItemIcon(type)}.svg" alt="${type}">`;
+            item.style.animation = `orbit ${orbitingItems[type].duration}s linear infinite`;
+            item.style.animationDelay = `${orbitingItems[type].delay}s`;
+            container.appendChild(item);
+            
+            // Start automatic clicking animation
+            setInterval(() => {
+                if(cookies >= 0) { // Only if game is active
+                    createAutoClickEffect(item);
+                }
+            }, orbitingItems[type].clickInterval);
+        }
+
+        function getItemIcon(type) {
+            const icons = {
+                cursor: 'emojione:computer-mouse',
+                factory: 'noto:factory',
+                wand: 'noto:magic-wand',
+                grandma: 'emojione:older-woman',
+                bakery: 'emojione:bread',
+                robot: 'noto:doughnut'
+            };
+            return icons[type];
+        }
+
+        function createAutoClickEffect(orbitingItem) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.innerHTML = `<img src="https://api.iconify.design/emojione:computer-mouse.svg" width="15" height="15">`;
+            
+            const rect = orbitingItem.getBoundingClientRect();
+            effect.style.left = rect.left + 'px';
+            effect.style.top = rect.top + 'px';
+            
+            document.body.appendChild(effect);
+            
+            // Add cookie value
+            cookies++;
+            updateDisplay();
+            updateCookieAppearance();
+            
+            // Remove effect after animation
+            effect.addEventListener('animationend', () => effect.remove());
+        }
+
+        function clickCookie() {
+            cookies++;
+            const cookie = document.getElementById('cookie');
+            const rect = cookie.getBoundingClientRect();
+            
+            // Add click animation
+            cookie.style.animation = 'none';
+            cookie.offsetHeight; // Trigger reflow
+            cookie.style.animation = 'float 3s ease-in-out infinite';
+            cookie.animate([
+                { transform: 'scale(0.95)', filter: 'brightness(1.5) drop-shadow(0 0 15px #ffd700)' },
+                { transform: 'scale(0.97)', filter: 'brightness(1.2) drop-shadow(0 0 12px #ffd700)' },
+                { transform: 'scale(1)', filter: 'brightness(1) drop-shadow(0 0 10px #ffd700)' }
+            ], {
+                duration: 300,
+                easing: 'ease-out'
+            });
+            
+            createParticle(rect.left + rect.width/2, rect.top);
+            updateDisplay();
+            updateCookieAppearance();
+        }
+
+        function purchaseItem(index) {
+            const item = items[index];
+            if (cookies >= item.cost) {
+                cookies -= item.cost;
+                item.owned++;
+                if(item.owned === 1) { // Only add orbiting item on first purchase
+                    addOrbitingItem(item.name);
+                }
+                item.cost = Math.ceil(item.cost * 1.15);
+                cps += item.cps;
+                updateDisplay();
+                showNotification(translations[currentLanguage].purchased.replace('{item}', translations[currentLanguage].items[item.name].name).replace('{cost}', item.cost));
+            } else {
+                showNotification(translations[currentLanguage].insufficientCookies);
+            }
+        }
+
+        setInterval(() => {
+            cookies += cps;
+            updateDisplay();
+            updateCookieAppearance();
+        }, 1000);
+
+        const room = new WebsimSocket();
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-btn');
+        const minimizeBtn = document.getElementById('minimize-chat');
+        const chatBox = document.getElementById('chat-box');
+        let currentUser = null;
+
+        async function getCurrentUser() {
+            currentUser = await window.websim.getUser();
+            return currentUser;
+        }
+
+        function updateParticipantList() {
+            const participants = Object.values(room.party.peers).map(peer => peer.username);
+            const participantList = document.getElementById('participant-list');
+            participantList.innerHTML = participants.map(username => `
+                <span style="color: #ffd700;">● ${username}</span>
+            `).join(', ');
+        }
+
+        function addChatMessage(username, message, cookieCount) {
+            const time = new Date().toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const messageElement = document.createElement('div');
+            const isCurrentUser = username === currentUser.username;
+            
+            messageElement.className = `message ${isCurrentUser ? 'user' : 'receiver'}`;
+            messageElement.innerHTML = `
+                <div class="message-header">
+                    ${username} • ${time} • 🍪 ${formatNumber(cookieCount)}
+                </div>
+                <div class="message-text">
+                    ${message}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        room.onmessage = (event) => {
+            const data = event.data;
+            if (data.type === 'chatMessage') {
+                addChatMessage(data.username, data.message, data.cookieCount);
+            }
+        };
+
+        let isMinimized = false;
+        minimizeBtn.addEventListener('click', () => {
+            isMinimized = !isMinimized;
+            chatBox.classList.toggle('chat-minimized');
+            minimizeBtn.textContent = isMinimized ? '+' : '−';
+        });
+
+        sendButton.addEventListener('click', () => {
             const message = messageInput.value.trim();
             if (message) {
-                if (message === '/123') {
-                    addMessage('Вы запросили тех. поддержку. Ожидайте ответа.', 'system');
-                } else {
-                    addMessage(message, 'user');
-                }
+                room.send({ 
+                    type: 'chatMessage', 
+                    username: currentUser.username, 
+                    message: message,
+                    cookieCount: cookies 
+                });
                 messageInput.value = '';
             }
         });
 
-        function addMessage(message, type = 'user') {
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${type}`;
-            
-            if (type === 'user') {
-                messageElement.setAttribute('data-user', currentUser);
-                messageElement.textContent = message;
-            } else if (type === 'support') {
-                messageElement.setAttribute('data-user', 'Тех. поддержка');
-                messageElement.textContent = message;
-            } else {
-                messageElement.textContent = message;
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                const message = messageInput.value.trim();
+                if (message) {
+                    room.send({ 
+                        type: 'chatMessage', 
+                        username: currentUser.username, 
+                        message: message,
+                        cookieCount: cookies 
+                    });
+                    messageInput.value = '';
+                }
             }
-            
-            chat.appendChild(messageElement);
-            chat.scrollTop = chat.scrollHeight;
-        }
+        });
+
+        room.onPeersChanged = updateParticipantList;
+
+        getCurrentUser().then(() => {
+            updateParticipantList();
+        });
+
+        updateDisplay();
     </script>
 </body>
 </html>
