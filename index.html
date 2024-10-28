@@ -3,7 +3,7 @@
 <base href="https://cookie-clicker-adventure.com/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Cookie Clicker Adventure</title>
+<title>Corgi Clicker Adventure</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
     body {
@@ -35,7 +35,7 @@
 
     .game-right {
         flex: 1;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgb(35,38,60);
         border-radius: 15px;
         padding: 20px;
     }
@@ -57,6 +57,10 @@
         filter: drop-shadow(0 0 10px #ffd700);
         animation: float 3s ease-in-out infinite;
         transform-origin: center;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        touch-action: manipulation;
     }
 
     .orbiting-item {
@@ -164,6 +168,25 @@
 
     .item-info {
         flex-grow: 1;
+    }
+
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .info-icon {
+        cursor: pointer;
+        font-size: 0.8em;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+        color: #4CAF50; /* Make icon green */
+    }
+
+    .info-icon:hover {
+        opacity: 1;
     }
 
     .item-name {
@@ -325,10 +348,23 @@
         opacity: 1;
         transform: scale(1.1);
     }
+
+    .tooltip {
+        position: fixed;
+        background: rgba(0, 0, 0, 0.9);
+        color: #ffd700;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 2px solid #ffd700;
+        z-index: 1000;
+        pointer-events: none;
+        font-size: 0.8em;
+        max-width: 200px;
+    }
 </style>
 </head>
 <body>
-    <h1 style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Aventure Cookie Clicker</h1>
+    <h1 style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Приключение Корги Кликер</h1>
 
     <div class="language-selector">
         <div class="flag" onclick="changeLanguage('en')">
@@ -342,67 +378,96 @@
     <div class="game-container">
         <div class="game-left">
             <div class="orbit-container">
-                <img id="cookie" class="cookie-stage-1" src="https://api.iconify.design/noto:cookie.svg" alt="Cookie" onclick="clickCookie()">
+                <img id="cookie" class="cookie-stage-1" src="https://api.iconify.design/noto:dog-face.svg" alt="Corgi" onclick="clickCookie()">
                 <div id="orbiting-items"></div>
             </div>
             <div class="stats">
-                <div id="score">Cookies: 0</div>
-                <div id="cps">Par seconde: 0</div>
+                <div id="score">Treats: 0</div>
+                <div id="cps">Per second: 0</div>
             </div>
             <div class="game-right">
-                <h2 class="shop-title">🏪 Boutique de Cookies</h2>
+                <h2 class="shop-title">🏪 Corgi Shop</h2>
                 <div class="shop-items">
                     <div class="item" onclick="purchaseItem(0)">
-                        <img src="https://api.iconify.design/emojione:computer-mouse.svg" alt="Cursor">
+                        <img src="https://api.iconify.design/noto:paw-prints.svg" alt="Paw">
                         <div class="item-info">
-                            <div class="item-name">Curseur Automatique</div>
-                            <div class="item-cost">Coût: <span id="cursor-cost">15</span> cookies</div>
-                            <div class="item-owned" id="cursor-count">Possédés: 0</div>
+                            <div class="item-header">
+                                <div class="item-name">Волшебная Лапа</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('paw')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="paw-cost">10</span> treats</div>
+                            <div class="item-owned" id="paw-count">Level: 0</div>
                         </div>
                     </div>
-
                     <div class="item" onclick="purchaseItem(1)">
-                        <img src="https://api.iconify.design/noto:factory.svg" alt="Factory">
+                        <img src="https://api.iconify.design/noto:dog-face.svg" alt="Puppy">
                         <div class="item-info">
-                            <div class="item-name">Mini Usine</div>
-                            <div class="item-cost">Coût: <span id="factory-cost">100</span> cookies</div>
-                            <div class="item-owned" id="factory-count">Possédés: 0</div>
+                            <div class="item-header">
+                                <div class="item-name">Corgi Puppy</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('puppy')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="puppy-cost">15</span> treats</div>
+                            <div class="item-owned" id="puppy-count">Level: 0</div>
                         </div>
                     </div>
 
                     <div class="item" onclick="purchaseItem(2)">
-                        <img src="https://api.iconify.design/noto:magic-wand.svg" alt="Magic Wand">
+                        <img src="https://api.iconify.design/noto:bowl-with-spoon.svg" alt="Bowl">
                         <div class="item-info">
-                            <div class="item-name">Baguette Magique</div>
-                            <div class="item-cost">Coût: <span id="wand-cost">500</span> cookies</div>
-                            <div class="item-owned" id="wand-count">Possédés: 0</div>
+                            <div class="item-header">
+                                <div class="item-name">Treat Bowl</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('bowl')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="bowl-cost">100</span> treats</div>
+                            <div class="item-owned" id="bowl-count">Level: 0</div>
                         </div>
                     </div>
 
                     <div class="item" onclick="purchaseItem(3)">
-                        <img src="https://api.iconify.design/emojione:older-woman.svg" alt="Grandma">
+                        <img src="https://api.iconify.design/emojione:teddy-bear.svg" alt="Toy">
                         <div class="item-info">
-                            <div class="item-name">Grand-mère à Cookies</div>
-                            <div class="item-cost">Coût: <span id="grandma-cost">1000</span> cookies</div>
-                            <div class="item-owned" id="grandma-count">Possédés: 0</div>
+                            <div class="item-header">
+                                <div class="item-name">Squeaky Toy</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('toy')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="toy-cost">500</span> treats</div>
+                            <div class="item-owned" id="toy-count">Level: 0</div>
                         </div>
                     </div>
 
                     <div class="item" onclick="purchaseItem(4)">
-                        <img src="https://api.iconify.design/emojione:bread.svg" alt="Bakery">
+                        <img src="https://api.iconify.design/noto:sleeping-face.svg" alt="Bed">
                         <div class="item-info">
-                            <div class="item-name">Boulangerie</div>
-                            <div class="item-cost">Coût: <span id="bakery-cost">5000</span> cookies</div>
-                            <div class="item-owned" id="bakery-count">Possédés: 0</div>
+                            <div class="item-header">
+                                <div class="item-name">Corgi Bed</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('bed')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="bed-cost">1000</span> treats</div>
+                            <div class="item-owned" id="bed-count">Level: 0</div>
                         </div>
                     </div>
 
                     <div class="item" onclick="purchaseItem(5)">
-                        <img src="https://api.iconify.design/noto:doughnut.svg" alt="Robot">
+                        <img src="https://api.iconify.design/emojione:house.svg" alt="House">
                         <div class="item-info">
-                            <div class="item-name">Robot à Cookies</div>
-                            <div class="item-cost">Coût: <span id="robot-cost">20000</span> cookies</div>
-                            <div class="item-owned" id="robot-count">Possédés: 0</div>
+                            <div class="item-header">
+                                <div class="item-name">Corgi House</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('house')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="house-cost">5000</span> treats</div>
+                            <div class="item-owned" id="house-count">Level: 0</div>
+                        </div>
+                    </div>
+
+                    <div class="item" onclick="purchaseItem(6)">
+                        <img src="https://api.iconify.design/noto:park.svg" alt="Park">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <div class="item-name">Corgi Park</div>
+                                <div class="info-icon" onclick="event.stopPropagation(); showItemInfo('park')">❔</div>
+                            </div>
+                            <div class="item-cost">Cost: <span id="park-cost">20000</span> treats</div>
+                            <div class="item-owned" id="park-count">Level: 0</div>
                         </div>
                     </div>
                 </div>
@@ -414,13 +479,15 @@
     <script>
         let cookies = 0;
         let cps = 0;
+        let clickPower = 1;
         let items = [
-            { name: 'cursor', cost: 15, cps: 0.1, owned: 0 },
-            { name: 'factory', cost: 100, cps: 1, owned: 0 },
-            { name: 'wand', cost: 500, cps: 5, owned: 0 },
-            { name: 'grandma', cost: 1000, cps: 10, owned: 0 },
-            { name: 'bakery', cost: 5000, cps: 50, owned: 0 },
-            { name: 'robot', cost: 20000, cps: 200, owned: 0 }
+            { name: 'paw', cost: 10, clickPower: 1, owned: 0 },
+            { name: 'puppy', cost: 15, cps: 0.1, owned: 0 },
+            { name: 'bowl', cost: 100, cps: 1, owned: 0 },
+            { name: 'toy', cost: 500, cps: 5, owned: 0 },
+            { name: 'bed', cost: 1000, cps: 10, owned: 0 },
+            { name: 'house', cost: 5000, cps: 50, owned: 0 },
+            { name: 'park', cost: 20000, cps: 200, owned: 0 }
         ];
 
         const cookieStages = [
@@ -433,74 +500,103 @@
 
         const translations = {
             'en': {
-                title: 'Cookie Clicker Adventure',
-                cookies: 'Cookies',
+                title: 'Corgi Clicker Adventure',
+                cookies: 'Treats',
                 perSecond: 'Per second',
-                shop: '🏪 Cookie Shop',
+                shop: '🏪 Corgi Shop',
                 items: {
-                    cursor: {
-                        name: 'Auto Cursor',
-                        owned: 'Owned'
+                    paw: {
+                        name: 'Magic Paw',
+                        owned: 'Level'
                     },
-                    factory: {
-                        name: 'Mini Factory',
-                        owned: 'Owned'
+                    puppy: {
+                        name: 'Corgi Puppy',
+                        owned: 'Level'
                     },
-                    wand: {
-                        name: 'Magic Wand',
-                        owned: 'Owned'
+                    bowl: {
+                        name: 'Treat Bowl',
+                        owned: 'Level'
                     },
-                    grandma: {
-                        name: 'Cookie Grandma',
-                        owned: 'Owned'
+                    toy: {
+                        name: 'Squeaky Toy',
+                        owned: 'Level'
                     },
-                    bakery: {
-                        name: 'Bakery',
-                        owned: 'Owned'
+                    bed: {
+                        name: 'Corgi Bed',
+                        owned: 'Level'
                     },
-                    robot: {
-                        name: 'Cookie Robot',
-                        owned: 'Owned'
+                    house: {
+                        name: 'Corgi House',
+                        owned: 'Level'
+                    },
+                    park: {
+                        name: 'Corgi Park',
+                        owned: 'Level'
                     }
                 },
                 cost: 'Cost',
-                insufficientCookies: 'Not enough cookies!',
-                purchased: 'Purchased {item} for {cost} cookies!'
+                insufficientCookies: 'Not enough treats!',
+                purchased: 'Purchased {item} for {cost} treats!'
             },
             'ru': {
-                title: 'Приключение Cookie Clicker',
-                cookies: 'Печенье',
+                title: 'Приключение Корги Кликер',
+                cookies: 'Лакомства',
                 perSecond: 'В секунду',
-                shop: '🏪 Магазин печенья',
+                shop: '🏪 Магазин Корги',
                 items: {
-                    cursor: {
-                        name: 'Авто-курсор',
-                        owned: 'Куплено'
+                    paw: {
+                        name: 'Волшебная Лапа',
+                        owned: 'Level'
                     },
-                    factory: {
-                        name: 'Мини-фабрика',
-                        owned: 'Куплено'
+                    puppy: {
+                        name: 'Щенок Корги',
+                        owned: 'Level'
                     },
-                    wand: {
-                        name: 'Волшебная палочка',
-                        owned: 'Куплено'
+                    bowl: {
+                        name: 'Миска',
+                        owned: 'Level'
                     },
-                    grandma: {
-                        name: 'Бабушка-пекарь',
-                        owned: 'Куплено'
+                    toy: {
+                        name: 'Пищащая игрушка',
+                        owned: 'Level'
                     },
-                    bakery: {
-                        name: 'Пекарня',
-                        owned: 'Куплено'
+                    bed: {
+                        name: 'Лежанка Корги',
+                        owned: 'Level'
                     },
-                    robot: {
-                        name: 'Робот-пекарь',
-                        owned: 'Куплено'
+                    house: {
+                        name: 'Домик Корги',
+                        owned: 'Level'
+                    },
+                    park: {
+                        name: 'Парк для Корги',
+                        owned: 'Level'
                     }
                 },
                 cost: 'Цена',
-                insufficientCookies: 'Недостаточно печенья!',
-                purchased: 'Куплено {item} за {cost} печенья!'
+                insufficientCookies: 'Недостаточно лакомств!',
+                purchased: 'Куплено {item} за {cost} лакомств!'
+            }
+        };
+
+        const itemDescriptions = {
+            'en': {
+                paw: "Increases click power by 1",
+                puppy: "Generates 0.1 treats per second",
+                bowl: "Generates 1 treat per second",
+                toy: "Generates 5 treats per second", 
+                bed: "Generates 10 treats per second",
+                house: "Generates 50 treats per second",
+                park: "Generates 200 treats per second"
+            },
+            'ru': {
+                paw: "Увеличивает силу клика на 1",
+                puppy: "Производит 0.1 лакомств в секунду",
+                bowl: "Производит 1 лакомство в секунду",
+                toy: "Производит 5 лакомств в секунду",
+                bed: "Производит 10 лакомств в секунду", 
+                house: "Производит 50 лакомств в секунду",
+                park: "Производит 200 лакомств в секунду"
             }
         };
 
@@ -532,14 +628,11 @@
             document.getElementById('score').textContent = `${translations[currentLanguage].cookies}: ${formatNumber(cookies)}`;
             document.getElementById('cps').textContent = `${translations[currentLanguage].perSecond}: ${cps.toFixed(1)}`;
             
-            const itemNames = ['cursor', 'factory', 'wand', 'grandma', 'bakery', 'robot'];
+            const itemNames = ['paw', 'puppy', 'bowl', 'toy', 'bed', 'house', 'park'];
             itemNames.forEach((item, index) => {
-                document.getElementById(`${item}-count`).textContent = 
-                    `${translations[currentLanguage].items[item].owned}: ${items[index].owned}`;
-                document.querySelector(`.item:nth-child(${index + 1}) .item-name`).textContent = 
-                    translations[currentLanguage].items[item].name;
-                document.querySelector(`.item:nth-child(${index + 1}) .item-cost`).textContent = 
-                    `${translations[currentLanguage].cost}: ${items[index].cost}`;
+                document.getElementById(`${item}-count`).textContent = `${translations[currentLanguage].items[item].owned}: Level ${items[index].owned}`;
+                document.querySelector(`.item:nth-child(${index + 1}) .item-name`).textContent = translations[currentLanguage].items[item].name;
+                document.querySelector(`.item:nth-child(${index + 1}) .item-cost`).textContent = `${translations[currentLanguage].cost}: ${items[index].cost}`;
             });
         }
 
@@ -597,12 +690,13 @@
         }
 
         const orbitingItems = {
-            cursor: { duration: 5, delay: 0, clickInterval: 2000 },
-            factory: { duration: 7, delay: 0.5, clickInterval: 1000 },
-            wand: { duration: 6, delay: 1, clickInterval: 800 },
-            grandma: { duration: 8, delay: 1.5, clickInterval: 1200 },
-            bakery: { duration: 9, delay: 2, clickInterval: 600 },
-            robot: { duration: 4, delay: 2.5, clickInterval: 400 }
+            paw: { duration: 4, delay: 0, clickInterval: 2000 },
+            puppy: { duration: 5, delay: 0, clickInterval: 2000 },
+            bowl: { duration: 7, delay: 0.5, clickInterval: 1000 },
+            toy: { duration: 6, delay: 1, clickInterval: 800 },
+            bed: { duration: 8, delay: 1.5, clickInterval: 1200 },
+            house: { duration: 9, delay: 2, clickInterval: 600 },
+            park: { duration: 4, delay: 2.5, clickInterval: 400 }
         };
 
         function addOrbitingItem(type) {
@@ -617,12 +711,13 @@
 
         function getItemIcon(type) {
             const icons = {
-                cursor: 'emojione:computer-mouse',
-                factory: 'noto:factory',
-                wand: 'noto:magic-wand',
-                grandma: 'emojione:older-woman',
-                bakery: 'emojione:bread',
-                robot: 'noto:doughnut'
+                paw: 'noto:paw-prints',
+                puppy: 'noto:dog-face',
+                bowl: 'noto:bowl-with-spoon',
+                toy: 'emojione:teddy-bear',
+                bed: 'noto:sleeping-face',
+                house: 'emojione:house',
+                park: 'noto:park'
             };
             return icons[type];
         }
@@ -630,7 +725,7 @@
         function createAutoClickEffect(orbitingItem) {
             const effect = document.createElement('div');
             effect.className = 'click-effect';
-            effect.innerHTML = `<img src="https://api.iconify.design/emojione:computer-mouse.svg" width="15" height="15">`;
+            effect.innerHTML = `<img src="https://api.iconify.design/noto:dog-face.svg" width="15" height="15">`;
             
             const rect = orbitingItem.getBoundingClientRect();
             effect.style.left = rect.left + 'px';
@@ -646,7 +741,7 @@
         }
 
         function clickCookie() {
-            cookies++;
+            cookies += clickPower;
             const cookie = document.getElementById('cookie');
             const rect = cookie.getBoundingClientRect();
             
@@ -672,11 +767,15 @@
             if (cookies >= item.cost) {
                 cookies -= item.cost;
                 item.owned++;
-                if(item.owned === 1) { // Only add orbiting item on first purchase
+                if(item.owned === 1) {
                     addOrbitingItem(item.name);
                 }
                 item.cost = Math.ceil(item.cost * 1.15);
-                cps += item.cps;
+                if (item.clickPower) {
+                    clickPower += item.clickPower;
+                } else if (item.cps) {
+                    cps += item.cps;
+                }
                 updateDisplay();
                 showNotification(translations[currentLanguage].purchased.replace('{item}', translations[currentLanguage].items[item.name].name).replace('{cost}', item.cost));
             } else {
@@ -688,6 +787,7 @@
             const gameState = {
                 cookies: cookies,
                 cps: cps,
+                clickPower: clickPower,
                 items: items
             };
             localStorage.setItem('cookieClickerState', JSON.stringify(gameState));
@@ -699,6 +799,7 @@
                 const gameState = JSON.parse(savedState);
                 cookies = gameState.cookies;
                 cps = gameState.cps;
+                clickPower = gameState.clickPower || 1;
                 gameState.items.forEach((item, index) => {
                     items[index].owned = item.owned;
                     items[index].cost = item.cost;
@@ -752,11 +853,49 @@
             });
         }
 
-        document.addEventListener('touchstart', (e) => {
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('touchstart', function(e) {
             if (e.touches.length > 1) {
                 e.preventDefault();
             }
         }, { passive: false });
+
+        document.getElementById('cookie').addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+
+        document.getElementById('cookie').addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        function showItemInfo(itemType) {
+            const existingTooltip = document.querySelector('.tooltip');
+            if (existingTooltip) {
+                existingTooltip.remove();
+            }
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = itemDescriptions[currentLanguage][itemType];
+            document.body.appendChild(tooltip);
+            
+            document.addEventListener('mousemove', moveTooltip);
+            setTimeout(() => {
+                tooltip.remove();
+                document.removeEventListener('mousemove', moveTooltip);
+            }, 3000);
+        }
+
+        function moveTooltip(e) {
+            const tooltip = document.querySelector('.tooltip');
+            if (tooltip) {
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top = (e.pageY + 10) + 'px';
+            }
+        }
     </script>
 </body>
 </html>
