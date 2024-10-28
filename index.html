@@ -2,7 +2,7 @@
 <head>
 <base href="https://cookie-clicker-adventure.com/">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Cookie Clicker Adventure</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
@@ -84,7 +84,6 @@
         100% { transform: translateY(0px); }
     }
 
-    /* Add new click animation */
     @keyframes clickPulse {
         0% { transform: scale(0.95); filter: brightness(1.5) drop-shadow(0 0 15px #ffd700); }
         50% { transform: scale(0.97); filter: brightness(1.2) drop-shadow(0 0 12px #ffd700); }
@@ -213,146 +212,68 @@
         }
     }
 
-    .chat-container {
-        background: rgba(0, 0, 0, 0.5);
-        border: 2px solid #ffd700;
-        border-radius: 10px;
-        width: 100%;
-        margin-top: 20px;
-        overflow: hidden;
+    @media (max-width: 768px) {
+        .game-container {
+            flex-direction: column;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .game-right {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            border-radius: 0;
+            overflow-y: auto;
+        }
+
+        .shop-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        .shop-close-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .shop-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #ffd700, #ff9900);
+            border: none;
+            border-radius: 15px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Press Start 2P', cursive;
+            color: #1a1c2c;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            z-index: 99;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .shop-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
     }
 
-    .chat-header {
-        background: rgba(0, 0, 0, 0.7);
-        padding: 10px;
-        border-bottom: 2px solid #ffd700;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .chat-title {
-        color: #ffd700;
-        font-size: 0.8em;
-    }
-
-    .minimize-btn {
-        background: none;
-        border: none;
-        color: #ffd700;
-        cursor: pointer;
-        font-size: 1.2em;
-    }
-
-    .chat-messages {
-        height: 200px;
-        overflow-y: auto;
-        padding: 10px;
-    }
-
-    .chat-input {
-        display: flex;
-        gap: 10px;
-        padding: 10px;
-        border-top: 2px solid #ffd700;
-    }
-
-    .chat-input input {
-        flex: 1;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid #ffd700;
-        border-radius: 5px;
-        padding: 5px 10px;
-        color: white;
-        font-family: 'Press Start 2P', cursive;
-        font-size: 0.7em;
-    }
-
-    #send-btn {
-        background: #ffd700;
-        border: none;
-        border-radius: 5px;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-
-    #send-btn svg {
-        width: 20px;
-        height: 20px;
-        fill: #000;
-    }
-
-    .message {
-        margin: 5px 0;
-        padding: 5px;
-        border-radius: 5px;
-        font-size: 0.7em;
-        word-break: break-word;
-    }
-
-    .message.user {
-        background: rgba(255, 215, 0, 0.2);
-        margin-left: auto;
-        border-radius: 5px 5px 0 5px;
-    }
-
-    .message.receiver {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 5px 5px 5px 0;
-    }
-
-    .message-header {
-        color: #ffd700;
-        font-size: 0.8em;
-        margin-bottom: 3px;
-    }
-
-    #participant-list {
-        padding: 5px 10px;
-        font-size: 0.6em;
-        color: #a0a0a0;
-        background: rgba(0, 0, 0, 0.7);
-        border-top: 2px solid #ffd700;
-    }
-
-    .chat-minimized {
-        height: 40px;
-        overflow: hidden;
-    }
-
-    .language-selector {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 20px 0;
-    }
-
-    .flag {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        filter: saturate(0.7);
-        padding: 5px;
-        border-radius: 5px;
-        background: rgba(255, 255, 255, 0.1);
-    }
-
-    .flag:hover {
-        transform: scale(1.1);
-        filter: saturate(1.2);
-        background: rgba(255, 215, 0, 0.2);
-    }
-
-    .flag.active {
-        background: rgba(255, 215, 0, 0.3);
-        filter: saturate(1.2);
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    }
-
-    /* Add this to the existing CSS */
     .cookie-stage-1 {
         filter: grayscale(0.8) brightness(0.8) drop-shadow(0 0 10px #ffd700);
     }
@@ -381,25 +302,39 @@
         75% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ff7000); }
         100% { filter: grayscale(0) brightness(1.2) saturate(1.5) drop-shadow(0 0 25px #ffd700); }
     }
+
+    .language-selector {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .flag {
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+
+    .flag:hover {
+        opacity: 1;
+    }
+
+    .flag.active {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 </style>
 </head>
 <body>
     <h1 style="color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Aventure Cookie Clicker</h1>
-    
+
     <div class="language-selector">
-        <div class="flag" onclick="changeLanguage('pt-BR')">
-            <img src="https://api.iconify.design/emojione:flag-for-brazil.svg" alt="Português" width="32" height="32">
-        </div>
         <div class="flag" onclick="changeLanguage('en')">
             <img src="https://api.iconify.design/emojione:flag-for-united-states.svg" alt="English" width="32" height="32">
         </div>
-        <div class="flag" onclick="changeLanguage('es')">
-            <img src="https://api.iconify.design/emojione:flag-for-spain.svg" alt="Español" width="32" height="32">
-        </div>
-        <div class="flag" onclick="changeLanguage('fr')">
-            <img src="https://api.iconify.design/emojione:flag-for-france.svg" alt="Français" width="32" height="32">  
-        </div>
-        <div class="flag" onclick="changeLanguage('ru')">
+        <div class="flag active" onclick="changeLanguage('ru')">
             <img src="https://api.iconify.design/emojione:flag-for-russia.svg" alt="Русский" width="32" height="32">
         </div>
     </div>
@@ -414,80 +349,64 @@
                 <div id="score">Cookies: 0</div>
                 <div id="cps">Par seconde: 0</div>
             </div>
-            <div id="chat-box" class="chat-container">
-                <div class="chat-header">
-                    <span class="chat-title">Chat Multijoueur</span>
-                    <button class="minimize-btn" id="minimize-chat">−</button>
-                </div>
-                <div id="messages" class="chat-messages"></div>
-                <div class="chat-input">
-                    <input type="text" id="message-input" placeholder="Tapez un message...">
-                    <button id="send-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                        </svg>
-                    </button>
-                </div>
-                <div id="participant-list"></div>
-            </div>
-        </div>
-        
-        <div class="game-right">
-            <h2 class="shop-title">🏪 Boutique de Cookies</h2>
-            <div class="shop-items">
-                <div class="item" onclick="purchaseItem(0)">
-                    <img src="https://api.iconify.design/emojione:computer-mouse.svg" alt="Cursor">
-                    <div class="item-info">
-                        <div class="item-name">Curseur Automatique</div>
-                        <div class="item-cost">Coût: <span id="cursor-cost">15</span> cookies</div>
-                        <div class="item-owned" id="cursor-count">Possédés: 0</div>
+            <div class="game-right">
+                <h2 class="shop-title">🏪 Boutique de Cookies</h2>
+                <div class="shop-items">
+                    <div class="item" onclick="purchaseItem(0)">
+                        <img src="https://api.iconify.design/emojione:computer-mouse.svg" alt="Cursor">
+                        <div class="item-info">
+                            <div class="item-name">Curseur Automatique</div>
+                            <div class="item-cost">Coût: <span id="cursor-cost">15</span> cookies</div>
+                            <div class="item-owned" id="cursor-count">Possédés: 0</div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="item" onclick="purchaseItem(1)">
-                    <img src="https://api.iconify.design/noto:factory.svg" alt="Factory">
-                    <div class="item-info">
-                        <div class="item-name">Mini Usine</div>
-                        <div class="item-cost">Coût: <span id="factory-cost">100</span> cookies</div>
-                        <div class="item-owned" id="factory-count">Possédés: 0</div>
+                    <div class="item" onclick="purchaseItem(1)">
+                        <img src="https://api.iconify.design/noto:factory.svg" alt="Factory">
+                        <div class="item-info">
+                            <div class="item-name">Mini Usine</div>
+                            <div class="item-cost">Coût: <span id="factory-cost">100</span> cookies</div>
+                            <div class="item-owned" id="factory-count">Possédés: 0</div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="item" onclick="purchaseItem(2)">
-                    <img src="https://api.iconify.design/noto:magic-wand.svg" alt="Magic Wand">
-                    <div class="item-info">
-                        <div class="item-name">Baguette Magique</div>
-                        <div class="item-cost">Coût: <span id="wand-cost">500</span> cookies</div>
-                        <div class="item-owned" id="wand-count">Possédés: 0</div>
+                    <div class="item" onclick="purchaseItem(2)">
+                        <img src="https://api.iconify.design/noto:magic-wand.svg" alt="Magic Wand">
+                        <div class="item-info">
+                            <div class="item-name">Baguette Magique</div>
+                            <div class="item-cost">Coût: <span id="wand-cost">500</span> cookies</div>
+                            <div class="item-owned" id="wand-count">Possédés: 0</div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="item" onclick="purchaseItem(3)">
-                    <img src="https://api.iconify.design/emojione:older-woman.svg" alt="Grandma">
-                    <div class="item-info">
-                        <div class="item-name">Grand-mère à Cookies</div>
-                        <div class="item-cost">Coût: <span id="grandma-cost">1000</span> cookies</div>
-                        <div class="item-owned" id="grandma-count">Possédés: 0</div>
+                    <div class="item" onclick="purchaseItem(3)">
+                        <img src="https://api.iconify.design/emojione:older-woman.svg" alt="Grandma">
+                        <div class="item-info">
+                            <div class="item-name">Grand-mère à Cookies</div>
+                            <div class="item-cost">Coût: <span id="grandma-cost">1000</span> cookies</div>
+                            <div class="item-owned" id="grandma-count">Possédés: 0</div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="item" onclick="purchaseItem(4)">
-                    <img src="https://api.iconify.design/emojione:bread.svg" alt="Bakery">
-                    <div class="item-info">
-                        <div class="item-name">Boulangerie</div>
-                        <div class="item-cost">Coût: <span id="bakery-cost">5000</span> cookies</div>
-                        <div class="item-owned" id="bakery-count">Possédés: 0</div>
+                    <div class="item" onclick="purchaseItem(4)">
+                        <img src="https://api.iconify.design/emojione:bread.svg" alt="Bakery">
+                        <div class="item-info">
+                            <div class="item-name">Boulangerie</div>
+                            <div class="item-cost">Coût: <span id="bakery-cost">5000</span> cookies</div>
+                            <div class="item-owned" id="bakery-count">Possédés: 0</div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="item" onclick="purchaseItem(5)">
-                    <img src="https://api.iconify.design/noto:doughnut.svg" alt="Robot">
-                    <div class="item-info">
-                        <div class="item-name">Robot à Cookies</div>
-                        <div class="item-cost">Coût: <span id="robot-cost">20000</span> cookies</div>
-                        <div class="item-owned" id="robot-count">Possédés: 0</div>
+                    <div class="item" onclick="purchaseItem(5)">
+                        <img src="https://api.iconify.design/noto:doughnut.svg" alt="Robot">
+                        <div class="item-info">
+                            <div class="item-name">Robot à Cookies</div>
+                            <div class="item-cost">Coût: <span id="robot-cost">20000</span> cookies</div>
+                            <div class="item-owned" id="robot-count">Possédés: 0</div>
+                        </div>
                     </div>
                 </div>
+                <button class="shop-close-btn">Закрыть</button>
             </div>
         </div>
     </div>
@@ -495,7 +414,7 @@
     <script>
         let cookies = 0;
         let cps = 0;
-        const items = [
+        let items = [
             { name: 'cursor', cost: 15, cps: 0.1, owned: 0 },
             { name: 'factory', cost: 100, cps: 1, owned: 0 },
             { name: 'wand', cost: 500, cps: 5, owned: 0 },
@@ -513,41 +432,6 @@
         ];
 
         const translations = {
-            'pt-BR': {
-                title: 'Cookie Clicker Adventure',
-                cookies: 'Cookies',
-                perSecond: 'Por segundo',
-                shop: '🏪 Loja de Cookies',
-                items: {
-                    cursor: {
-                        name: 'Cursor Automático',
-                        owned: 'Possuídos'
-                    },
-                    factory: {
-                        name: 'Mini Fábrica',
-                        owned: 'Possuídos'
-                    },
-                    wand: {
-                        name: 'Varinha Mágica',
-                        owned: 'Possuídos'
-                    },
-                    grandma: {
-                        name: 'Vovó Faz Cookies',
-                        owned: 'Possuídos'
-                    },
-                    bakery: {
-                        name: 'Panificadora',
-                        owned: 'Possuídos'
-                    },
-                    robot: {
-                        name: 'Robô Fazedor de Cookies',
-                        owned: 'Possuídos'
-                    }
-                },
-                cost: 'Custo',
-                insufficientCookies: 'Cookies insuficientes!',
-                purchased: 'Comprou {item} por {cost} cookies!'
-            },
             'en': {
                 title: 'Cookie Clicker Adventure',
                 cookies: 'Cookies',
@@ -582,76 +466,6 @@
                 cost: 'Cost',
                 insufficientCookies: 'Not enough cookies!',
                 purchased: 'Purchased {item} for {cost} cookies!'
-            },
-            'es': {
-                title: 'Aventura Cookie Clicker',
-                cookies: 'Galletas',
-                perSecond: 'Por segundo',
-                shop: '🏪 Tienda de Galletas',
-                items: {
-                    cursor: {
-                        name: 'Cursor Automático',
-                        owned: 'Obtenido'
-                    },
-                    factory: {
-                        name: 'Mini Fábrica',
-                        owned: 'Obtenido'
-                    },
-                    wand: {
-                        name: 'Varita Mágica',
-                        owned: 'Obtenido'
-                    },
-                    grandma: {
-                        name: 'Abuela de Galletas',
-                        owned: 'Obtenido'
-                    },
-                    bakery: {
-                        name: 'Panadería',
-                        owned: 'Obtenido'
-                    },
-                    robot: {
-                        name: 'Robot de Galletas',
-                        owned: 'Obtenido'
-                    }
-                },
-                cost: 'Costo',
-                insufficientCookies: '¡Galletas insuficientes!',
-                purchased: '¡Compraste {item} por {cost} galletas!'
-            },
-            'fr': {
-                title: 'Aventure Cookie Clicker',
-                cookies: 'Cookies',
-                perSecond: 'Par seconde',
-                shop: '🏪 Boutique de Cookies',
-                items: {
-                    cursor: {
-                        name: 'Curseur Automatique',
-                        owned: 'Possédés'
-                    },
-                    factory: {
-                        name: 'Mini Usine',
-                        owned: 'Possédés'
-                    },
-                    wand: {
-                        name: 'Baguette Magique',
-                        owned: 'Possédés'
-                    },
-                    grandma: {
-                        name: 'Grand-mère à Cookies',
-                        owned: 'Possédés'
-                    },
-                    bakery: {
-                        name: 'Boulangerie',
-                        owned: 'Possédés'
-                    },
-                    robot: {
-                        name: 'Robot à Cookies',
-                        owned: 'Possédés'
-                    }
-                },
-                cost: 'Coût',
-                insufficientCookies: 'Pas assez de cookies !',
-                purchased: '{item} acheté pour {cost} cookies !'
             },
             'ru': {
                 title: 'Приключение Cookie Clicker',
@@ -690,7 +504,7 @@
             }
         };
 
-        let currentLanguage = 'fr'; 
+        let currentLanguage = 'ru'; 
 
         function changeLanguage(lang) {
             currentLanguage = lang;
@@ -735,7 +549,6 @@
             notification.textContent = message;
             document.body.appendChild(notification);
             
-            // Remove notification after animation completes
             notification.addEventListener('animationend', () => {
                 notification.remove();
             });
@@ -748,22 +561,19 @@
                 .reverse()
                 .find(stage => cookies >= stage.threshold);
                 
-            // Remove all stage classes
             cookieStages.forEach(stage => {
                 cookie.classList.remove(stage.class);
             });
             
-            // Add current stage class
             if (currentStage) {
                 cookie.classList.add(currentStage.class);
             }
         }
 
         function createParticle(x, y) {
-            for (let i = 0; i < 3; i++) { // Create multiple particles
+            for (let i = 0; i < 3; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particles';
-                // Random position offset
                 const offsetX = (Math.random() - 0.5) * 40;
                 const offsetY = (Math.random() - 0.5) * 40;
                 particle.style.left = (x + offsetX) + 'px';
@@ -803,13 +613,6 @@
             item.style.animation = `orbit ${orbitingItems[type].duration}s linear infinite`;
             item.style.animationDelay = `${orbitingItems[type].delay}s`;
             container.appendChild(item);
-            
-            // Start automatic clicking animation
-            setInterval(() => {
-                if(cookies >= 0) { // Only if game is active
-                    createAutoClickEffect(item);
-                }
-            }, orbitingItems[type].clickInterval);
         }
 
         function getItemIcon(type) {
@@ -835,12 +638,10 @@
             
             document.body.appendChild(effect);
             
-            // Add cookie value
             cookies++;
             updateDisplay();
             updateCookieAppearance();
             
-            // Remove effect after animation
             effect.addEventListener('animationend', () => effect.remove());
         }
 
@@ -849,9 +650,8 @@
             const cookie = document.getElementById('cookie');
             const rect = cookie.getBoundingClientRect();
             
-            // Add click animation
             cookie.style.animation = 'none';
-            cookie.offsetHeight; // Trigger reflow
+            cookie.offsetHeight;
             cookie.style.animation = 'float 3s ease-in-out infinite';
             cookie.animate([
                 { transform: 'scale(0.95)', filter: 'brightness(1.5) drop-shadow(0 0 15px #ffd700)' },
@@ -884,104 +684,79 @@
             }
         }
 
+        function saveGameState() {
+            const gameState = {
+                cookies: cookies,
+                cps: cps,
+                items: items
+            };
+            localStorage.setItem('cookieClickerState', JSON.stringify(gameState));
+        }
+
+        function loadGameState() {
+            const savedState = localStorage.getItem('cookieClickerState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                cookies = gameState.cookies;
+                cps = gameState.cps;
+                gameState.items.forEach((item, index) => {
+                    items[index].owned = item.owned;
+                    items[index].cost = item.cost;
+                });
+                
+                document.getElementById('orbiting-items').innerHTML = '';
+                
+                items.forEach((item, index) => {
+                    for (let i = 0; i < item.owned; i++) {
+                        addOrbitingItem(item.name);
+                    }
+                });
+                
+                updateDisplay();
+                updateCookieAppearance();
+            }
+        }
+
         setInterval(() => {
             cookies += cps;
             updateDisplay();
             updateCookieAppearance();
         }, 1000);
 
-        const room = new WebsimSocket();
-        const messagesContainer = document.getElementById('messages');
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-btn');
-        const minimizeBtn = document.getElementById('minimize-chat');
-        const chatBox = document.getElementById('chat-box');
-        let currentUser = null;
+        setInterval(saveGameState, 30000);
 
-        async function getCurrentUser() {
-            currentUser = await window.websim.getUser();
-            return currentUser;
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGameState();
+            document.querySelector('.game-right').style.display = 'none';
+            changeLanguage('ru');
+            initMobileShop();
+            updateDisplay();
+        });
 
-        function updateParticipantList() {
-            const participants = Object.values(room.party.peers).map(peer => peer.username);
-            const participantList = document.getElementById('participant-list');
-            participantList.innerHTML = participants.map(username => `
-                <span style="color: #ffd700;">● ${username}</span>
-            `).join(', ');
-        }
+        function initMobileShop() {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'shop-toggle';
+            toggleBtn.innerHTML = '🏪 Магазин';
+            document.body.appendChild(toggleBtn);
 
-        function addChatMessage(username, message, cookieCount) {
-            const time = new Date().toLocaleTimeString([], { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+            const closeBtn = document.querySelector('.shop-close-btn');
+            closeBtn.textContent = 'Закрыть';
+
+            toggleBtn.addEventListener('click', () => {
+                const shop = document.querySelector('.game-right');
+                shop.style.display = shop.style.display === 'none' ? 'block' : 'none';
             });
-            const messageElement = document.createElement('div');
-            const isCurrentUser = username === currentUser.username;
-            
-            messageElement.className = `message ${isCurrentUser ? 'user' : 'receiver'}`;
-            messageElement.innerHTML = `
-                <div class="message-header">
-                    ${username} • ${time} • 🍪 ${formatNumber(cookieCount)}
-                </div>
-                <div class="message-text">
-                    ${message}
-                </div>
-            `;
-            
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            closeBtn.addEventListener('click', () => {
+                document.querySelector('.game-right').style.display = 'none';
+            });
         }
 
-        room.onmessage = (event) => {
-            const data = event.data;
-            if (data.type === 'chatMessage') {
-                addChatMessage(data.username, data.message, data.cookieCount);
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
             }
-        };
-
-        let isMinimized = false;
-        minimizeBtn.addEventListener('click', () => {
-            isMinimized = !isMinimized;
-            chatBox.classList.toggle('chat-minimized');
-            minimizeBtn.textContent = isMinimized ? '+' : '−';
-        });
-
-        sendButton.addEventListener('click', () => {
-            const message = messageInput.value.trim();
-            if (message) {
-                room.send({ 
-                    type: 'chatMessage', 
-                    username: currentUser.username, 
-                    message: message,
-                    cookieCount: cookies 
-                });
-                messageInput.value = '';
-            }
-        });
-
-        messageInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                const message = messageInput.value.trim();
-                if (message) {
-                    room.send({ 
-                        type: 'chatMessage', 
-                        username: currentUser.username, 
-                        message: message,
-                        cookieCount: cookies 
-                    });
-                    messageInput.value = '';
-                }
-            }
-        });
-
-        room.onPeersChanged = updateParticipantList;
-
-        getCurrentUser().then(() => {
-            updateParticipantList();
-        });
-
-        updateDisplay();
+        }, { passive: false });
     </script>
 </body>
 </html>
