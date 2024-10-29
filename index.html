@@ -296,6 +296,54 @@
             text-align: center;
             word-break: break-all;
         }
+        /* Добавим стиль для модального окна уведомления о передаче */
+        #transferModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        #transferModalContent {
+            padding: 1rem;
+            max-width: 500px;
+            margin: 5% auto;
+            background-color: #1a1c2c;
+            border-radius: 0.5rem;
+            color: #ffd700;
+        }
+        #transferModalContent h2 {
+            margin-top: 0;
+        }
+        #transferForm {
+            display: flex;
+            flex-direction: column;
+        }
+        #transferForm label {
+            margin-top: 0.5rem;
+        }
+        #transferForm input {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            margin-top: 0.25rem;
+            font-size: 1rem;
+        }
+        #transferForm button {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: #ffd700;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-family: 'Kosko', sans-serif;
+            font-size: 1rem;
+            color: black;
+        }
         /* Добавим стиль для модального окна уведомления */
         #idleModal {
             position: fixed;
@@ -542,6 +590,7 @@
                 <button class="game-button" onclick="openModal('wardrobe')">👗 Гардероб</button>
                 <button class="game-button" onclick="openModal('rewards')">🏆 Награды</button>
                 <button class="game-button" onclick="openModal('tasks')">📋 Задания</button>
+                <button class="game-button" onclick="openModal('transfer')">💸 Передача</button>
             </div>
         </div>
     </div>
@@ -594,6 +643,22 @@
         </div>
     </div>
 
+    <div id="transferModal" class="modal">
+        <div class="modal-content" id="transferModalContent">
+            <div class="modal-header">
+                <h2 class="modal-title">💸 Передача Лакомств</h2>
+                <button class="close-button" onclick="closeModal('transfer')">&times;</button>
+            </div>
+            <form id="transferForm">
+                <label for="recipientCode">Код получателя:</label>
+                <input type="text" id="recipientCode" name="recipientCode" required maxlength="8" pattern="[A-Z0-9]{8}" placeholder="Введите код получателя">
+                <label for="transferAmount">Сумма:</label>
+                <input type="number" id="transferAmount" name="transferAmount" required min="1" placeholder="Введите сумму">
+                <button type="submit">Передать</button>
+            </form>
+        </div>
+    </div>
+
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -603,6 +668,11 @@
             <div class="settings-section">
                 <h3>Ваш код:</h3>
                 <div id="userCode"></div>
+            </div>
+            <div class="settings-section">
+                <h3>Передать лакомства:</h3>
+                <!-- Кнопка открывающая модальное окно передачи -->
+                <button class="claim-button" onclick="openModal('transfer')">💸 Передать</button>
             </div>
         </div>
     </div>
@@ -654,6 +724,7 @@
     <div class="vignette" id="vignette" style="display: none;"></div>
 
     <script>
+        // Основные переменные
         let treats = 0;
         let cps = 0;
         let clickPower = 1;
@@ -717,56 +788,87 @@
         // Переменная для отслеживания ручных кликов
         let manualClicks = 0;
 
-        function loadGame() {
-            const savedGame = localStorage.getItem(storageKey);
-            if (savedGame) {
-                const gameState = JSON.parse(savedGame);
-                treats = gameState.treats || 0;
-                cps = gameState.cps || 0;
-                clickPower = gameState.clickPower || 1;
-                totalClicks = gameState.totalClicks || 0;
-                manualClicks = gameState.manualClicks || 0;
-                level = gameState.level || 1;
-                experience = gameState.experience || 0;
-                experienceToNextLevel = gameState.experienceToNextLevel || 100;
-                items = gameState.items ? JSON.parse(JSON.stringify(gameState.items)) : items;
-                tasks = gameState.tasks ? JSON.parse(JSON.stringify(gameState.tasks)) : tasks;
-                rewards = gameState.rewards ? JSON.parse(JSON.stringify(gameState.rewards)) : rewards;
-                userCode = gameState.userCode || generateUserCode();
-                clickColors = gameState.clickColors ? JSON.parse(JSON.stringify(gameState.clickColors)) : clickColors;
-                backgrounds = gameState.backgrounds ? JSON.parse(JSON.stringify(gameState.backgrounds)) : backgrounds;
-
-                // Вычисляем офлайн заработок
-                if (gameState.lastActivityTime) {
-                    const currentTime = Date.now();
-                    const timeDifference = (currentTime - gameState.lastActivityTime) / 1000; // в секундах
-                    const offlineEarnings = cps * timeDifference;
-                    if (offlineEarnings > 0) {
-                        idleEarnings = offlineEarnings;
-                        showIdleEarnings();
-                    }
-                }
-
-                // Применяем выбранный цвет клика
-                const selectedColor = clickColors.find(color => color.selected);
-                if (selectedColor) {
-                    clickColor = selectedColor.color;
-                }
-
-                // Применяем выбранный фон
-                const selectedBackground = backgrounds.find(bg => bg.selected);
-                if (selectedBackground) {
-                    changeBackground(selectedBackground.value);
-                }
-
-                updateDisplay();
-                updateTasks();
-                updateRewards();
+        // Функция для регистрации пользователя
+        function registerUser(userCode) {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (!users[userCode]) {
+                users[userCode] = {
+                    treats: 0,
+                    cps: 0,
+                    clickPower: 1,
+                    totalClicks: 0,
+                    manualClicks: 0,
+                    level: 1,
+                    experience: 0,
+                    experienceToNextLevel: 100,
+                    items: JSON.parse(JSON.stringify(items)),
+                    tasks: JSON.parse(JSON.stringify(tasks)),
+                    rewards: JSON.parse(JSON.stringify(rewards)),
+                    clickColors: JSON.parse(JSON.stringify(clickColors)),
+                    backgrounds: JSON.parse(JSON.stringify(backgrounds)),
+                    lastActivityTime: Date.now()
+                };
+                localStorage.setItem('users', JSON.stringify(users));
             }
         }
 
+        // Загрузка данных пользователя
+        function loadGame() {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (!users[userCode]) {
+                registerUser(userCode);
+            }
+            let gameState = users[userCode];
+
+            treats = gameState.treats || 0;
+            cps = gameState.cps || 0;
+            clickPower = gameState.clickPower || 1;
+            totalClicks = gameState.totalClicks || 0;
+            manualClicks = gameState.manualClicks || 0;
+            level = gameState.level || 1;
+            experience = gameState.experience || 0;
+            experienceToNextLevel = gameState.experienceToNextLevel || 100;
+            items = gameState.items ? JSON.parse(JSON.stringify(gameState.items)) : items;
+            tasks = gameState.tasks ? JSON.parse(JSON.stringify(gameState.tasks)) : tasks;
+            rewards = gameState.rewards ? JSON.parse(JSON.stringify(gameState.rewards)) : rewards;
+            clickColors = gameState.clickColors ? JSON.parse(JSON.stringify(gameState.clickColors)) : clickColors;
+            backgrounds = gameState.backgrounds ? JSON.parse(JSON.stringify(gameState.backgrounds)) : backgrounds;
+
+            // Вычисляем офлайн заработок
+            if (gameState.lastActivityTime) {
+                const currentTime = Date.now();
+                const timeDifference = (currentTime - gameState.lastActivityTime) / 1000; // в секундах
+                const offlineEarnings = cps * timeDifference;
+                if (offlineEarnings > 0) {
+                    idleEarnings = offlineEarnings;
+                    showIdleEarnings();
+                }
+            }
+
+            // Применяем выбранный цвет клика
+            const selectedColor = clickColors.find(color => color.selected);
+            if (selectedColor) {
+                clickColor = selectedColor.color;
+            }
+
+            // Применяем выбранный фон
+            const selectedBackground = backgrounds.find(bg => bg.selected);
+            if (selectedBackground) {
+                changeBackground(selectedBackground.value);
+            }
+
+            updateDisplay();
+            updateTasks();
+            updateRewards();
+        }
+
+        // Сохранение данных пользователя
         function saveGame() {
-            const gameState = {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (!users[userCode]) {
+                registerUser(userCode);
+            }
+            users[userCode] = {
                 treats,
                 cps,
                 clickPower,
@@ -778,12 +880,11 @@
                 items,
                 tasks,
                 rewards,
-                userCode,
                 clickColors,
                 backgrounds,
                 lastActivityTime: Date.now()
             };
-            localStorage.setItem(storageKey, JSON.stringify(gameState));
+            localStorage.setItem('users', JSON.stringify(users));
         }
 
         let clickColor = '#ffd700'; // По умолчанию желтый
@@ -879,6 +980,8 @@
                 updateWardrobe();
             } else if (modalType === 'cases') {
                 updateCases();
+            } else if (modalType === 'transfer') {
+                // Ничего особенного не делаем
             }
         }
 
@@ -1197,7 +1300,7 @@
                         task.progress = Math.min(manualClicks, task.requirement);
                         break;
                     case 'buy_puppy':
-                        task.progress = items[1].owned > 0 ? 1 : 0;
+                        task.progress = items.find(item => item.name === 'puppy').owned > 0 ? 1 : 0;
                         break;
                     case 'reach_cps_1':
                         task.progress = cps >= 1 ? 1 : 0;
@@ -1259,14 +1362,14 @@
             if (idleEarnings > 0) {
                 document.getElementById('idleEarningsMessage').textContent = `Ваш пёс заработал ${Math.floor(idleEarnings)} лакомств, пока вы были отсутствовали!`;
                 document.getElementById('idleModal').style.display = 'flex';
-                idleEarnings = 0; // Сбрасываем, чтобы не дублировать
+                // idleEarnings не сбрасывается здесь
             }
         }
 
         // Сбор заработка во время неактивности
         function collectIdleEarnings() {
-            treats += idleEarnings;
-            idleEarnings = 0;
+            treats += Math.floor(idleEarnings); // Добавляем округленное значение
+            idleEarnings = 0; // Сбрасываем после добавления
             updateDisplay();
             saveGame();
             document.getElementById('idleModal').style.display = 'none';
@@ -1390,7 +1493,6 @@
             });
 
             const itemWidth = 100;
-            const totalWidth = extendedItems.length * itemWidth;
             const animationTime = 10000; // 10 секунд
 
             // Расчет конечной позиции с ускорением и замедлением
@@ -1464,24 +1566,46 @@
             container.style.display = container.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Функция для обработки неактивности
-        let inactivityTimer;
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                const currentTime = Date.now();
-                const timeDifference = (currentTime - lastActivityTime) / 1000;
-                if (timeDifference >= 5) {
-                    idleEarnings = cps * timeDifference;
-                    if (idleEarnings > 0) {
-                        showIdleEarnings();
-                    }
-                }
-                lastActivityTime = Date.now();
-            }, 5000);
+        // Функция для передачи лакомств
+        function transferTreats(fromCode, toCode, amount) {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+
+            if (!users[toCode]) {
+                showNotification('Пользователь с таким кодом не найден!', 'error');
+                return;
+            }
+
+            if (users[fromCode].treats < amount) {
+                showNotification('Недостаточно лакомств для передачи!', 'error');
+                return;
+            }
+
+            users[fromCode].treats -= amount;
+            users[toCode].treats += amount;
+
+            localStorage.setItem('users', JSON.stringify(users));
+
+            showNotification(`Вы успешно передали ${amount} лакомств пользователю ${toCode}!`);
+            loadGame();
+        }
+
+        // Функции обновления модальных окон и интерфейса
+        // (Функции updateShop(), getItemName(), showTooltip(), purchaseItem(), updateWardrobe(), switchWardrobeTab(), buyClickColor(), selectClickColor(), buyBackground(), selectBackground(), changeBackground(), updateRewards(), claimReward(), updateTasks(), claimTask(), checkTasks(), checkRewards(), generateUserCode(), updateSettings(), showIdleEarnings(), collectIdleEarnings(), showNotification(), updateCases(), getRarity(), openCase(), startCaseAnimation(), showCaseResult(), getItemCost(), keepCaseItem(), sellCaseItem(), togglePossiblePrizes(), transferTreats() уже определены ранее и не требуют повторения.)
+
+        // Функция генерации или получения существующего кода пользователя
+        function initializeUser() {
+            let savedGame = JSON.parse(localStorage.getItem(storageKey));
+            if (savedGame && savedGame.userCode) {
+                userCode = savedGame.userCode;
+            } else {
+                userCode = generateUserCode();
+                saveGame();
+            }
+            registerUser(userCode);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            initializeUser();
             const clickArea = document.getElementById('clickArea');
             clickArea.addEventListener('click', clickDog);
             clickArea.addEventListener('touchend', clickDog);
@@ -1513,7 +1637,66 @@
                     lastActivityTime = Date.now();
                 }
             });
+
+            // Обработчик формы передачи лакомств
+            const transferForm = document.getElementById('transferForm');
+            transferForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const recipientCode = document.getElementById('recipientCode').value.trim().toUpperCase();
+                const amount = parseInt(document.getElementById('transferAmount').value, 10);
+
+                if (recipientCode === userCode) {
+                    showNotification('Нельзя передать лакомства самому себе!', 'error');
+                    return;
+                }
+
+                if (isNaN(amount) || amount <= 0) {
+                    showNotification('Введите корректную сумму для передачи!', 'error');
+                    return;
+                }
+
+                let users = JSON.parse(localStorage.getItem('users')) || {};
+
+                if (!users[recipientCode]) {
+                    showNotification('Пользователь с таким кодом не найден!', 'error');
+                    return;
+                }
+
+                if (treats < amount) {
+                    showNotification('Недостаточно лакомств для передачи!', 'error');
+                    return;
+                }
+
+                treats -= amount;
+                users[recipientCode].treats += amount;
+                localStorage.setItem('users', JSON.stringify(users));
+
+                updateDisplay();
+                saveGame();
+                showNotification(`Вы успешно передали ${amount} лакомств пользователю ${recipientCode}!`);
+
+                // Очистка формы
+                transferForm.reset();
+                closeModal('transfer');
+            });
         });
+
+        // Функция для обработки неактивности
+        let inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                const currentTime = Date.now();
+                const timeDifference = (currentTime - lastActivityTime) / 1000;
+                if (timeDifference >= 5) {
+                    idleEarnings = cps * timeDifference;
+                    if (idleEarnings > 0) {
+                        showIdleEarnings();
+                    }
+                }
+                lastActivityTime = Date.now();
+            }, 5000);
+        }
     </script>
 </body>
 </html>
