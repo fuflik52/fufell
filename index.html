@@ -5,10 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Приключение Собаки Кликер</title>
+    <!-- Подключаем шрифт Kosko -->
+    <style>
+        @font-face {
+            font-family: 'Kosko';
+            src: url('https://fonts-online.ru/font/Kosko.eot');
+            src: url('https://fonts-online.ru/font/Kosko.eot?#iefix') format('embedded-opentype'),
+                 url('https://fonts-online.ru/font/Kosko.woff') format('woff'),
+                 url('https://fonts-online.ru/font/Kosko.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
     <style>
         /* Стили для тела и основных элементов */
         body {
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Kosko', sans-serif;
             background: linear-gradient(to bottom, #1a1c2c, #2b2e4a);
             color: white;
             margin: 0;
@@ -16,6 +28,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             user-select: none;
+            position: relative; /* Добавлено для космического фона */
         }
         .container {
             max-width: 100%;
@@ -43,13 +56,14 @@
         #clickArea {
             width: 100%;
             height: 100%;
-            background-image: url('https://api.iconify.design/noto:dog-face.svg');
+            background-image: url('https://api.iconify.design/noto:dog-face.svg?inline=false');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             cursor: pointer;
             position: relative;
             z-index: 1;
+            transition: transform 0.1s ease-in-out;
         }
         .stats {
             background-color: rgba(0, 0, 0, 0.5);
@@ -58,6 +72,7 @@
             padding: 0.5rem;
             text-align: center;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            position: relative;
         }
         #score {
             font-size: 1.2rem;
@@ -68,6 +83,28 @@
             font-size: 0.8rem;
             color: #a0a0a0;
         }
+        /* Добавим уровень и прогресс */
+        #level {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            margin-top: 0.25rem;
+        }
+        .level-progress {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #4a4a5a;
+            border-radius: 0.25rem;
+            margin-top: 0.25rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .level-progress-bar {
+            height: 100%;
+            border-radius: 0.25rem;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            transition: width 0.3s ease-in-out;
+            width: 0%;
+        }
         .button-container {
             display: flex;
             flex-wrap: wrap;
@@ -76,7 +113,7 @@
             margin-bottom: 1rem;
         }
         .game-button {
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Kosko', sans-serif;
             font-size: 0.7rem;
             padding: 0.5rem;
             background-color: #4a4a5a;
@@ -122,7 +159,7 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        .shop-item, .reward-item, .task-item {
+        .shop-item, .reward-item, .task-item, .wardrobe-item {
             background-color: rgba(0, 0, 0, 0.5);
             border: 2px solid #4a4a5a;
             border-radius: 0.5rem;
@@ -133,10 +170,10 @@
             gap: 0.5rem;
             flex-wrap: wrap;
         }
-        .shop-item {
+        .shop-item, .wardrobe-item {
             justify-content: space-between;
         }
-        .shop-item img {
+        .shop-item img, .wardrobe-item img {
             width: 2rem;
             height: 2rem;
         }
@@ -153,7 +190,7 @@
             color: #a0a0a0;
         }
         .help-icon {
-            color: #4CAF50;
+            color: #ffd700;
             cursor: help;
             font-size: 1rem;
             margin-left: 0.5rem;
@@ -169,7 +206,9 @@
             display: none;
             text-align: center;
             max-width: 200px;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Kosko', sans-serif;
+            /* Текст по центру */
+            text-align: center;
         }
         .task-progress, .reward-progress {
             width: 100%;
@@ -186,13 +225,13 @@
             transition: width 0.3s ease-in-out;
         }
         .claim-button {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #ffd700;
+            color: black;
             border: none;
             padding: 0.5rem;
             border-radius: 0.25rem;
             cursor: pointer;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Kosko', sans-serif;
             font-size: 0.7rem;
         }
         .claim-button:disabled {
@@ -276,18 +315,206 @@
             border-radius: 0.5rem;
             text-align: center;
             color: #ffd700;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Kosko', sans-serif;
         }
         #idleModalContent button {
             margin-top: 1rem;
             padding: 0.5rem 1rem;
             font-size: 1rem;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Kosko', sans-serif;
             cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #ffd700;
+            color: black;
             border: none;
             border-radius: 0.25rem;
+        }
+        /* Стили для вкладок в гардеробе */
+        .wardrobe-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .wardrobe-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background-color: #4a4a5a;
+            margin: 0 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'Kosko', sans-serif;
+            font-size: 0.8rem;
+            color: white;
+        }
+        .wardrobe-tab.active {
+            background-color: #5a5a6a;
+        }
+        .wardrobe-section {
+            display: none;
+        }
+        .wardrobe-section.active {
+            display: block;
+        }
+        /* Стили для кейсов */
+        .case-container {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .case-button {
+            background-color: #ff7e5f;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-family: 'Kosko', sans-serif;
+            font-size: 0.7rem;
+        }
+        .case-button.sell {
+            background-color: #e74c3c;
+        }
+        .case-item {
+            display: inline-block;
+            width: 100px;
+            text-align: center;
+            margin: 0 5px;
+        }
+        .case-item img {
+            width: 50px;
+            height: 50px;
+        }
+        .case-items-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .case-wheel-container {
+            position: relative;
+            width: 300px;
+            height: 120px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+        }
+        .case-wheel {
+            display: flex;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: transform 10s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+        .case-wheel .case-item {
+            flex-shrink: 0;
+            width: 100px;
+            text-align: center;
+        }
+        .case-arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #ffd700;
+        }
+        /* Стили для всплывающих уведомлений */
+        .notification {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #ffd700;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Kosko', sans-serif;
+            font-size: 0.8rem;
+            z-index: 1003;
+            opacity: 0;
+            animation: fadeInOut 3s forwards;
+            text-align: center;
+            max-width: 80%;
+        }
+        .notification.error {
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        /* Стили для космического фона */
+        .stars, .nebula, .cosmic-dust, .vignette {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .stars {
+            background: radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(1px 1px at 50px 160px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 200px 20px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 300px 200px, #fff, rgba(0,0,0,0));
+            background-size: 400px 400px;
+            animation: movingStars 60s linear infinite;
+        }
+        @keyframes movingStars {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(400px);
+            }
+        }
+        .nebula {
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(76, 0, 255, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 70% 70%, rgba(255, 0, 221, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 30% 70%, rgba(0, 217, 255, 0.2) 0%, transparent 40%);
+            filter: blur(30px);
+        }
+        .cosmic-dust {
+            background-image: 
+                radial-gradient(1px 1px at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 100%),
+                radial-gradient(1px 1px at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 100%),
+                radial-gradient(2px 2px at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            animation: rotateDust 120s linear infinite;
+        }
+        @keyframes rotateDust {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .vignette {
+            background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.8) 100%);
+        }
+        /* Медиазапросы для мобильной версии */
+        @media (max-width: 600px) {
+            .game-container {
+                max-width: 100%;
+            }
+            .orbit-container {
+                width: 150px;
+                height: 150px;
+            }
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .game-button {
+                width: 90%;
+            }
+            .case-wheel-container {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -305,12 +532,16 @@
             <div class="stats">
                 <div id="score">Лакомства: 0</div>
                 <div id="cps">В секунду: 0</div>
+                <div id="level">Уровень: 1</div>
+                <div class="level-progress">
+                    <div class="level-progress-bar" id="levelProgressBar"></div>
+                </div>
             </div>
             <div class="button-container">
                 <button class="game-button" onclick="openModal('shop')">🏪 Магазин</button>
+                <button class="game-button" onclick="openModal('wardrobe')">👗 Гардероб</button>
                 <button class="game-button" onclick="openModal('rewards')">🏆 Награды</button>
                 <button class="game-button" onclick="openModal('tasks')">📋 Задания</button>
-                <button class="game-button" onclick="openModal('settings')">⚙️ Настройки</button>
             </div>
         </div>
     </div>
@@ -323,6 +554,23 @@
                 <button class="close-button" onclick="closeModal('shop')">&times;</button>
             </div>
             <div id="shopItems"></div>
+        </div>
+    </div>
+
+    <div id="wardrobeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">👗 Гардероб</h2>
+                <button class="close-button" onclick="closeModal('wardrobe')">&times;</button>
+            </div>
+            <div class="wardrobe-tabs">
+                <div class="wardrobe-tab active" onclick="switchWardrobeTab('clickColors')">Цвета Клика</div>
+                <div class="wardrobe-tab" onclick="switchWardrobeTab('backgrounds')">Фоны</div>
+                <div class="wardrobe-tab" onclick="switchWardrobeTab('cases')">Кейсы</div>
+            </div>
+            <div id="wardrobeItems">
+                <!-- Секции гардероба будут загружаться здесь -->
+            </div>
         </div>
     </div>
 
@@ -353,10 +601,6 @@
                 <button class="close-button" onclick="closeModal('settings')">&times;</button>
             </div>
             <div class="settings-section">
-                <h3>Выберите фон:</h3>
-                <div id="backgroundOptions"></div>
-            </div>
-            <div class="settings-section">
                 <h3>Ваш код:</h3>
                 <div id="userCode"></div>
             </div>
@@ -371,28 +615,69 @@
         </div>
     </div>
 
+    <!-- Модальное окно для кейсов -->
+    <div id="casesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🎁 Кейсы</h2>
+                <button class="close-button" onclick="closeModal('cases')">&times;</button>
+            </div>
+            <!-- Добавлена кнопка для показа возможных призов -->
+            <div class="case-container">
+                <button class="case-button" onclick="togglePossiblePrizes()">Показать возможные призы</button>
+                <button class="case-button" onclick="openCase()">Открыть кейс (5000 лакомств)</button>
+            </div>
+            <!-- Колесо кейса -->
+            <div class="case-wheel-container">
+                <div class="case-arrow">▼</div>
+                <div class="case-wheel" id="caseWheel"></div>
+            </div>
+            <div id="caseResult"></div>
+            <!-- Возможные призы отображаются снизу -->
+            <div id="possiblePrizesContainer" style="display: none;">
+                <h3>Возможные призы:</h3>
+                <div class="case-items-list" id="possiblePrizes"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tooltip -->
     <div id="tooltip" class="tooltip"></div>
+
+    <!-- Контейнер для уведомлений -->
+    <div id="notificationContainer"></div>
+
+    <!-- Элементы космического фона -->
+    <div class="stars" id="stars" style="display: none;"></div>
+    <div class="nebula" id="nebula" style="display: none;"></div>
+    <div class="cosmic-dust" id="cosmicDust" style="display: none;"></div>
+    <div class="vignette" id="vignette" style="display: none;"></div>
 
     <script>
         let treats = 0;
         let cps = 0;
         let clickPower = 1;
         let totalClicks = 0;
+        let level = 1;
+        let experience = 0;
+        let experienceToNextLevel = 100;
+
         let items = [
-            { name: 'paw', cost: 10, clickPower: 1, owned: 0, description: "Увеличивает силу клика на 1" },
-            { name: 'puppy', cost: 15, cps: 0.1, owned: 0, description: "Производит 0.1 лакомств в секунду" },
-            { name: 'bowl', cost: 100, cps: 1, owned: 0, description: "Производит 1 лакомство в секунду" },
-            { name: 'toy', cost: 500, cps: 5, owned: 0, description: "Производит 5 лакомств в секунду" },
-            { name: 'bed', cost: 1000, cps: 10, owned: 0, description: "Производит 10 лакомств в секунду" },
-            { name: 'house', cost: 5000, cps: 50, owned: 0, description: "Производит 50 лакомств в секунду" },
-            { name: 'park', cost: 20000, cps: 200, owned: 0, description: "Производит 200 лакомств в секунду" }
+            { name: 'paw', cost: 10, clickPower: 1, owned: 0, description: "Увеличивает силу клика на 1", icon: 'https://api.iconify.design/noto:paw-prints.svg?inline=false' },
+            { name: 'puppy', cost: 15, cps: 0.1, owned: 0, description: "Производит 0.1 лакомств в секунду", icon: 'https://api.iconify.design/noto:dog-face.svg?inline=false' },
+            { name: 'bowl', cost: 100, cps: 1, owned: 0, description: "Производит 1 лакомство в секунду", icon: 'https://api.iconify.design/noto:bowl-with-spoon.svg?inline=false' },
+            { name: 'toy', cost: 500, cps: 5, owned: 0, description: "Производит 5 лакомств в секунду", icon: 'https://api.iconify.design/emojione:teddy-bear.svg?inline=false' },
+            { name: 'bed', cost: 1000, cps: 10, owned: 0, description: "Производит 10 лакомств в секунду", icon: 'https://api.iconify.design/emojione:sleeping-face.svg?inline=false' },
+            { name: 'house', cost: 5000, cps: 50, owned: 0, description: "Производит 50 лакомств в секунду", icon: 'https://api.iconify.design/emojione:house.svg?inline=false' },
+            { name: 'park', cost: 20000, cps: 200, owned: 0, description: "Производит 200 лакомств в секунду", icon: 'https://api.iconify.design/noto:park.svg?inline=false' }
         ];
+
         let tasks = [
             { id: 'click_10', name: 'Быстрые клики', description: 'Кликните 10 раз', requirement: 10, progress: 0, reward: 50, claimed: false },
             { id: 'buy_puppy', name: 'Купить щенка', description: 'Купите щенка', requirement: 1, progress: 0, reward: 100, claimed: false },
             { id: 'reach_cps_1', name: 'Автоматизация', description: 'Достигните 1 лакомства в секунду', requirement: 1, progress: 0, reward: 200, claimed: false }
         ];
+
         let rewards = [
             { id: 'first_click', name: 'Первый клик', description: 'Сделайте первый клик', requirement: 1, claimed: false },
             { id: 'click_100', name: '100 кликов', description: 'Сделайте 100 кликов', requirement: 100, claimed: false },
@@ -400,23 +685,37 @@
             { id: 'treats_1000', name: '1000 лакомств', description: 'Накопите 1000 лакомств', requirement: 1000, claimed: false },
             { id: 'cps_10', name: '10 в секунду', description: 'Достигните 10 лакомств в секунду', requirement: 10, claimed: false }
         ];
+
         let userCode = generateUserCode();
-        let backgroundColors = [
-            { name: 'Стандартный', value: 'linear-gradient(to bottom, #1a1c2c, #2b2e4a)' },
-            { name: 'Закат', value: 'linear-gradient(to bottom, #ff7e5f, #feb47b)' },
-            { name: 'Океан', value: 'linear-gradient(to bottom, #2c3e50, #4ca1af)' },
-            { name: 'Лес', value: 'linear-gradient(to bottom, #134e5e, #71b280)' },
-            { name: 'Ночь', value: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)' }
+
+        // Добавим товары для гардероба
+        let clickColors = [
+            { name: 'Желтый', color: '#ffd700', cost: 0, owned: true, selected: true },
+            { name: 'Радужный', color: 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)', cost: 10000, owned: false, selected: false },
+            { name: 'Неоновый', color: '#39FF14', cost: 5000, owned: false, selected: false },
+            { name: 'Золотой', color: '#FFD700', cost: 20000, owned: false, selected: false },
+            { name: 'Сияющий', color: '#00FFFF', cost: 15000, owned: false, selected: false },
+            { name: 'Плазменный', color: '#FF1493', cost: 25000, owned: false, selected: false }
+        ];
+
+        let backgrounds = [
+            { name: 'Стандартный', value: 'linear-gradient(to bottom, #1a1c2c, #2b2e4a)', cost: 0, owned: true, selected: true },
+            { name: 'Закат', value: 'linear-gradient(to bottom, #ff7e5f, #feb47b)', cost: 1000, owned: false, selected: false },
+            { name: 'Океан', value: 'linear-gradient(to bottom, #2c3e50, #4ca1af)', cost: 5000, owned: false, selected: false },
+            { name: 'Лес', value: 'linear-gradient(to bottom, #134e5e, #71b280)', cost: 10000, owned: false, selected: false },
+            { name: 'Ночь', value: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)', cost: 20000, owned: false, selected: false },
+            { name: 'Космос', value: 'cosmos', cost: 50000, owned: false, selected: false }
         ];
 
         // Фиксированный ключ для локального хранения
         const storageKey = 'dogClickerSave';
 
-        // Переменные для отслеживания неактивности и автоклика
+        // Переменные для отслеживания неактивности и офлайн прогресса
         let lastActivityTime = Date.now();
-        let idleInterval;
-        let isIdle = false;
         let idleEarnings = 0;
+
+        // Переменная для отслеживания ручных кликов
+        let manualClicks = 0;
 
         function loadGame() {
             const savedGame = localStorage.getItem(storageKey);
@@ -426,14 +725,40 @@
                 cps = gameState.cps || 0;
                 clickPower = gameState.clickPower || 1;
                 totalClicks = gameState.totalClicks || 0;
-                // Глубокое копирование объектов
+                manualClicks = gameState.manualClicks || 0;
+                level = gameState.level || 1;
+                experience = gameState.experience || 0;
+                experienceToNextLevel = gameState.experienceToNextLevel || 100;
                 items = gameState.items ? JSON.parse(JSON.stringify(gameState.items)) : items;
                 tasks = gameState.tasks ? JSON.parse(JSON.stringify(gameState.tasks)) : tasks;
                 rewards = gameState.rewards ? JSON.parse(JSON.stringify(gameState.rewards)) : rewards;
                 userCode = gameState.userCode || generateUserCode();
-                if (gameState.backgroundIndex !== undefined && backgroundColors[gameState.backgroundIndex]) {
-                    changeBackground(gameState.backgroundIndex);
+                clickColors = gameState.clickColors ? JSON.parse(JSON.stringify(gameState.clickColors)) : clickColors;
+                backgrounds = gameState.backgrounds ? JSON.parse(JSON.stringify(gameState.backgrounds)) : backgrounds;
+
+                // Вычисляем офлайн заработок
+                if (gameState.lastActivityTime) {
+                    const currentTime = Date.now();
+                    const timeDifference = (currentTime - gameState.lastActivityTime) / 1000; // в секундах
+                    const offlineEarnings = cps * timeDifference;
+                    if (offlineEarnings > 0) {
+                        idleEarnings = offlineEarnings;
+                        showIdleEarnings();
+                    }
                 }
+
+                // Применяем выбранный цвет клика
+                const selectedColor = clickColors.find(color => color.selected);
+                if (selectedColor) {
+                    clickColor = selectedColor.color;
+                }
+
+                // Применяем выбранный фон
+                const selectedBackground = backgrounds.find(bg => bg.selected);
+                if (selectedBackground) {
+                    changeBackground(selectedBackground.value);
+                }
+
                 updateDisplay();
                 updateTasks();
                 updateRewards();
@@ -446,19 +771,29 @@
                 cps,
                 clickPower,
                 totalClicks,
+                manualClicks,
+                level,
+                experience,
+                experienceToNextLevel,
                 items,
                 tasks,
                 rewards,
                 userCode,
-                backgroundIndex: backgroundColors.findIndex(color => color.value === document.body.style.background)
+                clickColors,
+                backgrounds,
+                lastActivityTime: Date.now()
             };
             localStorage.setItem(storageKey, JSON.stringify(gameState));
         }
+
+        let clickColor = '#ffd700'; // По умолчанию желтый
 
         function clickDog(event) {
             event.preventDefault();
             treats += clickPower;
             totalClicks++;
+            manualClicks++; // Учитываем только ручные клики
+            gainExperience(1);
             updateDisplay();
             const rect = event.currentTarget.getBoundingClientRect();
             const x = event.changedTouches ? event.changedTouches[0].clientX - rect.left : event.clientX - rect.left;
@@ -467,7 +802,16 @@
             checkTasks();
             checkRewards();
             saveGame();
-            resetIdleTimer(); // Сброс таймера неактивности при клике
+            animateDog();
+            lastActivityTime = Date.now(); // Обновляем время последней активности
+        }
+
+        function animateDog() {
+            const clickArea = document.getElementById('clickArea');
+            clickArea.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                clickArea.style.transform = 'scale(1)';
+            }, 100);
         }
 
         function createParticle(x, y) {
@@ -476,6 +820,12 @@
             particle.style.left = x + 'px';
             particle.style.top = y + 'px';
             particle.textContent = '+' + clickPower;
+            particle.style.color = clickColor;
+            if (clickColor.includes('gradient')) {
+                particle.style.background = clickColor;
+                particle.style.webkitBackgroundClip = 'text';
+                particle.style.webkitTextFillColor = 'transparent';
+            }
             document.getElementById('particleContainer').appendChild(particle);
 
             particle.animate([
@@ -490,6 +840,28 @@
         function updateDisplay() {
             document.getElementById('score').textContent = 'Лакомства: ' + Math.floor(treats);
             document.getElementById('cps').textContent = 'В секунду: ' + cps.toFixed(1);
+            document.getElementById('level').textContent = 'Уровень: ' + level;
+            const progressPercentage = (experience / experienceToNextLevel) * 100;
+            document.getElementById('levelProgressBar').style.width = progressPercentage + '%';
+        }
+
+        function gainExperience(amount) {
+            experience += amount;
+            if (experience >= experienceToNextLevel) {
+                experience -= experienceToNextLevel;
+                levelUp();
+            }
+            updateDisplay();
+        }
+
+        function levelUp() {
+            level++;
+            experienceToNextLevel = Math.floor(experienceToNextLevel * 1.5);
+            const reward = level * 100;
+            treats += reward;
+            updateDisplay();
+            saveGame();
+            showNotification(`Поздравляем! Вы достигли уровня ${level}. Вам было выдано ${reward} лакомств.`);
         }
 
         function openModal(modalType) {
@@ -503,6 +875,10 @@
                 updateTasks();
             } else if (modalType === 'settings') {
                 updateSettings();
+            } else if (modalType === 'wardrobe') {
+                updateWardrobe();
+            } else if (modalType === 'cases') {
+                updateCases();
             }
         }
 
@@ -518,13 +894,7 @@
                 const itemElement = document.createElement('div');
                 itemElement.className = 'shop-item';
                 itemElement.innerHTML = `
-                    <img src="https://api.iconify.design/${item.name === 'paw' ? 'noto:paw-prints' : 
-                                    item.name === 'puppy' ? 'noto:dog-face' : 
-                                    item.name === 'bowl' ? 'noto:bowl-with-spoon' : 
-                                    item.name === 'toy' ? 'emojione:teddy-bear' : 
-                                    item.name === 'bed' ? 'emojione:sleeping-face' : 
-                                    item.name === 'house' ? 'emojione:house' : 
-                                    'noto:park'}.svg" alt="${item.name}">
+                    <img src="${item.icon}" alt="${item.name}">
                     <div class="item-info">
                         <div class="item-name">${getItemName(item.name)}</div>
                         <div class="item-cost">Цена: ${item.cost} лакомств</div>
@@ -560,8 +930,9 @@
             tooltip.textContent = text;
             tooltip.style.display = 'block';
             const rect = event.target.getBoundingClientRect();
-            tooltip.style.left = rect.left + 'px';
-            tooltip.style.top = rect.bottom + 'px';
+            const tooltipRect = tooltip.getBoundingClientRect();
+            tooltip.style.left = (rect.left + rect.width / 2 - tooltipRect.width / 2) + 'px';
+            tooltip.style.top = (rect.bottom + 5) + 'px';
             setTimeout(() => {
                 tooltip.style.display = 'none';
             }, 2000);
@@ -572,17 +943,169 @@
             if (treats >= item.cost) {
                 treats -= item.cost;
                 item.owned++;
-                if (item.clickPower) {
+                if (item.name !== 'paw') { // "Волшебная Лапа" не увеличивает CPS и не дает опыт
+                    if (item.cps) {
+                        cps += item.cps;
+                    }
+                } else {
                     clickPower += item.clickPower;
-                }
-                if (item.cps) {
-                    cps += item.cps;
                 }
                 item.cost = Math.ceil(item.cost * 1.15);
                 updateDisplay();
                 updateShop();
                 checkTasks();
                 saveGame();
+                showNotification('Вы приобрели: ' + getItemName(item.name));
+            } else {
+                showNotification('Недостаточно лакомств для покупки!', 'error');
+            }
+        }
+
+        function updateWardrobe() {
+            const wardrobeItems = document.getElementById('wardrobeItems');
+            wardrobeItems.innerHTML = '';
+
+            const clickColorSection = document.createElement('div');
+            clickColorSection.className = 'wardrobe-section active';
+            clickColors.forEach((color, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'wardrobe-item';
+                itemElement.innerHTML = `
+                    <div class="color-preview" style="background: ${color.color};"></div>
+                    <div class="item-info">
+                        <div class="item-name">${color.name}</div>
+                        <div class="item-cost">Цена: ${color.cost} лакомств</div>
+                    </div>
+                    ${color.owned ? `<button class="claim-button" onclick="selectClickColor(${index})">${color.selected ? 'Выбрано' : 'Выбрать'}</button>` : `<button class="claim-button" onclick="buyClickColor(${index})">Купить</button>`}
+                `;
+                itemElement.style.border = color.selected ? '2px solid #ffd700' : '2px solid transparent';
+                clickColorSection.appendChild(itemElement);
+            });
+
+            const backgroundSection = document.createElement('div');
+            backgroundSection.className = 'wardrobe-section';
+            backgrounds.forEach((bg, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'wardrobe-item';
+                itemElement.innerHTML = `
+                    <div class="color-preview" style="background: ${bg.value === 'cosmos' ? '#000' : bg.value};"></div>
+                    <div class="item-info">
+                        <div class="item-name">${bg.name}</div>
+                        <div class="item-cost">Цена: ${bg.cost} лакомств</div>
+                    </div>
+                    ${bg.owned ? `<button class="claim-button" onclick="selectBackground(${index})">${bg.selected ? 'Выбрано' : 'Выбрать'}</button>` : `<button class="claim-button" onclick="buyBackground(${index})">Купить</button>`}
+                `;
+                itemElement.style.border = bg.selected ? '2px solid #ffd700' : '2px solid transparent';
+                backgroundSection.appendChild(itemElement);
+            });
+
+            const casesSection = document.createElement('div');
+            casesSection.className = 'wardrobe-section';
+            casesSection.innerHTML = `
+                <div class="case-container">
+                    <p>Кейсы позволяют получить уникальные призы!</p>
+                    <button class="claim-button" onclick="openModal('cases')">Перейти к кейсам</button>
+                </div>
+            `;
+
+            wardrobeItems.appendChild(clickColorSection);
+            wardrobeItems.appendChild(backgroundSection);
+            wardrobeItems.appendChild(casesSection);
+
+            // Инициализируем отображение активной вкладки
+            const tabs = document.querySelectorAll('.wardrobe-tab');
+            const sections = document.querySelectorAll('.wardrobe-section');
+            sections.forEach(s => s.classList.remove('active'));
+            if (tabs[0].classList.contains('active')) {
+                sections[0].classList.add('active');
+            } else if (tabs[1].classList.contains('active')) {
+                sections[1].classList.add('active');
+            } else {
+                sections[2].classList.add('active');
+            }
+        }
+
+        function switchWardrobeTab(tab) {
+            const tabs = document.querySelectorAll('.wardrobe-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            const sections = document.querySelectorAll('.wardrobe-section');
+            sections.forEach(s => s.classList.remove('active'));
+
+            if (tab === 'clickColors') {
+                tabs[0].classList.add('active');
+                sections[0].classList.add('active');
+            } else if (tab === 'backgrounds') {
+                tabs[1].classList.add('active');
+                sections[1].classList.add('active');
+            } else if (tab === 'cases') {
+                tabs[2].classList.add('active');
+                sections[2].classList.add('active');
+            }
+        }
+
+        function buyClickColor(index) {
+            const color = clickColors[index];
+            if (treats >= color.cost) {
+                treats -= color.cost;
+                color.owned = true;
+                selectClickColor(index);
+                updateWardrobe();
+                updateDisplay();
+                saveGame();
+                showNotification('Вы приобрели цвет клика: ' + color.name);
+            } else {
+                showNotification('Недостаточно лакомств для покупки!', 'error');
+            }
+        }
+
+        function selectClickColor(index) {
+            clickColors.forEach((color, idx) => {
+                color.selected = idx === index;
+            });
+            clickColor = clickColors[index].color;
+            updateWardrobe();
+            saveGame();
+            showNotification('Вы выбрали цвет клика: ' + clickColors[index].name);
+        }
+
+        function buyBackground(index) {
+            const bg = backgrounds[index];
+            if (treats >= bg.cost) {
+                treats -= bg.cost;
+                bg.owned = true;
+                selectBackground(index);
+                updateWardrobe();
+                updateDisplay();
+                saveGame();
+                showNotification('Вы приобрели фон: ' + bg.name);
+            } else {
+                showNotification('Недостаточно лакомств для покупки!', 'error');
+            }
+        }
+
+        function selectBackground(index) {
+            backgrounds.forEach((bg, idx) => {
+                bg.selected = idx === index;
+            });
+            changeBackground(backgrounds[index].value);
+            updateWardrobe();
+            saveGame();
+            showNotification('Вы выбрали фон: ' + backgrounds[index].name);
+        }
+
+        function changeBackground(value) {
+            if (value === 'cosmos') {
+                document.body.style.background = '#000';
+                document.getElementById('stars').style.display = 'block';
+                document.getElementById('nebula').style.display = 'block';
+                document.getElementById('cosmicDust').style.display = 'block';
+                document.getElementById('vignette').style.display = 'block';
+            } else {
+                document.body.style.background = value;
+                document.getElementById('stars').style.display = 'none';
+                document.getElementById('nebula').style.display = 'none';
+                document.getElementById('cosmicDust').style.display = 'none';
+                document.getElementById('vignette').style.display = 'none';
             }
         }
 
@@ -614,13 +1137,14 @@
             if (reward && !reward.claimed) {
                 const progress = reward.id === 'treats_1000' ? treats / reward.requirement :
                                  reward.id === 'cps_10' ? cps / reward.requirement :
-                                 totalClicks / reward.requirement;
+                                 Math.min(totalClicks / reward.requirement, 1);
                 if (progress >= 1) {
                     reward.claimed = true;
                     treats += 1000;
                     updateDisplay();
                     updateRewards();
                     saveGame();
+                    showNotification('Вы получили награду: ' + reward.name);
                 }
             }
         }
@@ -646,6 +1170,11 @@
                     ${task.claimed ? '<p class="claimed">Награда получена</p>' : ''}
                 `;
                 tasksList.appendChild(taskElement);
+
+                // Показываем уведомление, если задание выполнено
+                if (!task.claimed && task.progress >= task.requirement) {
+                    showNotification('Достижение выполнено: ' + task.name);
+                }
             });
         }
 
@@ -657,6 +1186,7 @@
                 updateDisplay();
                 updateTasks();
                 saveGame();
+                showNotification('Вы получили награду за задание: ' + task.name);
             }
         }
 
@@ -664,7 +1194,7 @@
             tasks.forEach(task => {
                 switch (task.id) {
                     case 'click_10':
-                        task.progress = Math.min(totalClicks, task.requirement);
+                        task.progress = Math.min(manualClicks, task.requirement);
                         break;
                     case 'buy_puppy':
                         task.progress = items[1].owned > 0 ? 1 : 0;
@@ -683,26 +1213,31 @@
                     case 'first_click':
                         if (totalClicks >= 1 && !reward.claimed) {
                             reward.claimed = true;
+                            showNotification('Вы получили награду: ' + reward.name);
                         }
                         break;
                     case 'click_100':
                         if (totalClicks >= 100 && !reward.claimed) {
                             reward.claimed = true;
+                            showNotification('Вы получили награду: ' + reward.name);
                         }
                         break;
                     case 'click_1000':
                         if (totalClicks >= 1000 && !reward.claimed) {
                             reward.claimed = true;
+                            showNotification('Вы получили награду: ' + reward.name);
                         }
                         break;
                     case 'treats_1000':
                         if (treats >= 1000 && !reward.claimed) {
                             reward.claimed = true;
+                            showNotification('Вы получили награду: ' + reward.name);
                         }
                         break;
                     case 'cps_10':
                         if (cps >= 10 && !reward.claimed) {
                             reward.claimed = true;
+                            showNotification('Вы получили награду: ' + reward.name);
                         }
                         break;
                 }
@@ -715,58 +1250,16 @@
         }
 
         function updateSettings() {
-            const backgroundOptions = document.getElementById('backgroundOptions');
-            backgroundOptions.innerHTML = '';
-            backgroundColors.forEach((color, index) => {
-                const option = document.createElement('div');
-                option.className = 'color-option';
-                option.innerHTML = `
-                    <div class="color-preview" style="background: ${color.value};"></div>
-                    <span>${color.name}</span>
-                `;
-                option.onclick = () => changeBackground(index);
-                backgroundOptions.appendChild(option);
-            });
-
             const userCodeElement = document.getElementById('userCode');
             userCodeElement.textContent = userCode;
-        }
-
-        function changeBackground(index) {
-            document.body.style.background = backgroundColors[index].value;
-            saveGame();
-        }
-
-        // Новые функции для реализации автоклика при неактивности
-
-        // Сброс таймера неактивности
-        function resetIdleTimer() {
-            lastActivityTime = Date.now();
-            if (isIdle) {
-                // Если пользователь вернулся после неактивности
-                showIdleEarnings();
-                isIdle = false;
-                clearInterval(idleInterval);
-            }
-        }
-
-        // Проверка неактивности пользователя
-        function checkIdle() {
-            let currentTime = Date.now();
-            if (!isIdle && currentTime - lastActivityTime >= 10000) { // 10 секунд неактивности
-                isIdle = true;
-                idleEarnings = 0;
-                idleInterval = setInterval(() => {
-                    idleEarnings += clickPower;
-                }, 1000); // Начинаем автокликать каждую секунду
-            }
         }
 
         // Показать заработок во время неактивности
         function showIdleEarnings() {
             if (idleEarnings > 0) {
-                document.getElementById('idleEarningsMessage').textContent = `Вы отдыхали, и ваш верный пёс заработал ${idleEarnings} лакомств за вас!`;
+                document.getElementById('idleEarningsMessage').textContent = `Ваш пёс заработал ${Math.floor(idleEarnings)} лакомств, пока вы были отсутствовали!`;
                 document.getElementById('idleModal').style.display = 'flex';
+                idleEarnings = 0; // Сбрасываем, чтобы не дублировать
             }
         }
 
@@ -779,15 +1272,219 @@
             document.getElementById('idleModal').style.display = 'none';
         }
 
+        // Функция для отображения уведомлений
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            if (type === 'error') {
+                notification.classList.add('error');
+            }
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Функции для кейсов
+        function updateCases() {
+            // Обновляем список возможных призов
+            const possiblePrizes = document.getElementById('possiblePrizes');
+            possiblePrizes.innerHTML = '';
+
+            // Собираем все предметы из гардероба
+            const allWardrobeItems = [];
+
+            clickColors.forEach(color => {
+                allWardrobeItems.push({
+                    name: `Цвет клика "${color.name}"`,
+                    type: 'clickColor',
+                    value: { name: color.name },
+                    rarity: getRarity(color.cost),
+                    icon: 'https://api.iconify.design/mdi:palette.svg?inline=false'
+                });
+            });
+
+            backgrounds.forEach(bg => {
+                allWardrobeItems.push({
+                    name: `Фон "${bg.name}"`,
+                    type: 'background',
+                    value: { name: bg.name },
+                    rarity: getRarity(bg.cost),
+                    icon: 'https://api.iconify.design/mdi:image.svg?inline=false'
+                });
+            });
+
+            // Объединяем с лакомствами
+            const caseItemsList = [
+                { name: '1000 лакомств', type: 'treats', value: 1000, rarity: 'Обычный', icon: 'https://api.iconify.design/noto:candy.svg?inline=false' },
+                { name: '5000 лакомств', type: 'treats', value: 5000, rarity: 'Редкий', icon: 'https://api.iconify.design/noto:candy.svg?inline=false' },
+                { name: '10000 лакомств', type: 'treats', value: 10000, rarity: 'Эпический', icon: 'https://api.iconify.design/noto:candy.svg?inline=false' },
+                { name: '50000 лакомств', type: 'treats', value: 50000, rarity: 'Легендарный', icon: 'https://api.iconify.design/noto:candy.svg?inline=false' }
+            ];
+
+            // Объединяем все призы
+            const allCaseItems = caseItemsList.concat(allWardrobeItems);
+
+            // Сохраняем в глобальную переменную
+            window.allCaseItems = allCaseItems;
+
+            // Если призы уже отображены, не обновляем
+            if (possiblePrizes.children.length === 0) {
+                allCaseItems.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'case-item';
+                    itemElement.innerHTML = `
+                        <img src="${item.icon}" alt="${item.name}">
+                        <div>${item.name}</div>
+                        <div>${item.rarity}</div>
+                    `;
+                    possiblePrizes.appendChild(itemElement);
+                });
+            }
+
+            const caseWheel = document.getElementById('caseWheel');
+            caseWheel.innerHTML = '';
+            document.getElementById('caseResult').innerHTML = '';
+            caseWheel.style.transform = 'translateX(0)';
+        }
+
+        function getRarity(cost) {
+            if (cost <= 5000) return 'Обычный';
+            if (cost <= 15000) return 'Редкий';
+            if (cost <= 30000) return 'Эпический';
+            return 'Легендарный';
+        }
+
+        function openCase() {
+            const caseCost = 5000;
+            if (treats >= caseCost) {
+                treats -= caseCost;
+                updateDisplay();
+                saveGame();
+                startCaseAnimation();
+            } else {
+                showNotification('Недостаточно лакомств для покупки кейса!', 'error');
+            }
+        }
+
+        function startCaseAnimation() {
+            const caseWheel = document.getElementById('caseWheel');
+            caseWheel.innerHTML = '';
+
+            const extendedItems = [];
+            // Расширяем список предметов для более плавной анимации
+            for (let i = 0; i < 50; i++) {
+                const randomItem = window.allCaseItems[Math.floor(Math.random() * window.allCaseItems.length)];
+                extendedItems.push(randomItem);
+            }
+
+            extendedItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'case-item';
+                itemElement.innerHTML = `
+                    <img src="${item.icon}" alt="${item.name}">
+                    <div>${item.name}</div>
+                `;
+                caseWheel.appendChild(itemElement);
+            });
+
+            const itemWidth = 100;
+            const totalWidth = extendedItems.length * itemWidth;
+            const animationTime = 10000; // 10 секунд
+
+            // Расчет конечной позиции с ускорением и замедлением
+            const randomIndex = Math.floor(Math.random() * (extendedItems.length - 3)) + 1;
+            const targetPosition = -((randomIndex * itemWidth) - (itemWidth * 1));
+
+            caseWheel.style.transition = `transform ${animationTime}ms cubic-bezier(0.33, 1, 0.68, 1)`;
+            caseWheel.style.transform = `translateX(${targetPosition}px)`;
+
+            setTimeout(() => {
+                const wonItem = extendedItems[randomIndex + 1];
+                showCaseResult(wonItem);
+            }, animationTime + 100); // Небольшая задержка после анимации
+        }
+
+        function showCaseResult(item) {
+            const caseResult = document.getElementById('caseResult');
+            const sellValue = item.type === 'treats' ? item.value / 2 : Math.floor(getItemCost(item) / 2);
+            caseResult.innerHTML = `
+                <p>Вы получили: ${item.name}</p>
+                <button class="case-button" onclick='keepCaseItem(${JSON.stringify(item)})'>Забрать</button>
+                <button class="case-button sell" onclick='sellCaseItem(${JSON.stringify(item)}, ${sellValue})'>Продать за ${sellValue} лакомств</button>
+            `;
+        }
+
+        function getItemCost(item) {
+            if (item.type === 'clickColor') {
+                const color = clickColors.find(c => c.name === item.value.name);
+                return color ? color.cost : 5000;
+            } else if (item.type === 'background') {
+                const bg = backgrounds.find(b => b.name === item.value.name);
+                return bg ? bg.cost : 5000;
+            }
+            return 5000;
+        }
+
+        function keepCaseItem(item) {
+            if (item.type === 'treats') {
+                treats += item.value;
+                updateDisplay();
+            } else if (item.type === 'clickColor') {
+                const color = clickColors.find(c => c.name === item.value.name);
+                if (color) {
+                    color.owned = true;
+                }
+            } else if (item.type === 'background') {
+                const bg = backgrounds.find(b => b.name === item.value.name);
+                if (bg) {
+                    bg.owned = true;
+                }
+            }
+            saveGame();
+            showNotification('Вы забрали: ' + item.name);
+            document.getElementById('caseResult').innerHTML = '';
+            updateWardrobe();
+            updateDisplay();
+            updateCases();
+        }
+
+        function sellCaseItem(item, sellValue) {
+            treats += sellValue;
+            updateDisplay();
+            saveGame();
+            showNotification(`Вы продали: ${item.name} за ${sellValue} лакомств`);
+            document.getElementById('caseResult').innerHTML = '';
+            updateCases();
+        }
+
+        function togglePossiblePrizes() {
+            const container = document.getElementById('possiblePrizesContainer');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Функция для обработки неактивности
+        let inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                const currentTime = Date.now();
+                const timeDifference = (currentTime - lastActivityTime) / 1000;
+                if (timeDifference >= 5) {
+                    idleEarnings = cps * timeDifference;
+                    if (idleEarnings > 0) {
+                        showIdleEarnings();
+                    }
+                }
+                lastActivityTime = Date.now();
+            }, 5000);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const clickArea = document.getElementById('clickArea');
             clickArea.addEventListener('click', clickDog);
             clickArea.addEventListener('touchend', clickDog);
-
-            // Отслеживание активности пользователя
-            document.addEventListener('mousemove', resetIdleTimer);
-            document.addEventListener('keypress', resetIdleTimer);
-            document.addEventListener('touchstart', resetIdleTimer);
 
             loadGame();
 
@@ -797,8 +1494,25 @@
                 saveGame();
             }, 1000);
 
-            // Проверка неактивности каждые 5 секунд
-            setInterval(checkIdle, 5000);
+            // Отслеживание активности пользователя
+            document.addEventListener('mousemove', () => { lastActivityTime = Date.now(); resetInactivityTimer(); });
+            document.addEventListener('keypress', () => { lastActivityTime = Date.now(); resetInactivityTimer(); });
+            document.addEventListener('touchstart', () => { lastActivityTime = Date.now(); resetInactivityTimer(); });
+
+            // Обработка изменения видимости страницы
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    const currentTime = Date.now();
+                    const timeDifference = (currentTime - lastActivityTime) / 1000;
+                    if (timeDifference >= 5) {
+                        idleEarnings = cps * timeDifference;
+                        if (idleEarnings > 0) {
+                            showIdleEarnings();
+                        }
+                    }
+                    lastActivityTime = Date.now();
+                }
+            });
         });
     </script>
 </body>
