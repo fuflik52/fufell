@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- Мета-теги и стили -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Приключение Корги Кликер</title>
     <style>
+        /* Стили для тела и основных элементов */
         body {
             font-family: 'Press Start 2P', cursive;
             background: linear-gradient(to bottom, #1a1c2c, #2b2e4a);
@@ -31,19 +33,23 @@
             max-width: 320px;
             margin: 0 auto;
         }
+        /* Стили для области клика */
         .orbit-container {
             position: relative;
             width: 200px;
             height: 200px;
             margin: 0 auto 1rem;
+        }
+        #clickArea {
+            width: 100%;
+            height: 100%;
             background-image: url('https://api.iconify.design/noto:dog-face.svg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             cursor: pointer;
-        }
-        #cookie {
-            display: none;
+            position: relative;
+            z-index: 1;
         }
         .stats {
             background-color: rgba(0, 0, 0, 0.5);
@@ -254,7 +260,9 @@
     <div class="container">
         <h1>Приключение Корги Кликер</h1>
         <div class="game-container">
-            <div class="orbit-container" id="clickArea"></div>
+            <div class="orbit-container">
+                <div id="clickArea"></div>
+            </div>
             <div class="stats">
                 <div id="score">Лакомства: 0</div>
                 <div id="cps">В секунду: 0</div>
@@ -268,6 +276,7 @@
         </div>
     </div>
 
+    <!-- Модальные окна -->
     <div id="shopModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -391,11 +400,12 @@
         }
 
         function clickCookie(event) {
+            event.preventDefault();
             cookies += clickPower;
             totalClicks++;
             updateDisplay();
-            const x = event.touches ? event.touches[0].clientX : event.clientX;
-            const y = event.touches ? event.touches[0].clientY : event.clientY;
+            const x = event.changedTouches ? event.changedTouches[0].clientX : event.clientX;
+            const y = event.changedTouches ? event.changedTouches[0].clientY : event.clientY;
             createParticle(x, y);
             checkTasks();
             checkRewards();
@@ -669,7 +679,7 @@
             loadGame();
             const clickArea = document.getElementById('clickArea');
             clickArea.addEventListener('click', clickCookie);
-            clickArea.addEventListener('touchstart', clickCookie);
+            clickArea.addEventListener('touchend', clickCookie);
             setInterval(() => {
                 cookies += cps;
                 updateDisplay();
