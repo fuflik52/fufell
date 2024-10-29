@@ -159,7 +159,7 @@
             margin-left: 0.5rem;
         }
         .tooltip {
-            position: fixed;
+            position: absolute;
             background-color: rgba(0, 0, 0, 0.8);
             color: #ffd700;
             padding: 0.5rem;
@@ -169,9 +169,6 @@
             display: none;
             text-align: center;
             max-width: 200px;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
             font-family: 'Press Start 2P', cursive;
         }
         .task-progress, .reward-progress {
@@ -208,10 +205,12 @@
             100% { transform: translateY(0px); }
         }
         .particles {
-            position: fixed;
+            position: absolute;
             pointer-events: none;
-            font-size: 1.25rem;
+            font-size: 1rem;
             color: #ffd700;
+            z-index: 2;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
         }
         .settings-icon {
             position: fixed;
@@ -258,6 +257,38 @@
             text-align: center;
             word-break: break-all;
         }
+        /* Добавим стиль для модального окна уведомления */
+        #idleModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #idleModalContent {
+            background-color: #1a1c2c;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            color: #ffd700;
+            font-family: 'Press Start 2P', cursive;
+        }
+        #idleModalContent button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -266,7 +297,10 @@
         <h1>Приключение Собаки Кликер</h1>
         <div class="game-container">
             <div class="orbit-container">
-                <div id="clickArea"></div>
+                <div id="clickArea">
+                    <!-- Добавим контейнер для частиц поверх изображения собаки -->
+                    <div id="particleContainer" style="position: relative; width: 100%; height: 100%;"></div>
+                </div>
             </div>
             <div class="stats">
                 <div id="score">Лакомства: 0</div>
@@ -329,6 +363,15 @@
         </div>
     </div>
 
+    <!-- Модальное окно для уведомления о заработке во время неактивности -->
+    <div id="idleModal">
+        <div id="idleModalContent">
+            <p id="idleEarningsMessage"></p>
+            <button onclick="collectIdleEarnings()">OK</button>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
     <div id="tooltip" class="tooltip"></div>
 
     <script>
@@ -368,6 +411,12 @@
 
         // Фиксированный ключ для локального хранения
         const storageKey = 'dogClickerSave';
+
+        // Переменные для отслеживания неактивности и автоклика
+        let lastActivityTime = Date.now();
+        let idleInterval;
+        let isIdle = false;
+        let idleEarnings = 0;
 
         function loadGame() {
             const savedGame = localStorage.getItem(storageKey);
@@ -411,12 +460,14 @@
             treats += clickPower;
             totalClicks++;
             updateDisplay();
-            const x = event.changedTouches ? event.changedTouches[0].clientX : event.clientX;
-            const y = event.changedTouches ? event.changedTouches[0].clientY : event.clientY;
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = event.changedTouches ? event.changedTouches[0].clientX - rect.left : event.clientX - rect.left;
+            const y = event.changedTouches ? event.changedTouches[0].clientY - rect.top : event.clientY - rect.top;
             createParticle(x, y);
             checkTasks();
             checkRewards();
             saveGame();
+            resetIdleTimer(); // Сброс таймера неактивности при клике
         }
 
         function createParticle(x, y) {
@@ -425,7 +476,7 @@
             particle.style.left = x + 'px';
             particle.style.top = y + 'px';
             particle.textContent = '+' + clickPower;
-            document.body.appendChild(particle);
+            document.getElementById('particleContainer').appendChild(particle);
 
             particle.animate([
                 { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
@@ -479,7 +530,7 @@
                         <div class="item-cost">Цена: ${item.cost} лакомств</div>
                         <div class="item-owned">Уровень: ${item.owned}</div>
                     </div>
-                    <span class="help-icon" onclick="showTooltip('${item.description}')">?</span>
+                    <span class="help-icon" onclick="showTooltip(event, '${item.description}')">?</span>
                 `;
                 itemElement.onclick = (e) => {
                     if (!e.target.classList.contains('help-icon')) {
@@ -503,10 +554,14 @@
             }
         }
 
-        function showTooltip(text) {
+        function showTooltip(event, text) {
+            event.stopPropagation();
             const tooltip = document.getElementById('tooltip');
             tooltip.textContent = text;
             tooltip.style.display = 'block';
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = rect.bottom + 'px';
             setTimeout(() => {
                 tooltip.style.display = 'none';
             }, 2000);
@@ -682,10 +737,57 @@
             saveGame();
         }
 
+        // Новые функции для реализации автоклика при неактивности
+
+        // Сброс таймера неактивности
+        function resetIdleTimer() {
+            lastActivityTime = Date.now();
+            if (isIdle) {
+                // Если пользователь вернулся после неактивности
+                showIdleEarnings();
+                isIdle = false;
+                clearInterval(idleInterval);
+            }
+        }
+
+        // Проверка неактивности пользователя
+        function checkIdle() {
+            let currentTime = Date.now();
+            if (!isIdle && currentTime - lastActivityTime >= 10000) { // 10 секунд неактивности
+                isIdle = true;
+                idleEarnings = 0;
+                idleInterval = setInterval(() => {
+                    idleEarnings += clickPower;
+                }, 1000); // Начинаем автокликать каждую секунду
+            }
+        }
+
+        // Показать заработок во время неактивности
+        function showIdleEarnings() {
+            if (idleEarnings > 0) {
+                document.getElementById('idleEarningsMessage').textContent = `Вы отдыхали, и ваш верный пёс заработал ${idleEarnings} лакомств за вас!`;
+                document.getElementById('idleModal').style.display = 'flex';
+            }
+        }
+
+        // Сбор заработка во время неактивности
+        function collectIdleEarnings() {
+            treats += idleEarnings;
+            idleEarnings = 0;
+            updateDisplay();
+            saveGame();
+            document.getElementById('idleModal').style.display = 'none';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const clickArea = document.getElementById('clickArea');
             clickArea.addEventListener('click', clickDog);
             clickArea.addEventListener('touchend', clickDog);
+
+            // Отслеживание активности пользователя
+            document.addEventListener('mousemove', resetIdleTimer);
+            document.addEventListener('keypress', resetIdleTimer);
+            document.addEventListener('touchstart', resetIdleTimer);
 
             loadGame();
 
@@ -694,6 +796,9 @@
                 updateDisplay();
                 saveGame();
             }, 1000);
+
+            // Проверка неактивности каждые 5 секунд
+            setInterval(checkIdle, 5000);
         });
     </script>
 </body>
