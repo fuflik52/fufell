@@ -36,14 +36,12 @@
             width: 200px;
             height: 200px;
             margin: 0 auto 1rem;
-            /* Добавляем фоновое изображение для кликов по всей зоне */
             background-image: url('https://api.iconify.design/noto:dog-face.svg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             cursor: pointer;
         }
-        /* Убираем изображение #cookie */
         #cookie {
             display: none;
         }
@@ -256,10 +254,7 @@
     <div class="container">
         <h1>Приключение Корги Кликер</h1>
         <div class="game-container">
-            <div class="orbit-container" id="clickArea">
-                <!-- Удаляем изображение -->
-                <!-- <img id="cookie" src="https://api.iconify.design/noto:dog-face.svg" alt="Corgi"> -->
-            </div>
+            <div class="orbit-container" id="clickArea"></div>
             <div class="stats">
                 <div id="score">Лакомства: 0</div>
                 <div id="cps">В секунду: 0</div>
@@ -357,8 +352,12 @@
             { name: 'Ночь', value: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)' }
         ];
 
+        // Проверка устройства
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const storageKey = isMobile ? 'corgiClickerMobileSave' : 'corgiClickerDesktopSave';
+
         function loadGame() {
-            const savedGame = localStorage.getItem('corgiClickerSave');
+            const savedGame = localStorage.getItem(storageKey);
             if (savedGame) {
                 const gameState = JSON.parse(savedGame);
                 cookies = gameState.cookies;
@@ -388,14 +387,16 @@
                 userCode,
                 backgroundIndex: backgroundColors.findIndex(color => color.value === document.body.style.background)
             };
-            localStorage.setItem('corgiClickerSave', JSON.stringify(gameState));
+            localStorage.setItem(storageKey, JSON.stringify(gameState));
         }
 
         function clickCookie(event) {
             cookies += clickPower;
             totalClicks++;
             updateDisplay();
-            createParticle(event.clientX, event.clientY);
+            const x = event.touches ? event.touches[0].clientX : event.clientX;
+            const y = event.touches ? event.touches[0].clientY : event.clientY;
+            createParticle(x, y);
             checkTasks();
             checkRewards();
             saveGame();
@@ -459,7 +460,7 @@
                     <div class="item-info">
                         <div class="item-name">${getItemName(item.name)}</div>
                         <div class="item-cost">Цена: ${item.cost} лакомств</div>
-                        <div class="item-owned">Level: ${item.owned}</div>
+                        <div class="item-owned">Уровень: ${item.owned}</div>
                     </div>
                     <span class="help-icon" onclick="showTooltip('${item.description}')">?</span>
                 `;
