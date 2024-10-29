@@ -70,6 +70,7 @@
         }
         .button-container {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
             gap: 0.5rem;
             margin-bottom: 1rem;
@@ -101,6 +102,8 @@
         }
         .modal-content {
             padding: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
         .modal-header {
             display: flex;
@@ -128,6 +131,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         .shop-item {
             justify-content: space-between;
@@ -252,6 +256,7 @@
             border-radius: 0.25rem;
             font-size: 1rem;
             text-align: center;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -372,11 +377,12 @@
                 cps = gameState.cps || 0;
                 clickPower = gameState.clickPower || 1;
                 totalClicks = gameState.totalClicks || 0;
-                items = gameState.items || items;
-                tasks = gameState.tasks || tasks;
-                rewards = gameState.rewards || rewards;
+                // Глубокое копирование объектов
+                items = gameState.items ? JSON.parse(JSON.stringify(gameState.items)) : items;
+                tasks = gameState.tasks ? JSON.parse(JSON.stringify(gameState.tasks)) : tasks;
+                rewards = gameState.rewards ? JSON.parse(JSON.stringify(gameState.rewards)) : rewards;
                 userCode = gameState.userCode || generateUserCode();
-                if (gameState.backgroundIndex !== undefined) {
+                if (gameState.backgroundIndex !== undefined && backgroundColors[gameState.backgroundIndex]) {
                     changeBackground(gameState.backgroundIndex);
                 }
                 updateDisplay();
@@ -568,9 +574,9 @@
             const tasksList = document.getElementById('tasksList');
             tasksList.innerHTML = '';
             tasks.forEach(task => {
+                const progress = task.progress / task.requirement;
                 const taskElement = document.createElement('div');
                 taskElement.className = 'task-item';
-                const progress = task.progress / task.requirement;
                 taskElement.innerHTML = `
                     <div class="task-info">
                         <h3>${task.name}</h3>
@@ -677,10 +683,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadGame();
             const clickArea = document.getElementById('clickArea');
             clickArea.addEventListener('click', clickDog);
             clickArea.addEventListener('touchend', clickDog);
+
+            loadGame();
+
             setInterval(() => {
                 treats += cps;
                 updateDisplay();
