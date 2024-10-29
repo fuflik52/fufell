@@ -36,17 +36,16 @@
             width: 200px;
             height: 200px;
             margin: 0 auto 1rem;
-        }
-        #cookie {
-            width: 150px;
-            height: 150px;
+            /* Добавляем фоновое изображение для кликов по всей зоне */
+            background-image: url('https://api.iconify.design/noto:dog-face.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             cursor: pointer;
-            transition: transform 0.2s;
-            filter: drop-shadow(0 0 10px #ffd700);
-            animation: float 3s ease-in-out infinite;
         }
-        #cookie:hover {
-            transform: scale(1.05);
+        /* Убираем изображение #cookie */
+        #cookie {
+            display: none;
         }
         .stats {
             background-color: rgba(0, 0, 0, 0.5);
@@ -257,8 +256,9 @@
     <div class="container">
         <h1>Приключение Корги Кликер</h1>
         <div class="game-container">
-            <div class="orbit-container">
-                <img id="cookie" src="https://api.iconify.design/noto:dog-face.svg" alt="Corgi">
+            <div class="orbit-container" id="clickArea">
+                <!-- Удаляем изображение -->
+                <!-- <img id="cookie" src="https://api.iconify.design/noto:dog-face.svg" alt="Corgi"> -->
             </div>
             <div class="stats">
                 <div id="score">Лакомства: 0</div>
@@ -351,7 +351,7 @@
         let userCode = generateUserCode();
         let backgroundColors = [
             { name: 'Стандартный', value: 'linear-gradient(to bottom, #1a1c2c, #2b2e4a)' },
-            { name: 'Закат', value: 'linear-gradient(to bottom,   #ff7e5f, #feb47b)' },
+            { name: 'Закат', value: 'linear-gradient(to bottom, #ff7e5f, #feb47b)' },
             { name: 'Океан', value: 'linear-gradient(to bottom, #2c3e50, #4ca1af)' },
             { name: 'Лес', value: 'linear-gradient(to bottom, #134e5e, #71b280)' },
             { name: 'Ночь', value: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)' }
@@ -666,7 +666,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadGame();
-            document.getElementById('cookie').addEventListener('click', clickCookie);
+            const clickArea = document.getElementById('clickArea');
+            clickArea.addEventListener('click', clickCookie);
+            clickArea.addEventListener('touchstart', clickCookie);
             setInterval(() => {
                 cookies += cps;
                 updateDisplay();
