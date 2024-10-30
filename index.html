@@ -18,7 +18,7 @@
         }
     </style>
     <style>
-        /* Стили для тела и основных элементов */
+        /* Общие стили */
         body {
             font-family: 'Kosko', sans-serif;
             background: linear-gradient(to bottom, #1a1c2c, #2b2e4a);
@@ -28,7 +28,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             user-select: none;
-            position: relative; /* Добавлено для космического фона */
+            position: relative; /* Для космического фона */
         }
         .container {
             max-width: 100%;
@@ -45,6 +45,40 @@
         .game-container {
             max-width: 320px;
             margin: 0 auto;
+        }
+        /* Стили для системы энергии */
+        .energy-display {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .energy-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 0.5rem;
+        }
+        .energy-bar-container {
+            flex-grow: 1;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-right: 0.5rem;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        .energy-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #00ff00);
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            width: 100%; /* Начальное состояние - полная энергия */
+        }
+        #currentEnergy {
+            min-width: 50px;
+            text-align: right;
+            color: #00ffff;
+            font-weight: bold;
         }
         /* Стили для области клика */
         .orbit-container {
@@ -73,6 +107,7 @@
             text-align: center;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
             position: relative;
+            margin-bottom: 1rem;
         }
         #score {
             font-size: 1.2rem;
@@ -105,27 +140,31 @@
             transition: width 0.3s ease-in-out;
             width: 0%;
         }
+        /* Стили для кнопок */
         .button-container {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
         .game-button {
-            font-family: 'Kosko', sans-serif;
-            font-size: 0.7rem;
-            padding: 0.5rem;
-            background-color: #4a4a5a;
+            background: none;
             border: none;
-            border-radius: 0.25rem;
-            color: white;
+            padding: 0;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: transform 0.2s;
+            position: relative;
         }
-        .game-button:hover {
-            background-color: #5a5a6a;
+        .game-button img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
         }
+        .game-button:hover img {
+            transform: scale(1.1);
+        }
+        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
@@ -169,9 +208,10 @@
             align-items: center;
             gap: 0.5rem;
             flex-wrap: wrap;
+            position: relative; /* Для бейджа */
         }
-        .shop-item, .wardrobe-item {
-            justify-content: space-between;
+        .shop-item.energy-upgrade {
+            border-color: green;
         }
         .shop-item img, .wardrobe-item img {
             width: 2rem;
@@ -195,6 +235,16 @@
             font-size: 1rem;
             margin-left: 0.5rem;
         }
+        .new-badge {
+            background-color: green;
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
         .tooltip {
             position: absolute;
             background-color: rgba(0, 0, 0, 0.8);
@@ -207,8 +257,6 @@
             text-align: center;
             max-width: 200px;
             font-family: 'Kosko', sans-serif;
-            /* Текст по центру */
-            text-align: center;
         }
         .task-progress, .reward-progress {
             width: 100%;
@@ -216,7 +264,6 @@
             background-color: #4a4a5a;
             border-radius: 0.25rem;
             margin-top: 0.25rem;
-            overflow: hidden;
         }
         .task-progress-bar, .reward-progress-bar {
             height: 100%;
@@ -296,7 +343,7 @@
             text-align: center;
             word-break: break-all;
         }
-        /* Добавим стиль для модального окна уведомления о передаче */
+        /* Модальное окно передачи */
         #transferModal {
             position: fixed;
             top: 0;
@@ -344,7 +391,7 @@
             font-size: 1rem;
             color: black;
         }
-        /* Добавим стиль для модального окна уведомления */
+        /* Модальное окно уведомления */
         #idleModal {
             position: fixed;
             top: 0;
@@ -415,6 +462,7 @@
             cursor: pointer;
             font-family: 'Kosko', sans-serif;
             font-size: 0.7rem;
+            margin: 0.25rem;
         }
         .case-button.sell {
             background-color: #e74c3c;
@@ -464,7 +512,7 @@
             font-size: 2rem;
             color: #ffd700;
         }
-        /* Стили для всплывающих уведомлений */
+        /* Всплывающие уведомления */
         .notification {
             position: fixed;
             bottom: 1rem;
@@ -492,7 +540,7 @@
             90% { opacity: 1; }
             100% { opacity: 0; }
         }
-        /* Стили для космического фона */
+        /* Космический фон */
         .stars, .nebula, .cosmic-dust, .vignette {
             position: fixed;
             width: 100%;
@@ -510,6 +558,7 @@
                         radial-gradient(2px 2px at 300px 200px, #fff, rgba(0,0,0,0));
             background-size: 400px 400px;
             animation: movingStars 60s linear infinite;
+            display: none; /* По умолчанию скрыто */
         }
         @keyframes movingStars {
             from {
@@ -525,6 +574,7 @@
                 radial-gradient(circle at 70% 70%, rgba(255, 0, 221, 0.2) 0%, transparent 40%),
                 radial-gradient(circle at 30% 70%, rgba(0, 217, 255, 0.2) 0%, transparent 40%);
             filter: blur(30px);
+            display: none; /* По умолчанию скрыто */
         }
         .cosmic-dust {
             background-image: 
@@ -532,6 +582,7 @@
                 radial-gradient(1px 1px at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 100%),
                 radial-gradient(2px 2px at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
             animation: rotateDust 120s linear infinite;
+            display: none; /* По умолчанию скрыто */
         }
         @keyframes rotateDust {
             from {
@@ -543,6 +594,7 @@
         }
         .vignette {
             background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.8) 100%);
+            display: none; /* По умолчанию скрыто */
         }
         /* Медиазапросы для мобильной версии */
         @media (max-width: 600px) {
@@ -554,14 +606,30 @@
                 height: 150px;
             }
             .button-container {
-                flex-direction: column;
-                align-items: center;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
             }
-            .game-button {
-                width: 90%;
+            .game-button img {
+                width: 50px;
+                height: 50px;
             }
             .case-wheel-container {
                 width: 100%;
+            }
+            .energy-display {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%; /* Добавлено */
+            }
+            .energy-bar-container {
+                width: 100%; /* Добавлено */
+                margin-right: 0; /* Убрано */
+                margin-bottom: 0.5rem; /* Добавлено */
+            }
+            #currentEnergy {
+                align-self: flex-end;
             }
         }
     </style>
@@ -571,12 +639,22 @@
     <div class="container">
         <h1>Приключение Собаки Кликер</h1>
         <div class="game-container">
+            <!-- Система энергии -->
+            <div class="energy-display">
+                <img src="https://i.postimg.cc/kgzTvPSr/energy.png" alt="Energy" class="energy-icon">
+                <div class="energy-bar-container">
+                    <div class="energy-bar" id="energyBar"></div>
+                </div>
+                <span id="currentEnergy">1000</span>
+            </div>
+            <!-- Область клика -->
             <div class="orbit-container">
                 <div id="clickArea">
-                    <!-- Добавим контейнер для частиц поверх изображения собаки -->
+                    <!-- Контейнер для частиц -->
                     <div id="particleContainer" style="position: relative; width: 100%; height: 100%;"></div>
                 </div>
             </div>
+            <!-- Статистика -->
             <div class="stats">
                 <div id="score">Лакомства: 0</div>
                 <div id="cps">В секунду: 0</div>
@@ -585,12 +663,23 @@
                     <div class="level-progress-bar" id="levelProgressBar"></div>
                 </div>
             </div>
+            <!-- Кнопки -->
             <div class="button-container">
-                <button class="game-button" onclick="openModal('shop')">🏪 Магазин</button>
-                <button class="game-button" onclick="openModal('wardrobe')">👗 Гардероб</button>
-                <button class="game-button" onclick="openModal('rewards')">🏆 Награды</button>
-                <button class="game-button" onclick="openModal('tasks')">📋 Задания</button>
-                <button class="game-button" onclick="openModal('transfer')">💸 Передача</button>
+                <button class="game-button" onclick="openModal('shop')">
+                    <img src="https://i.postimg.cc/3dvCcWvs/shop.png" alt="Магазин">
+                </button>
+                <button class="game-button" onclick="openModal('wardrobe')">
+                    <img src="https://i.postimg.cc/TKjjTSQQ/wardrobe.png" alt="Гардероб">
+                </button>
+                <button class="game-button" onclick="openModal('rewards')">
+                    <img src="https://i.postimg.cc/hhw1sVf8/rewards.png" alt="Награды">
+                </button>
+                <button class="game-button" onclick="openModal('tasks')">
+                    <img src="https://i.postimg.cc/jDYQ0K6L/tasks.png" alt="Задания">
+                </button>
+                <button class="game-button" onclick="openModal('transfer')">
+                    💸
+                </button>
             </div>
         </div>
     </div>
@@ -733,14 +822,75 @@
         let experience = 0;
         let experienceToNextLevel = 100;
 
+        let maxEnergy = 1000; // Максимальная энергия
+        let currentEnergy = 1000; // Текущая энергия
+
         let items = [
-            { name: 'paw', cost: 10, clickPower: 1, owned: 0, description: "Увеличивает силу клика на 1", icon: 'https://api.iconify.design/noto:paw-prints.svg?inline=false' },
-            { name: 'puppy', cost: 15, cps: 0.1, owned: 0, description: "Производит 0.1 лакомств в секунду", icon: 'https://api.iconify.design/noto:dog-face.svg?inline=false' },
-            { name: 'bowl', cost: 100, cps: 1, owned: 0, description: "Производит 1 лакомство в секунду", icon: 'https://api.iconify.design/noto:bowl-with-spoon.svg?inline=false' },
-            { name: 'toy', cost: 500, cps: 5, owned: 0, description: "Производит 5 лакомств в секунду", icon: 'https://api.iconify.design/emojione:teddy-bear.svg?inline=false' },
-            { name: 'bed', cost: 1000, cps: 10, owned: 0, description: "Производит 10 лакомств в секунду", icon: 'https://api.iconify.design/emojione:sleeping-face.svg?inline=false' },
-            { name: 'house', cost: 5000, cps: 50, owned: 0, description: "Производит 50 лакомств в секунду", icon: 'https://api.iconify.design/emojione:house.svg?inline=false' },
-            { name: 'park', cost: 20000, cps: 200, owned: 0, description: "Производит 200 лакомств в секунду", icon: 'https://api.iconify.design/noto:park.svg?inline=false' }
+            // Новый товар для улучшения энергии как первый элемент
+            { 
+                name: 'energy_upgrade', 
+                cost: 500, 
+                owned: 0, 
+                description: "Увеличивает максимальную энергию на 500", 
+                icon: 'https://i.postimg.cc/kgzTvPSr/energy.png', 
+                isNew: true 
+            },
+            { 
+                name: 'paw', 
+                cost: 10, 
+                clickPower: 1, 
+                owned: 0, 
+                description: "Увеличивает силу клика на 1", 
+                icon: 'https://api.iconify.design/noto:paw-prints.svg?inline=false' 
+            },
+            { 
+                name: 'puppy', 
+                cost: 15, 
+                cps: 0.1, 
+                owned: 0, 
+                description: "Производит 0.1 лакомств в секунду", 
+                icon: 'https://api.iconify.design/noto:dog-face.svg?inline=false' 
+            },
+            { 
+                name: 'bowl', 
+                cost: 100, 
+                cps: 1, 
+                owned: 0, 
+                description: "Производит 1 лакомство в секунду", 
+                icon: 'https://api.iconify.design/noto:bowl-with-spoon.svg?inline=false' 
+            },
+            { 
+                name: 'toy', 
+                cost: 500, 
+                cps: 5, 
+                owned: 0, 
+                description: "Производит 5 лакомств в секунду", 
+                icon: 'https://api.iconify.design/emojione:teddy-bear.svg?inline=false' 
+            },
+            { 
+                name: 'bed', 
+                cost: 1000, 
+                cps: 10, 
+                owned: 0, 
+                description: "Производит 10 лакомств в секунду", 
+                icon: 'https://api.iconify.design/emojione:sleeping-face.svg?inline=false' 
+            },
+            { 
+                name: 'house', 
+                cost: 5000, 
+                cps: 50, 
+                owned: 0, 
+                description: "Производит 50 лакомств в секунду", 
+                icon: 'https://api.iconify.design/emojione:house.svg?inline=false' 
+            },
+            { 
+                name: 'park', 
+                cost: 20000, 
+                cps: 200, 
+                owned: 0, 
+                description: "Производит 200 лакомств в секунду", 
+                icon: 'https://api.iconify.design/noto:park.svg?inline=false' 
+            }
         ];
 
         let tasks = [
@@ -801,6 +951,8 @@
                     level: 1,
                     experience: 0,
                     experienceToNextLevel: 100,
+                    maxEnergy: 1000,
+                    currentEnergy: 1000,
                     items: JSON.parse(JSON.stringify(items)),
                     tasks: JSON.parse(JSON.stringify(tasks)),
                     rewards: JSON.parse(JSON.stringify(rewards)),
@@ -828,6 +980,8 @@
             level = gameState.level || 1;
             experience = gameState.experience || 0;
             experienceToNextLevel = gameState.experienceToNextLevel || 100;
+            maxEnergy = gameState.maxEnergy || 1000;
+            currentEnergy = Math.min(gameState.currentEnergy || 1000, maxEnergy);
             items = gameState.items ? JSON.parse(JSON.stringify(gameState.items)) : items;
             tasks = gameState.tasks ? JSON.parse(JSON.stringify(gameState.tasks)) : tasks;
             rewards = gameState.rewards ? JSON.parse(JSON.stringify(gameState.rewards)) : rewards;
@@ -877,6 +1031,8 @@
                 level,
                 experience,
                 experienceToNextLevel,
+                maxEnergy,
+                currentEnergy,
                 items,
                 tasks,
                 rewards,
@@ -891,6 +1047,11 @@
 
         function clickDog(event) {
             event.preventDefault();
+            if (currentEnergy < clickPower) {
+                showNotification('Недостаточно энергии для клика!', 'error');
+                return;
+            }
+            currentEnergy -= clickPower;
             treats += clickPower;
             totalClicks++;
             manualClicks++; // Учитываем только ручные клики
@@ -905,6 +1066,11 @@
             saveGame();
             animateDog();
             lastActivityTime = Date.now(); // Обновляем время последней активности
+
+            // Добавляем вибрацию для мобильных устройств
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
 
         function animateDog() {
@@ -944,6 +1110,8 @@
             document.getElementById('level').textContent = 'Уровень: ' + level;
             const progressPercentage = (experience / experienceToNextLevel) * 100;
             document.getElementById('levelProgressBar').style.width = progressPercentage + '%';
+            document.getElementById('currentEnergy').textContent = Math.floor(currentEnergy);
+            document.getElementById('energyBar').style.width = (currentEnergy / maxEnergy) * 100 + '%';
         }
 
         function gainExperience(amount) {
@@ -996,6 +1164,9 @@
             items.forEach((item, index) => {
                 const itemElement = document.createElement('div');
                 itemElement.className = 'shop-item';
+                if (item.name === 'energy_upgrade') {
+                    itemElement.classList.add('energy-upgrade');
+                }
                 itemElement.innerHTML = `
                     <img src="${item.icon}" alt="${item.name}">
                     <div class="item-info">
@@ -1005,6 +1176,12 @@
                     </div>
                     <span class="help-icon" onclick="showTooltip(event, '${item.description}')">?</span>
                 `;
+                if (item.isNew) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'new-badge';
+                    newBadge.textContent = 'New';
+                    itemElement.appendChild(newBadge);
+                }
                 itemElement.onclick = (e) => {
                     if (!e.target.classList.contains('help-icon')) {
                         purchaseItem(index);
@@ -1023,6 +1200,7 @@
                 case 'bed': return 'Лежанка';
                 case 'house': return 'Домик';
                 case 'park': return 'Парк';
+                case 'energy_upgrade': return 'Улучшение Энергии';
                 default: return itemName;
             }
         }
@@ -1046,14 +1224,26 @@
             if (treats >= item.cost) {
                 treats -= item.cost;
                 item.owned++;
-                if (item.name !== 'paw') { // "Волшебная Лапа" не увеличивает CPS и не дает опыт
+                if (item.name === 'energy_upgrade') {
+                    maxEnergy += 500;
+                    currentEnergy = Math.min(currentEnergy + 500, maxEnergy); // Увеличиваем текущую энергию до нового максимума
+                    // Убрать флаг 'isNew' после первой покупки
+                    if (item.isNew) {
+                        item.isNew = false;
+                    }
+                } else if (item.name !== 'paw') { // "Волшебная Лапа" не увеличивает CPS и не дает опыт
                     if (item.cps) {
                         cps += item.cps;
                     }
                 } else {
                     clickPower += item.clickPower;
                 }
-                item.cost = Math.ceil(item.cost * 1.15);
+                // Увеличение стоимости товара после покупки
+                if (item.name !== 'energy_upgrade') {
+                    item.cost = Math.ceil(item.cost * 1.15);
+                } else {
+                    item.cost = Math.ceil(item.cost * 1.2); // Можно увеличить быстрее для energy_upgrade
+                }
                 updateDisplay();
                 updateShop();
                 checkTasks();
@@ -1107,7 +1297,7 @@
             casesSection.innerHTML = `
                 <div class="case-container">
                     <p>Кейсы позволяют получить уникальные призы!</p>
-                    <button class="claim-button" onclick="openModal('cases')">Перейти к кейсам</button>
+                    <button class="case-button" onclick="openModal('cases')">Перейти к кейсам</button>
                 </div>
             `;
 
@@ -1612,6 +1802,15 @@
 
             loadGame();
 
+            // Интервал для пополнения энергии
+            setInterval(() => {
+                if (currentEnergy < maxEnergy) {
+                    currentEnergy += 1;
+                    updateDisplay();
+                    saveGame();
+                }
+            }, 300); // 0.3 секунды
+
             setInterval(() => {
                 treats += cps;
                 updateDisplay();
@@ -1697,6 +1896,12 @@
                 lastActivityTime = Date.now();
             }, 5000);
         }
+
+        // Функция для пополнения энергии
+        // Теперь энергия пополняется постоянно независимо от кликов
+        // Реализована через отдельный интервал выше (setInterval в DOMContentLoaded)
+        // Каждые 0.3 секунды проверяем и пополняем энергию до максимума
+
     </script>
 </body>
 </html>
