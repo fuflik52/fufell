@@ -2023,6 +2023,38 @@
         // Теперь энергия пополняется 5 за 0.3 секунды
         // Реализована через отдельный интервал выше (setInterval в DOMContentLoaded)
 
+
+function generateUserReport() {
+    const users = JSON.parse(localStorage.getItem('users')) || {};
+
+    let reportContent = '';
+    for (const [code, user] of Object.entries(users)) {
+        reportContent += `Код пользователя: ${code}\n`;
+        reportContent += `Лакомства: ${user.treats}\n`;
+        reportContent += `Уровень: ${user.level}\n`;
+        reportContent += `Опыт: ${user.experience} / ${user.experienceToNextLevel}\n`;
+        reportContent += `Максимальная энергия: ${user.maxEnergy}\n`;
+        reportContent += `Текущая энергия: ${user.currentEnergy}\n`;
+        reportContent += `Предметы:\n`;
+        user.items.forEach((item) => {
+            reportContent += `  - ${item.name}: Уровень ${item.owned}, Стоимость: ${item.cost}\n`;
+        });
+        reportContent += `\n`;
+    }
+
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'user_report.txt';
+    link.click();
+}
+
+// Устанавливаем таймер для автоматического обновления данных пользователей каждую секунду
+setInterval(generateUserReport, 1000);
+
+
+
+        
     </script>
 </body>
 </html>
