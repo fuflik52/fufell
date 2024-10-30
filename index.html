@@ -2023,59 +2023,6 @@
         // Теперь энергия пополняется 5 за 0.3 секунды
         // Реализована через отдельный интервал выше (setInterval в DOMContentLoaded)
 
-
-function generateUserReport() {
-    const users = {
-        "USER123": {
-            treats: 1000,
-            level: 5,
-            experience: 250,
-            experienceToNextLevel: 500,
-            maxEnergy: 1000,
-            currentEnergy: 800,
-            items: [
-                { name: "paw", owned: 1, cost: 10 },
-                { name: "toy", owned: 2, cost: 500 },
-            ]
-        },
-        "USER456": {
-            treats: 1500,
-            level: 10,
-            experience: 500,
-            experienceToNextLevel: 1000,
-            maxEnergy: 1200,
-            currentEnergy: 900,
-            items: [
-                { name: "house", owned: 1, cost: 5000 },
-            ]
-        }
-    };
-
-    let reportContent = '';
-    for (const [code, user] of Object.entries(users)) {
-        reportContent += `User Code: ${code}\n`;
-        reportContent += `Treats: ${user.treats}\n`;
-        reportContent += `Level: ${user.level}\n`;
-        reportContent += `Experience: ${user.experience} / ${user.experienceToNextLevel}\n`;
-        reportContent += `Max Energy: ${user.maxEnergy}\n`;
-        reportContent += `Current Energy: ${user.currentEnergy}\n`;
-        reportContent += `Items:\n`;
-        user.items.forEach(item => {
-            reportContent += `  - ${item.name}: Level ${item.owned}, Cost: ${item.cost}\n`;
-        });
-        reportContent += '\n';
-    }
-
-    const blob = new Blob([reportContent], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'UsersClicker.txt';
-    link.click();
-}
-
-
-generateUserReport();
-
         
     </script>
 </body>
