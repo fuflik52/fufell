@@ -533,6 +533,103 @@ let clickPower = 1;
 let level = 1;
 let clicks = 0;
 let purchasedPremiumItems = [];
+const buildings = [
+    {
+        id: 1,
+        name: "Жуткий дом",
+        icon: "🏚️",
+        baseIncome: 1,
+        baseCost: 10,
+        multiplier: 1.1
+    },
+    {
+        id: 2,
+        name: "Лавка ведьмы",
+        icon: "🧙‍♀️",
+        baseIncome: 4,
+        baseCost: 50,
+        multiplier: 1.15
+    },
+    {
+        id: 3,
+        name: "Башня призраков",
+        icon: "👻",
+        baseIncome: 10,
+        baseCost: 200,
+        multiplier: 1.2
+    },
+    {
+        id: 4,
+        name: "Фабрика монстров",
+        icon: "👹",
+        baseIncome: 40,
+        baseCost: 1000,
+        multiplier: 1.25
+    },
+    {
+        id: 5,
+        name: "Портал Теней",
+        icon: "🌀",
+        baseIncome: 100,
+        baseCost: 5000,
+        multiplier: 1.3,
+        elite: true,
+        isNew: true
+    },
+    {
+        id: 6,
+        name: "Замок Вампиров",
+        icon: "🏰",
+        baseIncome: 250,
+        baseCost: 25000,
+        multiplier: 1.35,
+        elite: true,
+        isNew: true
+    },
+    {
+        id: 7,
+        name: "Некрополис",
+        icon: "💀",
+        baseIncome: 1000,
+        baseCost: 100000,
+        multiplier: 1.4,
+        elite: true,
+        isNew: true
+    },
+    {
+        id: 8,
+        name: "Космодром",
+        icon: "🚀",
+        baseIncome: 50000,
+        baseCost: 100000000,
+        multiplier: 1.5,
+        elite: true,
+        isNew: true
+    },
+    {
+        id: 9,
+        name: "Космическая станция",
+        icon: "🛰️",
+        baseIncome: 50000,
+        baseCost: 100000000,
+        multiplier: 1.5,
+        elite: true,
+        isNew: true
+    }
+];
+
+const quests = [
+    { id: 1, name: "Начинающий кликер", description: "Кликни 1000 раз", progress: 0, goal: 1000 },
+    { id: 2, name: "Коллекционер тыкв", description: "Собери 10000 тыкв", progress: 0, goal: 10000 },
+    { id: 3, name: "Строитель города", description: "Построй 10 зданий", progress: 0, goal: 10 },
+    { id: 4, name: "Магнат", description: "Заработай 1000000 тыкв", progress: 0, goal: 1000000 },
+    { id: 5, name: "Элитный застройщик", description: "Построй 3 элитных здания", progress: 0, goal: 3 },
+    { id: 6, name: "Модник", description: "Купи 5 предметов гардероба", progress: 0, goal: 5 },
+    { id: 7, name: "Премиум игрок", description: "Купи премиум предмет", progress: 0, goal: 1 },
+    { id: 8, name: "Максималист", description: "Улучши здание до 10 уровня", progress: 0, goal: 10 },
+    { id: 9, name: "Halloween King", description: "Заработай 10000000 тыкв", progress: 0, goal: 10000000 },
+    { id: 10, name: "Властелин города", description: "Построй все здания", progress: 0, goal: buildings.length }
+];
 
 let purchasedWardrobeItems = {
     colors: [],
@@ -647,7 +744,6 @@ function purchaseShopItem(itemId) {
         
         if (item.id === 'paw') {
             clickPower += item.income;    
-            document.querySelector('.dog circle').setAttribute('fill', item.color);
         } else if (item.id === 'energy') {
             // Handle energy increase
         } else {
@@ -708,96 +804,6 @@ function showCategory(category) {
         categoryButtons[1].classList.add('active');
     }
 }
-
-const buildings = [
-    {
-        id: 1,
-        name: "Жуткий дом",
-        icon: "🏚️",
-        baseIncome: 1,
-        baseCost: 10,
-        multiplier: 1.1
-    },
-    {
-        id: 2,
-        name: "Лавка ведьмы",
-        icon: "🧙‍♀️",
-        baseIncome: 4,
-        baseCost: 50,
-        multiplier: 1.15
-    },
-    {
-        id: 3,
-        name: "Башня призраков",
-        icon: "👻",
-        baseIncome: 10,
-        baseCost: 200,
-        multiplier: 1.2
-    },
-    {
-        id: 4,
-        name: "Фабрика монстров",
-        icon: "👹",
-        baseIncome: 40,
-        baseCost: 1000,
-        multiplier: 1.25
-    },
-    {
-        id: 8,
-        name: "Космодром",
-        icon: "🚀",
-        baseIncome: 50000,
-        baseCost: 100000000,
-        multiplier: 1.5,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 9,
-        name: "Космическая станция",
-        icon: "🛰️",
-        baseIncome: 50000,
-        baseCost: 100000000,
-        multiplier: 1.5,
-        elite: true,
-        isNew: true
-    }
-];
-
-const eliteBuildings = [
-    {
-        id: 5,
-        name: "Портал Теней",
-        icon: "🌀",
-        baseIncome: 100,
-        baseCost: 5000,
-        multiplier: 1.3,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 6,
-        name: "Замок Вампиров",
-        icon: "🏰",
-        baseIncome: 250,
-        baseCost: 25000,
-        multiplier: 1.35,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 7,
-        name: "Некрополис",
-        icon: "💀",
-        baseIncome: 1000,
-        baseCost: 100000,
-        multiplier: 1.4,
-        elite: true,
-        isNew: true
-    }
-];
-
-buildings.push(...eliteBuildings);
 
 let gameState = {
     money: 0,
@@ -955,7 +961,17 @@ function closeQuests() {
 }
 
 function generateQuests() {
-    const quests = updateQuestProgress();
+    quests[0].progress = clicks;
+    quests[1].progress = treats;
+    quests[2].progress = Object.keys(gameState.buildings).length;
+    quests[3].progress = treats;
+    quests[4].progress = Object.values(gameState.buildings).filter(b => b.elite).length;
+    quests[5].progress = Object.values(purchasedWardrobeItems).flat().length;
+    quests[6].progress = purchasedPremiumItems.length;
+    quests[7].progress = Math.max(...Object.values(gameState.buildings).map(b => b.level || 0));
+    quests[8].progress = treats;
+    quests[9].progress = Object.keys(gameState.buildings).length;
+    
     return quests.map(quest => `
         <div class="quest">
             <h3>${quest.name}</h3>
@@ -969,21 +985,18 @@ function generateQuests() {
 }
 
 function updateQuestProgress() {
-    const quests = [
-        { id: 1, name: "Начинающий кликер", progress: clicks },
-        { id: 2, name: "Коллекционер тыкв", progress: treats },
-        { id: 3, name: "Строитель города", progress: Object.keys(gameState.buildings).length },
-        { id: 4, name: "Магнат", progress: treats },
-        { id: 5, name: "Элитный застройщик", progress: Object.values(gameState.buildings).filter(b => b.elite).length },
-        { id: 6, name: "Модник", progress: Object.values(purchasedWardrobeItems).flat().length },
-        { id: 7, name: "Премиум игрок", progress: purchasedPremiumItems.length },
-        { id: 8, name: "Максималист", progress: Math.max(...Object.values(gameState.buildings).map(b => b.level)) },
-        { id: 9, name: "Halloween King", progress: treats },
-        { id: 10, name: "Властелин города", progress: Object.keys(gameState.buildings).length }
-    ];
+    quests[0].progress = clicks;
+    quests[1].progress = treats;
+    quests[2].progress = Object.keys(gameState.buildings).length;
+    quests[3].progress = treats;
+    quests[4].progress = Object.values(gameState.buildings).filter(b => b.elite).length;
+    quests[5].progress = Object.values(purchasedWardrobeItems).flat().length;
+    quests[6].progress = purchasedPremiumItems.length;
+    quests[7].progress = Math.max(...Object.values(gameState.buildings).map(b => b.level || 0));
+    quests[8].progress = treats;
+    quests[9].progress = Object.keys(gameState.buildings).length;
     
     localStorage.setItem('questProgress', JSON.stringify(quests));
-    return quests;
 }
 
 function openWardrobe() {
