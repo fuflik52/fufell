@@ -1,15 +1,5 @@
 <html><head><base href="https://example.com" />
 <title>Spooky Puppy Clicker</title>
-
-
-  @media (max-width: 768px) {
-      body {
-          background-color: lightblue;
-      }
-  }
-  
-
-    
 <style>
 body {
     background-color: #1a0f2e;
@@ -446,6 +436,34 @@ body {
     border: 2px solid #ff6b1a;
 }
 
+.energy-bar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 200px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #2ecc71;
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.energy-fill {
+    height: 100%;
+    background: #2ecc71;
+    transition: width 0.3s;
+}
+
+.energy-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    line-height: 20px;
+}
+
 @media (max-width: 768px) {
     #wardrobeContainer {
         width: 95vw;
@@ -460,8 +478,9 @@ body {
         flex-direction: column;
     }
     
-    .menu-button {
+    .menu-button, .claim-button, .category-button, .close-button {
         width: 100%;
+        margin: 5px 0;
     }
 }
 
@@ -469,10 +488,32 @@ body {
     border: 2px solid #4CAF50;
     background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(76,175,80,0.2));
 }
+
+#shopContainer {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a0f2e;
+    border: 2px solid #ff6b1a;
+    border-radius: 15px;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1000;
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="energy-bar">
+        <div class="energy-fill"></div>
+        <div class="energy-text">100/100</div>
+    </div>
+
     <div class="dog-container" onclick="clickDog()">
         <svg class="dog" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" fill="#ff6b1a"/>
@@ -490,6 +531,7 @@ body {
         <div>В секунду: <span id="perSecond">0.0</span></div>
         <div>Уровень: <span id="level">1</span></div>
         <div>Неоплаченные: <span id="unclaimed">0</span></div>
+        <div>Энергия: <span id="energy">100</span>/<span>100</span></div>
     </div>
 
     <div class="menu-buttons">
@@ -500,14 +542,79 @@ body {
         <button class="menu-button" onclick="openTown()">Город</button>
     </div>
 
-    <div id="shopContainer">
+    <div id="shopContainer" style="display: none;">
         <div class="shop-categories">
             <button class="category-button active" onclick="showCategory('regular')">Обычные предметы</button>
             <button class="category-button" onclick="showCategory('premium')">Премиум предметы</button>
         </div>
         <div class="items-container">
             <div id="regularItems" class="category-section">
-                ${generateRegularItems()}
+                <div class="item">
+                    <div class="item-info">
+                        <div class="icon">🎃</div>
+                        <div>
+                            <h3 class="title">Маленькая тыква</h3>
+                            <p class="details">Цена: 100 тыкв</p>
+                            <p class="details">Бонус: +1 к клику</p>
+                        </div>
+                    </div>
+                    <button class="menu-button" onclick="purchaseItem('treat1')">Купить</button>
+                </div>
+                <div class="item">
+                    <div class="item-info">
+                        <div class="icon">🎃</div>
+                        <div>
+                            <h3 class="title">Большая тыква</h3>
+                            <p class="details">Цена: 500 тыкв</p>
+                            <p class="details">Бонус: +5 к клику</p>
+                        </div>
+                    </div>
+                    <button class="menu-button" onclick="purchaseItem('treat2')">Купить</button>
+                </div>
+                <div class="item">
+                    <div class="item-info">
+                        <div class="icon">🎃</div>
+                        <div>
+                            <h3 class="title">Золотая тыква</h3>
+                            <p class="details">Цена: 2000 тыкв</p>
+                            <p class="details">Бонус: +25 к клику</p>
+                        </div>
+                    </div>
+                    <button class="menu-button" onclick="purchaseItem('treat3')">Купить</button>
+                </div>
+                <div class="item">
+                    <div class="item-info">
+                        <div class="icon">⚡</div>
+                        <div>
+                            <h3 class="title">Энергетический напиток</h3>
+                            <p class="details">Цена: 1000 тыкв</p>
+                            <p class="details">Бонус: +50 энергии</p>
+                        </div>
+                    </div>
+                    <button class="menu-button" onclick="purchaseItem('energyBoost')">Купить</button>
+                </div>
+                <div class="item">
+                    <div class="item-info">
+                        <div class="icon">🤖</div>
+                        <div>
+                            <h3 class="title">Автокликер</h3>
+                            <p class="details">Цена: 5000 тыкв</p>
+                            <p class="details">Бонус: +2 к клику</p>
+                        </div>
+                    </div>
+                    <button class="menu-button" onclick="purchaseItem('autoClicker')">Купить</button>
+                </div>
+                <div class="item">
+                    <div class="item-info">
+                        <div class="icon">🍀</div>
+                        <div>
+                            <h3 class="title">Счастливый амулет</h3>
+                            <p class="details">Цена: 3000 тыкв</p>
+                            <p class="details">Бонус: +15 к клику</p>
+                        </div>
+                    </div>
+                    <button class="menu-button" onclick="purchaseItem('luckyCharm')">Купить</button>
+                </div>
             </div>
             <div id="premiumItems" class="category-section" style="display:none">
                 ${generatePremiumItems()}
@@ -517,6 +624,7 @@ body {
     </div>
 
     <div id="wardrobeContainer">
+        <button class="close-button" onclick="closeWardrobe()">Закрыть</button>
         <div class="wardrobe-tabs">
             <button onclick="showWardrobeTab('colors')">Цвет Мячика</button>
             <button onclick="showWardrobeTab('backgrounds')">Фоны</button>
@@ -534,382 +642,217 @@ body {
         </div>
         <div class="city" id="city"></div>
         <div class="notification" id="notification"></div>
+        <div class="city" id="city"></div>
     </div>
 
 <script>
-let treats = 0;
-let perSecond = 0; 
-let clickPower = 1;
-let level = 1;
-let clicks = 0;
-let purchasedPremiumItems = [];
-const buildings = [
-    {
-        id: 1,
-        name: "Жуткий дом",
-        icon: "🏚️",
-        baseIncome: 1,
-        baseCost: 10,
-        multiplier: 1.1
-    },
-    {
-        id: 2,
-        name: "Лавка ведьмы",
-        icon: "🧙‍♀️",
-        baseIncome: 4,
-        baseCost: 50,
-        multiplier: 1.15
-    },
-    {
-        id: 3,
-        name: "Башня призраков",
-        icon: "👻",
-        baseIncome: 10,
-        baseCost: 200,
-        multiplier: 1.2
-    },
-    {
-        id: 4,
-        name: "Фабрика монстров",
-        icon: "👹",
-        baseIncome: 40,
-        baseCost: 1000,
-        multiplier: 1.25
-    },
-    {
-        id: 5,
-        name: "Портал Теней",
-        icon: "🌀",
-        baseIncome: 100,
-        baseCost: 5000,
-        multiplier: 1.3,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 6,
-        name: "Замок Вампиров",
-        icon: "🏰",
-        baseIncome: 250,
-        baseCost: 25000,
-        multiplier: 1.35,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 7,
-        name: "Некрополис",
-        icon: "💀",
-        baseIncome: 1000,
-        baseCost: 100000,
-        multiplier: 1.4,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 8,
-        name: "Космодром",
-        icon: "🚀",
-        baseIncome: 50000,
-        baseCost: 100000000,
-        multiplier: 1.5,
-        elite: true,
-        isNew: true
-    },
-    {
-        id: 9,
-        name: "Космическая станция",
-        icon: "🛰️",
-        baseIncome: 50000,
-        baseCost: 100000000,
-        multiplier: 1.5,
-        elite: true,
-        isNew: true
+function clickDog() {
+    if (energy.current >= energy.clickCost) {
+        energy.current -= energy.clickCost;
+        energy.spent += energy.clickCost;
+        treats += clickPower;
+        clicks++;
+        updateQuestProgress('clicks', 1);
+        updateDisplay();
+        saveGame();
+        
+        // Create and animate floating number
+        const dogContainer = document.querySelector('.dog-container');
+        const floatingNumber = document.createElement('div');
+        floatingNumber.textContent = `+${clickPower}`;
+        floatingNumber.style.position = 'absolute';
+        floatingNumber.style.left = '50%';
+        floatingNumber.style.transform = 'translateX(-50%)';
+        floatingNumber.style.animation = 'float 1s ease-out';
+        floatingNumber.style.color = '#ff6b1a';
+        floatingNumber.style.fontSize = '20px';
+        floatingNumber.style.pointerEvents = 'none';
+        dogContainer.appendChild(floatingNumber);
+        
+        // Remove the element after animation
+        setTimeout(() => {
+            floatingNumber.remove();
+        }, 1000);
+    } else {
+        showNotification('Недостаточно энергии!');
     }
-];
-
-const quests = [
-    { id: 1, name: "Начинающий кликер", description: "Кликни 1000 раз", progress: 0, goal: 1000 },
-    { id: 2, name: "Коллекционер тыкв", description: "Собери 10000 тыкв", progress: 0, goal: 10000 },
-    { id: 3, name: "Строитель города", description: "Построй 10 зданий", progress: 0, goal: 10 },
-    { id: 4, name: "Магнат", description: "Заработай 1000000 тыкв", progress: 0, goal: 1000000 },
-    { id: 5, name: "Элитный застройщик", description: "Построй 3 элитных здания", progress: 0, goal: 3 },
-    { id: 6, name: "Модник", description: "Купи 5 предметов гардероба", progress: 0, goal: 5 },
-    { id: 7, name: "Премиум игрок", description: "Купи премиум предмет", progress: 0, goal: 1 },
-    { id: 8, name: "Максималист", description: "Улучши здание до 10 уровня", progress: 0, goal: 10 },
-    { id: 9, name: "Halloween King", description: "Заработай 10000000 тыкв", progress: 0, goal: 10000000 },
-    { id: 10, name: "Властелин города", description: "Построй все здания", progress: 0, goal: buildings.length }
-];
-
-let purchasedWardrobeItems = {
-    colors: [],
-    backgrounds: []
-};
-
-function getItemIcon(id) {
-    const icons = {
-        'paw': '🐾',
-        'energy': '⚡',
-        'puppy': '🐕',
-        'bowl': '🍽️',
-        'toy': '🧸',
-        'bed': '🛏️',
-        'house': '🏠',
-        'park': '🌳',
-        'golden_kennel': '🏆',
-        'diamond_collar': '💎',
-        'pet_castle': '🏰',
-        'vip_spa': '💆',
-        'helicopter': '🚁',
-        'private_island': '🏝️'
-    };
-    return icons[id] || '❓';
 }
 
-function getItemDescription(id) {
-    const descriptions = {
-        'paw': 'Увеличивает силу клика',
-        'energy': 'Дает временный бонус к производству',
-        'puppy': 'Производит тыквы автоматически',
-        'bowl': 'Увеличивает производство тыкв',
-        'toy': 'Значительно увеличивает производство',
-        'bed': 'Большое увеличение производства',
-        'house': 'Огромное увеличение производства',
-        'park': 'Максимальное увеличение производства',
-        'golden_kennel': 'Премиум предмет: Золотая конура',
-        'diamond_collar': 'Премиум предмет: Алмазный ошейник',
-        'pet_castle': 'Премиум предмет: Замок для питомца',
-        'vip_spa': 'Премиум предмет: VIP-спа',
-        'helicopter': 'Премиум предмет: Вертолет',
-        'private_island': 'Премиум предмет: Частный остров'
-    };
-    return descriptions[id] || 'Описание отсутствует';
+function calculateOfflineProgress() {
+    const lastPlayTime = localStorage.getItem('lastPlayTime');
+    if (lastPlayTime) {
+        const offlineTime = (Date.now() - parseInt(lastPlayTime)) / 1000; // Convert to seconds
+        const offlineEarnings = Math.floor(perSecond * offlineTime);
+        if (offlineEarnings > 0) {
+            treats += offlineEarnings;
+            showNotification(`Пока вы отсутствовали: +${formatNumber(offlineEarnings)} тыкв!`);
+        }
+
+        // Calculate offline energy regeneration
+        const energyGained = Math.floor(offlineTime * 2); // 2 energy per second
+        energy.current = Math.min(energy.current + energyGained, energy.max);
+    }
+    localStorage.setItem('lastPlayTime', Date.now().toString());
+}
+
+function startEnergyRegen() {
+    energyRegenInterval = setInterval(() => {
+        if (energy.current < energy.max) {
+            energy.current = Math.min(energy.current + energy.regenRate, energy.max);
+            updateDisplay();
+            saveGame();
+        }
+    }, 500);
 }
 
 function openShop() {
     const container = document.getElementById('shopContainer');
     container.style.display = 'block';
-    container.style.position = 'fixed';
-    container.style.top = '50%';
-    container.style.left = '50%';
-    container.style.transform = 'translate(-50%, -50%)';
-    container.style.maxWidth = '90vw';
-    container.style.width = '800px';
-    container.style.maxHeight = '90vh';
-    container.style.overflowY = 'auto';
-    container.style.background = 'linear-gradient(135deg, #1a0f2e 0%, #2d1b36 100%)';
-    container.style.border = '2px solid #ff6b1a';
-    container.style.borderRadius = '15px';
-    container.style.padding = '20px';
-    container.style.zIndex = '1000';
-    renderShop();
-}
-
-function calculateTotalIncome() {
-    let totalIncome = 0;
-    for (const buildingId in gameState.buildings) {
-        const building = gameState.buildings[buildingId];
-        if (building && building.income) {
-            totalIncome += building.income;
-        }
-    }
-    return totalIncome;
-}
-
-function generatePremiumItems() {
-    const premiumItems = [
-        {id: 'golden_kennel', name: 'Золотая конура', baseCost: 100000, income: 1000},
-        {id: 'diamond_collar', name: 'Алмазный ошейник', baseCost: 500000, income: 5000},
-        {id: 'pet_castle', name: 'Замок для питомца', baseCost: 1000000, income: 10000},
-        {id: 'vip_spa', name: 'VIP-спа', baseCost: 5000000, income: 50000},
-        {id: 'helicopter', name: 'Вертолет', baseCost: 10000000, income: 100000},
-        {id: 'private_island', name: 'Частный остров', baseCost: 50000000, income: 500000}
-    ];
-
-    return premiumItems.map(item => `
-        <div class="item">
-            <div class="item-info">
-                <div class="icon">${getItemIcon(item.id)}</div>
-                <div>
-                    <h3 class="title">${item.name}</h3>
-                    <p class="details">Цена: <span class="price">${formatNumber(item.baseCost)} тыкв</span></p>
-                </div>
-            </div>
-            <button class="menu-button" onclick="purchasePremiumItem('${item.id}')">Купить</button>
-        </div>
-    `).join('');
+    // Clean up the items containers
+    document.getElementById('regularItems').innerHTML = generateRegularItems();
+    document.getElementById('premiumItems').innerHTML = generatePremiumItems();
+    showCategory('regular'); // Show regular items by default
 }
 
 function closeShop() {
     document.getElementById('shopContainer').style.display = 'none';
 }
 
-function purchaseShopItem(itemId) { 
-    const item = shopItems.find(i => i.id === itemId);
-    const cost = Math.floor(item.baseCost * Math.pow(1.15, item.level));
+function showCategory(category) {
+    // Get all category buttons and remove active class
+    document.querySelectorAll('.category-button').forEach(button => {
+        button.classList.remove('active');
+    });
     
-    if (treats >= cost) {
-        treats -= cost;
-        item.level++;
-        
-        if (item.id === 'paw') {
-            clickPower += item.income;    
-        } else if (item.id === 'energy') {
-            // Handle energy increase
+    // Add active class to selected category button
+    document.querySelector(`.category-button[onclick*="${category}"]`).classList.add('active');
+    
+    // Hide all category sections
+    document.querySelectorAll('.category-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show selected category section
+    document.getElementById(`${category}Items`).style.display = 'block';
+}
+
+function generateRegularItems() {
+    const items = [
+        { id: 'treat1', name: 'Маленькая тыква', price: 100, boost: 1, icon: '🎃' },
+        { id: 'treat2', name: 'Большая тыква', price: 500, boost: 5, icon: '🎃' },
+        { id: 'treat3', name: 'Золотая тыква', price: 2000, boost: 25, icon: '🎃' },
+        { id: 'energyBoost', name: 'Энергетический напиток', price: 1000, type: 'energy', boost: 50, icon: '⚡' },
+        { id: 'autoClicker', name: 'Автокликер', price: 5000, boost: 2, icon: '🤖' },
+        { id: 'luckyCharm', name: 'Счастливый амулет', price: 3000, boost: 15, icon: '🍀' }
+    ];
+
+    return items.map(item => `
+        <div class="item">
+            <div class="item-info">
+                <div class="icon">${item.icon}</div>
+                <div>
+                    <h3 class="title">${item.name}</h3>
+                    <p class="details">Цена: ${formatNumber(item.price)} тыкв</p>
+                    <p class="details">Бонус: +${item.boost} ${item.type === 'energy' ? 'энергии' : 'к клику'}</p>
+                </div>
+            </div>
+            <button class="menu-button" onclick="purchaseItem('${item.id}')">Купить</button>
+        </div>
+    `).join('');
+}
+
+function generatePremiumItems() {
+    const items = [
+        { id: 'goldenPup', name: 'Золотой щенок', price: 10000, boost: 100 },
+        { id: 'rainbowPup', name: 'Радужный щенок', price: 50000, boost: 500 },
+        { id: 'ghostPup', name: 'Призрачный щенок', price: 100000, boost: 1000 }
+    ];
+
+    return items.map(item => `
+        <div class="item">
+            <div class="item-info">
+                <div class="icon">✨</div>
+                <div>
+                    <h3 class="title">${item.name}</h3>
+                    <p class="details">Цена: ${formatNumber(item.price)} тыкв</p>
+                    <p class="details">Бонус: +${item.boost} к клику</p>
+                </div>
+            </div>
+            ${purchasedPremiumItems.includes(item.id) ?
+                '<button class="menu-button" disabled>Куплено</button>' :
+                `<button class="menu-button" onclick="purchasePremiumItem('${item.id}')">Купить</button>`
+            }
+        </div>
+    `).join('');
+}
+
+function purchaseItem(itemId) {
+    const items = {
+        'treat1': { price: 100, boost: 1 },
+        'treat2': { price: 500, boost: 5 },
+        'treat3': { price: 2000, boost: 25 },
+        'energyBoost': { price: 1000, boost: 50, type: 'energy' },
+        'autoClicker': { price: 5000, boost: 2 },
+        'luckyCharm': { price: 3000, boost: 15 }
+    };
+
+    const item = items[itemId];
+    if (treats >= item.price) {
+        treats -= item.price;
+        if (item.type === 'energy') {
+            energy.current = Math.min(energy.current + item.boost, energy.max);
         } else {
-            perSecond += item.income;
+            clickPower += item.boost;
         }
-        
-        showNotification(`${item.name} куплен!`);
+        showNotification(`Куплено: ${itemId}!`);
         updateDisplay();
-        renderShop();
+        saveGame();
     } else {
         showNotification('Недостаточно тыкв!');
     }
 }
 
-function showItemTooltip(event, itemId) {
-    const tooltip = event.target.parentElement.querySelector('.tooltip');
-    tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
-    
-    document.addEventListener('click', function hideTooltip(e) {
-        if (!e.target.classList.contains('question-mark')) {
-            tooltip.style.display = 'none';
-            document.removeEventListener('click', hideTooltip);
-        }
-    });
+function purchasePremiumItem(itemId) {
+    const items = {
+        'goldenPup': { price: 10000, boost: 100 },
+        'rainbowPup': { price: 50000, boost: 500 },
+        'ghostPup': { price: 100000, boost: 1000 }
+    };
+
+    const item = items[itemId];
+    if (treats >= item.price && !purchasedPremiumItems.includes(itemId)) {
+        treats -= item.price;
+        clickPower += item.boost;
+        purchasedPremiumItems.push(itemId);
+        showNotification(`Куплено: ${itemId}!`);
+        updateDisplay();
+        saveGame();
+        openShop(); // Refresh shop display
+    } else if (purchasedPremiumItems.includes(itemId)) {
+        showNotification('Уже куплено!');
+    } else {
+        showNotification('Недостаточно тыкв!');
+    }
 }
 
-function generateRegularItems() {
-    return shopItems.map(item => `
-        <div class="item">
-            <div class="item-info">
-                <div class="icon">${getItemIcon(item.id)}</div>
-                <div>
-                    <h3 class="title">${item.name}</h3>
-                    <p class="details">Цена: <span class="price">${Math.floor(item.baseCost * Math.pow(1.15, item.level))} тыкв</span><br>Уровень: ${item.level}</p>
-                </div>
-            </div>
-            <div class="question-mark" onclick="showItemTooltip(event, '${item.id}')">?</div>
-            <button class="menu-button" onclick="purchaseShopItem('${item.id}')">Купить</button>
-            <div class="tooltip">${getItemDescription(item.id)}</div>
+function generateAchievements() {
+    const achievementList = [
+        { id: 'clicks100', name: 'Начинающий кликер', description: 'Кликни 100 раз', reward: 500 },
+        { id: 'treats1000', name: 'Тыквенный король', description: 'Накопи 1000 тыкв', reward: 1000 },
+        { id: 'energy500', name: 'Энергичный', description: 'Потрать 500 энергии', reward: 2000 }
+    ];
+
+    return achievementList.map(achievement => `
+        <div class="achievement ${achievements.includes(achievement.id) ? 'completed' : ''}">
+            <h3>${achievement.name}</h3>
+            <p>${achievement.description}</p>
+            <p>Награда: ${achievement.reward} тыкв</p>
+            ${achievements.includes(achievement.id) ? 
+                '<p>✅ Получено!</p>' : 
+                `<button class="claim-button" onclick="claimAchievement('${achievement.id}', ${achievement.reward})">Получить</button>`
+            }
         </div>
     `).join('');
-}
-
-function showCategory(category) {
-    const regularItems = document.getElementById('regularItems');
-    const premiumItems = document.getElementById('premiumItems');
-    const categoryButtons = document.querySelectorAll('.category-button');
-
-    if (category === 'regular') {
-        regularItems.style.display = 'block';
-        premiumItems.style.display = 'none';
-        categoryButtons[0].classList.add('active');
-        categoryButtons[1].classList.remove('active');
-    } else {
-        regularItems.style.display = 'none';
-        premiumItems.style.display = 'block';
-        categoryButtons[0].classList.remove('active');
-        categoryButtons[1].classList.add('active');
-    }
-}
-
-let gameState = {
-    money: 0,
-    buildings: {},
-    unclaimedIncome: 0
-};
-
-let shopItems = [
-    {id: 'energy', name: 'Улучшение Энергии', baseCost: 500, level: 0, income: 500},
-    {id: 'paw', name: 'Волшебная Лапа', baseCost: 10, level: 0, income: 1},
-    {id: 'puppy', name: 'Щенок', baseCost: 15, level: 0, income: 0.1},
-    {id: 'bowl', name: 'Миска', baseCost: 100, level: 0, income: 1},
-    {id: 'toy', name: 'Пищащая игрушка', baseCost: 500, level: 0, income: 5},
-    {id: 'bed', name: 'Лежанка', baseCost: 1000, level: 0, income: 10},
-    {id: 'house', name: 'Домик', baseCost: 5000, level: 0, income: 50},
-    {id: 'park', name: 'Парк', baseCost: 20000, level: 0, income: 200}
-];
-
-function clickDog() {
-    treats += clickPower;
-    clicks++;
-    updateDisplay();
-    createFloatingNumber(clickPower);
-    updateQuestProgress();
-}
-
-function createFloatingNumber(amount) {
-    const floating = document.createElement('div');
-    floating.innerText = `+${amount} 🎃`;
-    floating.style.position = 'absolute';
-    floating.style.left = (event.clientX - 10) + 'px';
-    floating.style.top = (event.clientY - 10) + 'px';
-    floating.style.color = '#2ecc71'; // Change to green
-    floating.style.fontSize = '20px';
-    floating.style.pointerEvents = 'none';
-    floating.style.animation = 'float 1s ease-out';
-    document.body.appendChild(floating);
-    setTimeout(() => floating.remove(), 1000);
-}
-
-function formatNumber(num) {
-    if (num < 1000) return Math.floor(num);
-    
-    const units = ['', 'K', 'M', 'B', 'T', 'Q'];
-    const order = Math.floor(Math.log(num) / Math.log(1000));
-    
-    let unitValue = num / Math.pow(1000, order);
-    unitValue = Math.floor(unitValue * 100) / 100;
-    
-    return unitValue + units[order];
-}
-
-function updateDisplay() {
-    const treatsElement = document.getElementById('treats');
-    const perSecondElement = document.getElementById('perSecond');
-    const levelElement = document.getElementById('level');
-    const moneyElement = document.getElementById('money');
-
-    if (treatsElement) treatsElement.textContent = formatNumber(treats);
-    if (perSecondElement) perSecondElement.textContent = perSecond.toFixed(1);
-    if (levelElement) levelElement.textContent = level;
-    if (moneyElement) moneyElement.textContent = formatNumber(Math.floor(treats));
-    
-    if (document.documentElement) {
-        document.documentElement.style.setProperty('--click-color', '#ff6b1a');
-    }
-}
-
-function calculateOfflineProgress() {
-    const lastSave = localStorage.getItem('lastSaveTime');
-    if (lastSave) {
-        const timeDiff = (Date.now() - parseInt(lastSave)) / 1000;
-        const offlineIncome = Math.floor(timeDiff * perSecond);
-        if (offlineIncome > 0) {
-            gameState.unclaimedIncome += offlineIncome;
-            showNotification(`Вы заработали ${formatNumber(offlineIncome)} тыкв пока были офлайн!`);
-        }
-    }
-    localStorage.setItem('lastSaveTime', Date.now().toString());
-}
-
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
-    
-    const container = document.getElementById('gameContainer').style.display === 'block' 
-        ? document.getElementById('gameContainer')
-        : document.body;
-    
-    container.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideDown 0.3s ease-out forwards';
-        setTimeout(() => notification.remove(), 300);
-    }, 2000);
 }
 
 function openAchievements() {
@@ -918,7 +861,7 @@ function openAchievements() {
     container.innerHTML = `
         <button class="close-button" onclick="closeAchievements()">Закрыть</button>
         <div class="achievements-list">
-            <h2>Награды</h2>
+            <h2>Достижения</h2>
             ${generateAchievements()}
         </div>
     `;
@@ -928,31 +871,140 @@ function closeAchievements() {
     document.getElementById('gameContainer').style.display = 'none';
 }
 
-function generateAchievements() {
-    const achievements = [
-        { id: 1, name: "Первые шаги", description: "Заработать 100 тыкв", goal: 100, completed: false },
-        { id: 2, name: "Тыквенный магнат", description: "Заработать 10000 тыкв", goal: 10000, completed: false },
-        { id: 3, name: "Щелкунчик", description: "Кликнуть 1000 раз", goal: 1000, completed: false },
-        { id: 4, name: "Коллекционер", description: "Собрать все предметы из магазина", goal: shopItems.length, completed: false },
-        { id: 5, name: "Городской планировщик", description: "Построить 10 зданий", goal: 10, completed: false },
-        { id: 6, name: "Премиум игрок", description: "Купить премиум предмет", goal: 1, completed: false },
-        { id: 7, name: "Стилист", description: "Купить все предметы в гардеробе", goal: 10, completed: false },
-        { id: 8, name: "Миллионер", description: "Заработать 1000000 тыкв", goal: 1000000, completed: false },
-        { id: 9, name: "Мастер строитель", description: "Улучшить здание до максимального уровня", goal: 50, completed: false },
-        { id: 10, name: "Легенда", description: "Выполнить все достижения", goal: 9, completed: false }
-    ];
+function purchaseWardrobeItem(category, itemId) {
+    const item = wardrobeItems[category].find(i => i.id === itemId);
+    if (!item) {
+        showNotification('Предмет не найден!');
+        return;
+    }
 
-    return achievements.map(achievement => `
-        <div class="achievement ${achievement.completed ? 'completed' : ''}">
-            <h3>${achievement.name}</h3>
-            <p>${achievement.description}</p>
-            <div class="progress">
-                <div class="progress-bar" style="width: ${achievement.completed ? '100' : '0'}%"></div>
-            </div>
-            <p>Прогресс: ${achievement.completed ? 'Выполнено!' : 'В процессе'}</p>
-        </div>
-    `).join('');
+    if (treats >= item.price) {
+        if (!purchasedWardrobeItems[category].includes(itemId)) {
+            treats -= item.price;
+            purchasedWardrobeItems[category].push(itemId);
+            showNotification(`Куплено: ${item.name}!`);
+            updateDisplay();
+            saveGame();
+            showWardrobeItems(category, wardrobeItems[category]); // Refresh wardrobe display
+        } else {
+            showNotification('Этот предмет уже куплен!');
+        }
+    } else {
+        showNotification('Недостаточно тыкв!');
+    }
 }
+
+function openWardrobe() {
+    const container = document.getElementById('wardrobeContainer');
+    if (!container) return;
+    
+    container.style.display = 'block';
+    
+    // Show colors tab by default
+    showWardrobeTab('colors');
+}
+
+function closeWardrobe() {
+    document.getElementById('wardrobeContainer').style.display = 'none';
+}
+
+function showWardrobeTab(category) {
+    // Get all tab buttons and remove active class
+    document.querySelectorAll('.wardrobe-tabs button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Add active class to selected tab button
+    document.querySelector(`.wardrobe-tabs button[onclick*="${category}"]`).classList.add('active');
+    
+    // Show items for selected category
+    showWardrobeItems(category, wardrobeItems[category]);
+}
+
+function claimAchievement(achievementId, reward) {
+    if (!achievements.includes(achievementId)) {
+        achievements.push(achievementId);
+        treats += reward;
+        showNotification(`Получено достижение! +${reward} тыкв`);
+        saveGame();
+        openAchievements(); // Refresh achievements display
+    }
+}
+
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    if (notification) {
+        notification.textContent = message;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    } else {
+        // Create notification element if it doesn't exist
+        const newNotification = document.createElement('div');
+        newNotification.id = 'notification';
+        newNotification.className = 'notification';
+        newNotification.textContent = message;
+        document.body.appendChild(newNotification);
+        setTimeout(() => {
+            newNotification.remove();
+        }, 3000);
+    }
+}
+
+let treats = 0;
+let perSecond = 0;
+let clickPower = 1;
+let level = 1;
+let clicks = 0;
+let purchasedPremiumItems = [];
+let energy = {
+    current: 100,
+    max: 100,
+    clickCost: 1,
+    regenRate: 1,
+    spent: 0
+};
+let purchasedWardrobeItems = {
+    colors: [],
+    backgrounds: []
+};
+let gameState = {
+    money: 0,
+    buildings: {},
+    unclaimedIncome: 0
+};
+let shopItems = [];
+let achievements = [];
+let quests = [
+    {
+        id: 'quest1',
+        name: 'Начинающий кликер',
+        description: 'Кликни 100 раз',
+        target: 100,
+        reward: 500,
+        progress: 0,
+        type: 'clicks'
+    },
+    {
+        id: 'quest2',
+        name: 'Копилка тыкв',
+        description: 'Накопи 1000 тыкв',
+        target: 1000,
+        reward: 200,
+        progress: 0,
+        type: 'treats'
+    },
+    {
+        id: 'quest3',
+        name: 'Энергичный щенок',
+        description: 'Потрать 500 энергии',
+        target: 500,
+        reward: 1000,
+        progress: 0,
+        type: 'energy'
+    }
+];
 
 function openQuests() {
     const container = document.getElementById('gameContainer');
@@ -965,332 +1017,368 @@ function openQuests() {
         </div>
     `;
 }
+function generateQuests() {
+    return quests.map(quest => {
+        const progress = (quest.progress / quest.target) * 100;
+        const isCompleted = quest.progress >= quest.target;
+        return `
+            <div class="quest ${isCompleted ? 'completed' : ''}">
+                <h3>${quest.name}</h3>
+                <p>${quest.description}</p>
+                <div class="progress">
+                    <div class="progress-bar" style="width: ${progress}%"></div>
+                </div>
+                <p>Прогресс: ${quest.progress}/${quest.target}</p>
+                <p>Награда: ${quest.reward} тыкв</p>
+                ${isCompleted ? 
+                    `<button class="claim-button" onclick="claimQuest('${quest.id}')">Получить награду</button>` : 
+                    ''
+                }
+            </div>
+        `;
+    }).join('');
+}
+
+function claimIncome() {
+    if (gameState.unclaimedIncome > 0) {
+        // Apply 10% penalty for claiming
+        const claimAmount = Math.floor(gameState.unclaimedIncome * 0.9);
+        treats += claimAmount;
+        gameState.unclaimedIncome = 0;
+        showNotification(`Получено ${formatNumber(claimAmount)} тыкв!`);
+        updateDisplay();
+        saveGame();
+    } else {
+        showNotification('Нечего получать!');
+    }
+}
 
 function closeQuests() {
     document.getElementById('gameContainer').style.display = 'none';
 }
 
-function generateQuests() {
-    quests[0].progress = clicks;
-    quests[1].progress = treats;
-    quests[2].progress = Object.keys(gameState.buildings).length;
-    quests[3].progress = treats;
-    quests[4].progress = Object.values(gameState.buildings).filter(b => b.elite).length;
-    quests[5].progress = Object.values(purchasedWardrobeItems).flat().length;
-    quests[6].progress = purchasedPremiumItems.length;
-    quests[7].progress = Math.max(...Object.values(gameState.buildings).map(b => b.level || 0));
-    quests[8].progress = treats;
-    quests[9].progress = Object.keys(gameState.buildings).length;
-    
-    return quests.map(quest => `
-        <div class="quest">
-            <h3>${quest.name}</h3>
-            <p>${quest.description}</p>
-            <div class="progress">
-                <div class="progress-bar" style="width: ${(quest.progress / quest.goal * 100)}%"></div>
-            </div>
-            <p>Прогресс: ${Math.floor(quest.progress)}/${quest.goal}</p>
-        </div>
-    `).join('');
+function claimQuest(questId) {
+    const quest = quests.find(q => q.id === questId);
+    if (quest && quest.progress >= quest.target) {
+        treats += quest.reward;
+        quest.progress = 0; // Reset progress after claiming
+        showNotification(`Получено ${quest.reward} тыкв за выполнение задания!`);
+        saveGame();
+        openQuests(); // Refresh quests display
+    }
 }
 
-function updateQuestProgress() {
-    quests[0].progress = clicks;
-    quests[1].progress = treats;
-    quests[2].progress = Object.keys(gameState.buildings).length;
-    quests[3].progress = treats;
-    quests[4].progress = Object.values(gameState.buildings).filter(b => b.elite).length;
-    quests[5].progress = Object.values(purchasedWardrobeItems).flat().length;
-    quests[6].progress = purchasedPremiumItems.length;
-    quests[7].progress = Math.max(...Object.values(gameState.buildings).map(b => b.level || 0));
-    quests[8].progress = treats;
-    quests[9].progress = Object.keys(gameState.buildings).length;
-    
-    localStorage.setItem('questProgress', JSON.stringify(quests));
-}
+// Add automatic income generation every 10 seconds
+setInterval(() => {
+    const generatedIncome = perSecond * 10; // Generate 10 seconds worth of income
+    if (generatedIncome > 0) {
+        gameState.unclaimedIncome += generatedIncome;
+        updateDisplay();
+        saveGame();
+    }
+}, 10000);
 
-function openWardrobe() {
-    const container = document.getElementById('wardrobeContainer');
-    container.innerHTML = `
-        <button class="close-button" onclick="closeWardrobe()">Закрыть</button>
-        <div class="wardrobe-tabs">
-            <button class="wardrobe-button active" onclick="showWardrobeTab('colors')">Цвет Мячика</button>
-            <button class="wardrobe-button" onclick="showWardrobeTab('backgrounds')">Фоны</button>
-        </div>
-        <div class="wardrobe-items"></div>
-    `;
-    container.style.display = 'block';
-    showWardrobeTab('colors');
-}
-
-function closeWardrobe() {
-    document.getElementById('wardrobeContainer').style.display = 'none';
-}
-
-function showWardrobeTab(tab) {
-    const wardrobeItems = document.querySelector('.wardrobe-items');
-    const buttons = document.querySelectorAll('.wardrobe-tabs button');
-    
-    buttons.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent.toLowerCase().includes(tab)) {
-            btn.classList.add('active');
+function updateQuestProgress(type, amount) {
+    quests.forEach(quest => {
+        if (quest.type === type && quest.progress < quest.target) {
+            quest.progress += amount;
+            if (quest.progress >= quest.target) {
+                showNotification('Задание выполнено! Нажмите на кнопку "Задания" чтобы получить награду.');
+            }
         }
     });
-    
-    const items = {
-        colors: [
-            { id: 'orange', name: 'Оранжевый мячик', cost: 1000, color: '#ff6b1a' },
-            { id: 'purple', name: 'Фиолетовый мячик', cost: 2000, color: '#9b59b6' },
-            { id: 'green', name: 'Зелёный мячик', cost: 3000, color: '#2ecc71' },
-            { id: 'blue', name: 'Синий мячик', cost: 4000, color: '#3498db' },
-            { id: 'red', name: 'Красный мячик', cost: 5000, color: '#e74c3c' },
-            { id: 'yellow', name: 'Жёлтый мячик', cost: 6000, color: '#f1c40f' },
-            { id: 'pink', name: 'Розовый мячик', cost: 7000, color: '#e84393' },
-            { id: 'cyan', name: 'Голубой мячик', cost: 8000, color: '#00cec9' }
-        ],
-        backgrounds: [
-            { id: 'spooky', name: 'Жуткий фон', cost: 5000, pattern: 'linear-gradient(135deg, #1a0f2e 0%, #2d1b36 100%)' },
-            { id: 'haunted', name: 'Призрачный фон', cost: 10000, pattern: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)' },
-            { id: 'dark', name: 'Тёмный фон', cost: 15000, pattern: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)' },
-            { id: 'mystic', name: 'Мистический фон', cost: 20000, pattern: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)' },
-            { id: 'blood', name: 'Кровавый фон', cost: 25000, pattern: 'linear-gradient(135deg, #c0392b 0%, #e74c3c 100%)' }
-        ]
-    };
-    
-    wardrobeItems.innerHTML = items[tab].map(item => `
+    saveGame();
+}
+
+const wardrobeItems = {
+    colors: [
+        { id: '#ff6b1a', name: 'Оранжевый', price: 1000 },
+        { id: '#ff3333', name: 'Красный', price: 1000 },
+        { id: '#3366ff', name: 'Синий', price: 1000 },
+        { id: '#33cc33', name: 'Зеленый', price: 1000 },
+        { id: '#9933ff', name: 'Фиолетовый', price: 1000 },
+        { id: 'linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)', name: 'Радужный', price: 5000 }
+    ],
+    backgrounds: [
+        { 
+            id: 'haunted', 
+            name: 'Жуткий дом', 
+            price: 2000, 
+            style: `
+                background-color: #1a0f2e;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M60,180 L100,100 L140,180 Z M80,180 v-40 h40 v40' fill='%23ff6b1a33'/%3E%3C/svg%3E");
+                background-size: 200px;
+            `
+        },
+        { 
+            id: 'graveyard', 
+            name: 'Кладбище', 
+            price: 2000, 
+            style: `
+                background-color: #1a0f2e;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpath d='M40,80 v-30 h20 v30 M30,50 h40 l-20,-30 z' fill='%23ff6b1a33'/%3E%3C/svg%3E");
+                background-size: 100px;
+            `
+        },
+        { 
+            id: 'pumpkin_patch', 
+            name: 'Тыквенное поле', 
+            price: 2000, 
+            style: `
+                background-color: #1a0f2e;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='25' fill='%23ff6b1a33'/%3E%3Cpath d='M50,25 v-10 q10,-10 20,0' fill='%23ff6b1a33'/%3E%3C/svg%3E");
+                background-size: 100px;
+            `
+        },
+        { 
+            id: 'spooky_forest', 
+            name: 'Жуткий лес', 
+            price: 2000, 
+            style: `
+                background-color: #1a0f2e;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cpath d='M30,120 v-60 l30,-30 l30,30 v60 M90,120 v-40 l20,-20 l20,20 v40' fill='%23ff6b1a33'/%3E%3C/svg%3E");
+                background-size: 150px;
+            `
+        }
+    ]
+};
+
+function showWardrobeItems(category, items) {
+    const container = document.querySelector('.wardrobe-items');
+    container.innerHTML = items.map(item => `
         <div class="wardrobe-item">
+            ${category === 'colors' ? 
+                `<div class="preview" style="background: ${item.id}"></div>` :
+                `<div class="preview" style="${item.style}"></div>`
+            }
             <h3>${item.name}</h3>
-            <div class="preview" style="background: ${item.color || item.pattern}"></div>
-            ${purchasedWardrobeItems[tab].includes(item.id) ? 
-                `<button onclick="purchaseWardrobeItem('${tab}', '${item.id}')" class="menu-button">Применить</button>` :
-                `<p>Цена: ${formatNumber(item.cost)} тыкв</p>
-                <button onclick="purchaseWardrobeItem('${tab}', '${item.id}')" class="menu-button">Купить</button>`
+            <p>${formatNumber(item.price)} тыкв</p>
+            ${purchasedWardrobeItems[category].includes(item.id) ?
+                '<button class="menu-button" onclick="equipItem(\'' + category + '\', \'' + item.id + '\')">Надеть</button>' :
+                '<button class="menu-button" onclick="purchaseWardrobeItem(\'' + category + '\', \'' + item.id + '\')">Купить</button>'
             }
         </div>
     `).join('');
 }
 
-function purchaseWardrobeItem(type, id) {
-    const items = {
-        colors: [
-            { id: 'orange', cost: 1000, color: '#ff6b1a' },
-            { id: 'purple', cost: 2000, color: '#9b59b6' },
-            { id: 'green', cost: 3000, color: '#2ecc71' },
-            { id: 'blue', cost: 4000, color: '#3498db' },
-            { id: 'red', cost: 5000, color: '#e74c3c' }
-        ],
-        backgrounds: [
-            { id: 'spooky', cost: 5000, pattern: 'linear-gradient(135deg, #1a0f2e 0%, #2d1b36 100%)' },
-            { id: 'haunted', cost: 10000, pattern: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)' },
-            { id: 'dark', cost: 15000, pattern: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)' },
-            { id: 'mystic', cost: 20000, pattern: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)' },
-            { id: 'blood', cost: 25000, pattern: 'linear-gradient(135deg, #c0392b 0%, #e74c3c 100%)' }
-        ]
-    };
+function equipItem(category, itemId) {
+    const item = wardrobeItems[category].find(i => i.id === itemId);
+    if (!item) return;
 
-    const item = items[type].find(i => i.id === id);
-    const isPurchased = purchasedWardrobeItems[type].includes(id);
-    
-    if (isPurchased) {
-        if (type === 'colors') {
-            document.querySelector('.dog circle').setAttribute('fill', item.color);
-        } else if (type === 'backgrounds') {
-            document.body.style.background = item.pattern;
-        }
-        showNotification(`Применено: ${item.id}`);
-    } else if (treats >= item.cost) {
-        treats -= item.cost;
-        purchasedWardrobeItems[type].push(id);
-        if (type === 'colors') {
-            document.querySelector('.dog circle').setAttribute('fill', item.color);
-        } else if (type === 'backgrounds') {
-            document.body.style.background = item.pattern;
-        }
-        showNotification(`Куплено: ${item.id}`);
-        updateDisplay();
-        showWardrobeTab(type);
-    } else {
-        showNotification('Недостаточно тыкв!');
+    if (category === 'colors') {
+        document.querySelector('.dog circle:first-child').style.fill = item.id;
+    } else if (category === 'backgrounds') {
+        document.body.style = item.style;
     }
-}
-
-function renderShop() {
-    const container = document.getElementById('shopContainer');
-    container.innerHTML = `
-        <button class="close-button" onclick="closeShop()">Закрыть</button>
-        <div class="shop-categories">
-            <button class="category-button active" onclick="showCategory('regular')">Обычные предметы</button>
-            <button class="category-button" onclick="showCategory('premium')">Премиум предметы</button>
-        </div>
-        <div class="items-container">
-            <div id="regularItems" class="category-section">
-                ${generateRegularItems()}
-            </div>
-            <div id="premiumItems" class="category-section" style="display:none">
-                ${generatePremiumItems()}
-            </div>
-        </div>
-    `;
+    showNotification('Предмет надет!');
 }
 
 function loadGame() {
-    const savedGame = localStorage.getItem('spookyPuppyGame');
-    if (savedGame) {
-        const gameData = JSON.parse(savedGame);
-        treats = gameData.treats;
-        perSecond = gameData.perSecond;
-        level = gameData.level;
-        gameState = gameData.gameState;
-        shopItems = gameData.shopItems;
-        purchasedWardrobeItems = gameData.purchasedWardrobeItems || { colors: [], backgrounds: [] };
+    const savedData = localStorage.getItem('gameData');
+    if (savedData) {
+        const gameData = JSON.parse(savedData);
+        treats = gameData.treats || 0;
+        perSecond = gameData.perSecond || 0;
+        clickPower = gameData.clickPower || 1;
+        level = gameData.level || 1;
+        clicks = gameData.clicks || 0;
+        purchasedPremiumItems = gameData.purchasedPremiumItems || [];
+        energy = gameData.energy || {
+            current: 100,
+            max: 100,
+            clickCost: 1,
+            regenRate: 1,
+            spent: 0
+        };
+        purchasedWardrobeItems = gameData.purchasedWardrobeItems || {
+            colors: [],
+            backgrounds: []
+        };
+        gameState = gameData.gameState || {
+            money: 0,
+            buildings: {},
+            unclaimedIncome: 0
+        };
+
+        // Update quest progress while keeping original quest definitions
+        if (gameData.quests) {
+            quests.forEach((quest, index) => {
+                if (gameData.quests[index]) {
+                    quest.progress = gameData.quests[index].progress;
+                }
+            });
+        }
+
+        if (gameData.achievements) {
+            achievements = gameData.achievements;
+        }
+        if (gameData.shopItems) {
+            shopItems = gameData.shopItems;
+        }
+
+        calculateOfflineProgress();
         updateDisplay();
-        closeShop(); // Ensure the shop doesn't open automatically
+        startEnergyRegen();
     }
 }
 
 function saveGame() {
     const gameData = {
-        treats: treats,
-        perSecond: perSecond,
-        level: level,
-        gameState: gameState,
-        shopItems: shopItems,
-        purchasedWardrobeItems: purchasedWardrobeItems
+        treats,
+        perSecond,
+        clickPower,
+        level,
+        clicks,
+        purchasedPremiumItems,
+        energy,
+        purchasedWardrobeItems,
+        gameState,
+        quests,
+        achievements,
+        shopItems
     };
-    localStorage.setItem('spookyPuppyGame', JSON.stringify(gameData));
+    localStorage.setItem('gameData', JSON.stringify(gameData));
+    localStorage.setItem('lastPlayTime', Date.now().toString());
 }
 
-function purchasePremiumItem(itemId) {
-    const premiumItems = {
-        golden_kennel: {cost: 100000, income: 1000},
-        diamond_collar: {cost: 500000, income: 5000},
-        pet_castle: {cost: 1000000, income: 10000},
-        vip_spa: {cost: 5000000, income: 50000},
-        helicopter: {cost: 10000000, income: 100000},
-        private_island: {cost: 50000000, income: 500000}
-    };
-
-    const item = premiumItems[itemId];
-    if (treats >= item.cost) {
-        treats -= item.cost;
-        perSecond += item.income;
-        showNotification(`Премиум предмет куплен!`);
-        updateDisplay();
+function formatNumber(num) {
+    if (num >= 1e6) {
+        return (num / 1e6).toFixed(1) + 'M';
+    } else if (num >= 1e3) {
+        return (num / 1e3).toFixed(1) + 'K';
     } else {
-        showNotification('Недостаточно тыкв!');
+        return num.toString();
     }
 }
 
-function claimIncome() {
-    if (gameState.unclaimedIncome > 0) {
-        const fee = Math.floor(gameState.unclaimedIncome * 0.1); // 10% fee
-        const amount = Math.floor(gameState.unclaimedIncome - fee);
-        treats += amount;
-        gameState.unclaimedIncome = 0; // Reset unclaimed balance
-        showNotification(`Получено ${formatNumber(amount)} 🎃 (-${formatNumber(fee)} комиссия)`);
-        updateDisplay();
-        updateCityUI();
-        saveGame();
+function updateDisplay() {
+    // Update treats and per second display
+    const treatsElement = document.getElementById('treats');
+    const perSecondElement = document.getElementById('perSecond');
+    const levelElement = document.getElementById('level');
+    const unclaimedElement = document.getElementById('unclaimed');
+    const energyElement = document.getElementById('energy');
+    
+    if (treatsElement) treatsElement.textContent = formatNumber(treats);
+    if (perSecondElement) perSecondElement.textContent = formatNumber(perSecond);
+    if (levelElement) levelElement.textContent = level;
+    if (unclaimedElement) unclaimedElement.textContent = formatNumber(gameState.unclaimedIncome);
+    
+    // Update energy display
+    if (energyElement) energyElement.textContent = Math.floor(energy.current);
+    
+    const energyFill = document.querySelector('.energy-fill');
+    const energyText = document.querySelector('.energy-text');
+    if (energyFill && energyText) {
+        const percentage = (energy.current / energy.max) * 100;
+        energyFill.style.width = `${percentage}%`;
+        energyText.textContent = `${Math.floor(energy.current)}/${energy.max}`;
     }
 }
 
 function openTown() {
+    // Close other containers first
+    document.getElementById('shopContainer').style.display = 'none';
+    
     const container = document.getElementById('gameContainer');
     container.style.display = 'block';
     container.innerHTML = `
         <button class="close-button" onclick="closeTown()">Закрыть</button>
         <div class="resources">
-            <div class="money">🎃 <span id="money">${formatNumber(Math.floor(treats))}</span></div>
-            <div class="income">👻 <span id="income">${formatNumber(calculateTotalIncome())}</span>/10сек</div>
-            <div class="unclaimed">💰 <span id="unclaimed">${formatNumber(Math.floor(gameState.unclaimedIncome))}</span></div>
+            <div class="money">🎃 <span id="money">0</span></div>
+            <div class="income">👻 <span id="income">0</span>/10сек</div>
+            <div class="unclaimed">💰 <span id="unclaimed">0</span></div>
             <button class="claim-button" onclick="claimIncome()">Получить (-10%)</button>
         </div>
-        <div class="city" id="city">
-            ${buildings.map(building => {
-                const owned = gameState.buildings[building.id] || { level: 0, income: 0 };
-                const cost = Math.floor(building.baseCost * Math.pow(building.multiplier, owned.level));
-                const eliteClass = building.elite ? 'elite' : '';
-                const spaceStationClass = building.id === 9 ? 'spacestation' : '';
-                return `
-                    <div class="building ${eliteClass} ${spaceStationClass}" onclick="upgradeBuilding(${building.id})">
-                        ${building.elite ? '<span class="elite-tag">Elite</span>' : ''}
-                        ${building.isNew ? '<span class="new-tag">New!</span>' : ''}
-                        <div class="icon">${building.icon}</div>
-                        <h3>${building.name}</h3>
-                        <p>Уровень: ${owned.level}</p>
-                        <p>Доход: ${formatNumber(owned.income)}/10сек</p>
-                        <p>Цена: ${formatNumber(cost)} 🎃</p>
-                    </div>
-                `;
-            }).join('')}
-        </div>
+        <div class="city" id="city"></div>
     `;
-    updateCityUI();
+    
+    // Generate town buildings
+    const city = document.getElementById('city');
+    if (city) {
+        city.innerHTML = generateTownBuildings();
+    }
+    updateDisplay();
+}
+
+function generateTownBuildings() {
+    let buildings = '';
+    const buildingTypes = {
+        'house': { name: 'Домик', baseIncome: 10, baseCost: 100, icon: '🏠' },
+        'shop': { name: 'Магазин', baseIncome: 30, baseCost: 300, icon: '🏪' },
+        'factory': { name: 'Фабрика', baseIncome: 100, baseCost: 1000, icon: '🏭' },
+        'mansion': { name: 'Особняк', baseIncome: 300, baseCost: 3000, icon: '🏰' },
+        'tower': { name: 'Башня', baseIncome: 1000, baseCost: 10000, icon: '🗼' }
+    };
+
+    for (let [type, data] of Object.entries(buildingTypes)) {
+        const owned = gameState.buildings[type] || 0;
+        const cost = Math.floor(data.baseCost * Math.pow(1.15, owned));
+        const income = data.baseIncome * owned;
+
+        buildings += `
+            <div class="building" onclick="buyBuilding('${type}')">
+                <div class="icon">${data.icon}</div>
+                <h3>${data.name}</h3>
+                <p>Стоимость: ${formatNumber(cost)} 🎃</p>
+                <p>Доход: ${formatNumber(data.baseIncome)}/10сек</p>
+                <p>Принадлежит: ${owned}</p>
+            </div>
+        `;
+    }
+    return buildings;
+}
+
+function buyBuilding(type) {
+    const buildingTypes = {
+        'house': { baseCost: 100, baseIncome: 10 },
+        'shop': { baseCost: 300, baseIncome: 30 },
+        'factory': { baseCost: 1000, baseIncome: 100 },
+        'mansion': { baseCost: 3000, baseIncome: 300 },
+        'tower': { baseCost: 10000, baseIncome: 1000 }
+    };
+
+    const owned = gameState.buildings[type] || 0;
+    const cost = Math.floor(buildingTypes[type].baseCost * Math.pow(1.15, owned));
+
+    if (treats >= cost) {
+        treats -= cost;
+        gameState.buildings[type] = (gameState.buildings[type] || 0) + 1;
+        updateIncomeRate();
+        showNotification(`Куплено: ${type}!`);
+        openTown(); // Refresh town display
+        saveGame();
+    } else {
+        showNotification('Недостаточно тыкв!');
+    }
+}
+
+function updateIncomeRate() {
+    let totalIncome = 0;
+    const buildingTypes = {
+        'house': { baseIncome: 10 },
+        'shop': { baseIncome: 30 },
+        'factory': { baseIncome: 100 },
+        'mansion': { baseIncome: 300 },
+        'tower': { baseIncome: 1000 }
+    };
+
+    for (let [type, data] of Object.entries(buildingTypes)) {
+        if (gameState.buildings[type]) {
+            totalIncome += data.baseIncome * gameState.buildings[type];
+        }
+    }
+    
+    perSecond = totalIncome / 10; // Convert to per-second rate
+    updateDisplay();
 }
 
 function closeTown() {
     document.getElementById('gameContainer').style.display = 'none';
 }
 
-function updateCityUI() {
-    const gameContainer = document.getElementById('gameContainer');
-    if (gameContainer && gameContainer.style.display === 'block') {
-        const moneySpan = document.getElementById('money');
-        const incomeSpan = document.getElementById('income');
-        const unclaimedSpan = document.getElementById('unclaimed');
-        
-        if (moneySpan) moneySpan.textContent = formatNumber(Math.floor(treats));
-        if (incomeSpan) incomeSpan.textContent = formatNumber(calculateTotalIncome());
-        if (unclaimedSpan) unclaimedSpan.textContent = formatNumber(Math.floor(gameState.unclaimedIncome));
-    }
-    updateDisplay(); // Ensure display updates in real-time
-}
-
-// Modify the setInterval that handles income:
-setInterval(() => {
-    treats += perSecond; // Regular passive income
-    gameState.unclaimedIncome += calculateTotalIncome() / 10; // Add city income to unclaimed balance
-    updateDisplay();
-    updateCityUI(); // Update city UI regularly
-    saveGame();
-}, 1000);
-
-function upgradeBuilding(buildingId) {
-    const building = buildings.find(b => b.id === buildingId);
-    const ownedBuilding = gameState.buildings[buildingId] || { level: 0, income: 0 };
-    const cost = Math.floor(building.baseCost * Math.pow(building.multiplier, ownedBuilding.level));
-    
-    if (treats >= cost) {
-        treats -= cost;
-        if (!gameState.buildings[buildingId]) {
-            gameState.buildings[buildingId] = { level: 0, income: 0 };
-        }
-        gameState.buildings[buildingId].level++;
-        gameState.buildings[buildingId].income = building.baseIncome * gameState.buildings[buildingId].level;
-        
-        showNotification(`Улучшено: ${building.name}`);
-        updateCityUI();
-        updateDisplay();
-        saveGame();
-    } else {
-        showNotification('Недостаточно тыкв!');
-    }
-}
-
-// Add auto-income calculation
-setInterval(() => {
-    treats += perSecond;
-    updateDisplay();
-}, 1000);
-
-window.onload = () => {
-    if (!document.getElementById('treats')) {
-        console.error('Required elements not found. Page structure may be incomplete.');
-        return;
-    }
-    loadGame();
-    calculateOfflineProgress();
-};
+// Add this line at the end of the script to load saved game on page load
+window.addEventListener('load', loadGame);
 </script>
-</body></html>
+</body>
+</html>
