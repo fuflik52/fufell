@@ -47,12 +47,13 @@
             font-size: 24px;
             padding: 20px;
             text-align: center;
+            animation: fadeIn 1s ease-in-out;
         }
         
         #splashScreen h1 {
             font-size: 48px;
             margin-bottom: 20px;
-            animation: fadeInText 2s forwards;
+            animation: bounceIn 1s;
         }
         
         #splashScreen input {
@@ -64,28 +65,47 @@
             outline: none;
             width: 80%;
             max-width: 300px;
+            animation: slideInLeft 1s;
         }
         
         #splashScreen button {
             padding: 15px 30px;
             border: none;
             border-radius: 30px;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
             font-size: 18px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s, background 0.3s;
+            animation: slideInRight 1s;
         }
         
         #splashScreen button:hover {
             transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
         }
         
-        @keyframes fadeInText {
+        @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
         /* Контейнер игры */
@@ -100,22 +120,10 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
             margin-top: 20px;
-            border: 8px solid rgba(255, 140, 0, 0.7); /* Теплый оранжевый бордер */
+            border: 8px solid rgba(75, 0, 130, 0.7); /* Изменен цвет бордера */
             perspective: 1000px;
             transition: background 0.5s ease;
-        }
-        
-        /* Анимации для элементов интерфейса */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(255,140,0,0.5); }
-            50% { box-shadow: 0 0 20px rgba(255,140,0,0.8); }
-            100% { box-shadow: 0 0 5px rgba(255,140,0,0.5); }
+            animation: fadeIn 2s;
         }
         
         /* Текущий фрукт */
@@ -128,6 +136,7 @@
             text-align: center;
             z-index: 1;
             pointer-events: none;
+            animation: fadeIn 1s;
         }
         
         #currentFruit img {
@@ -136,6 +145,12 @@
             display: block;
             margin: 0 auto;
             background: transparent; 
+            animation: rotate 5s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
         /* Следующий фрукт */
@@ -150,6 +165,12 @@
             text-align: center;
             transform: scale(0.6);
             transform-origin: top right;
+            animation: fadeInDown 1s;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px) scale(0.6); }
+            to { opacity: 1; transform: translateY(0) scale(0.6); }
         }
         
         #nextFruit img {
@@ -157,6 +178,13 @@
             height: 30px; 
             display: block;
             margin: 0 auto 5px; 
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
         
         #nextFruit span {
@@ -166,10 +194,10 @@
             display: block;
         }
         
-        /* Контейнер для коллекции фруктов (Полоска ниже) */
+        /* Контейнер для коллекции фруктов (Полоска внизу) */
         #collectionContainer {
             position: absolute;
-            bottom: 60px; /* Отступ снизу для размещения стрелок */
+            bottom: 10px; /* Смещено ближе к низу */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -179,10 +207,31 @@
             border-radius: 15px;  
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
             z-index: 1000;
-            overflow: hidden; /* Убираем стандартный скролл */
-            max-width: 85%; /* Ограничение максимальной ширины */
+            overflow-x: auto; /* Горизонтальный скролл */
+            max-width: 95%; /* Ограничение максимальной ширины */
+            animation: slideUp 1s;
         }
         
+        @keyframes slideUp {
+            from { transform: translate(-50%, 50px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        /* Стилизация скролла */
+        #collectionContainer::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        #collectionContainer::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        #collectionContainer::-webkit-scrollbar-thumb {
+            background: #ffcc00;
+            border-radius: 4px;
+        }
+
         /* Контейнер для списка фруктов */
         .collectionList {
             display: flex;
@@ -192,10 +241,10 @@
         /* Кнопки навигации для коллекции фруктов */
         .collection-nav {
             position: absolute;
-            bottom: 20px; /* Размещены ниже коллекции фруктов */
+            bottom: 10px; /* Смещено ближе к нижнему краю */
             width: 30px;
             height: 30px;
-            background: rgba(255, 140, 0, 0.8);
+            background: rgba(75, 0, 130, 0.8); /* Изменен цвет */
             border: none;
             border-radius: 50%;
             color: white;
@@ -206,10 +255,11 @@
             justify-content: center;
             z-index: 1001;
             transition: background 0.3s, transform 0.2s;
+            animation: fadeIn 1s;
         }
         
         .collection-nav:hover {
-            background: rgba(255, 165, 0, 0.9);
+            background: rgba(138, 43, 226, 0.9); /* Изменен цвет при наведении */
             transform: scale(1.1);
         }
         
@@ -235,6 +285,19 @@
             flex-shrink: 0;
             position: relative;
             pointer-events: none; /* Отключено взаимодействие */
+            animation: fadeIn 1s;
+        }
+        
+        .collectionItem img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
         
         /* Экран окончания игры */
@@ -253,34 +316,37 @@
             z-index: 3000;
             text-align: center;
             padding: 20px;
+            animation: fadeIn 1.5s;
         }
         
         #gameOverScreen h2 {
             font-size: 36px;
             margin-bottom: 20px;
-            animation: fadeInText 1s forwards;
+            animation: bounceIn 1s;
         }
         
         #gameOverScreen p {
             font-size: 24px;
             margin-bottom: 20px;
+            animation: fadeIn 2s;
         }
         
         #gameOverScreen button {
             padding: 12px 25px;
             border: none;
             border-radius: 25px;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
             font-size: 16px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s, background 0.3s;
+            animation: fadeIn 2.5s;
         }
         
         #gameOverScreen button:hover {
             transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
         }
         
         /* Контролы игры */
@@ -291,10 +357,11 @@
             display: flex;
             gap: 10px;
             z-index: 3;
+            animation: fadeIn 1s;
         }
         
         .control-btn {
-            background: rgba(0,0,0,0.7);
+            background: rgba(75, 0, 130, 0.7); /* Изменен цвет */
             border: none;
             border-radius: 50%;
             width: 40px;
@@ -308,7 +375,7 @@
         
         .control-btn:hover {
             transform: scale(1.1);    
-            background: rgba(255, 140, 0, 0.9); /* Оранжевый оттенок при наведении */
+            background: rgba(138, 43, 226, 0.9); /* Изменен цвет при наведении */
         }
         
         #currentFruit img, #nextFruit img {
@@ -335,6 +402,7 @@
             );
             box-shadow: 0 0 10px rgba(0,255,0,0.5);
             z-index: 1;
+            animation: pulse 2s infinite;
         }
         
         /* 3D рамка */
@@ -345,12 +413,18 @@
             right: 0;
             bottom: 0;
             pointer-events: none;
-            border: 2px solid rgba(255, 140, 0, 0.7); /* Оранжевый бордер */
+            border: 2px solid rgba(75, 0, 130, 0.7); /* Изменен цвет бордера */
             transform-style: preserve-3d;
             transform: perspective(1000px) rotateX(1deg);
             box-shadow: 
-                inset 0 0 50px rgba(255,140,0,0.1),
-                0 0 20px rgba(255,140,0,0.2);
+                inset 0 0 50px rgba(75, 0, 130, 0.1),
+                0 0 20px rgba(75, 0, 130, 0.2);
+            animation: rotateFrame 10s linear infinite;
+        }
+        
+        @keyframes rotateFrame {
+            from { transform: perspective(1000px) rotateX(1deg) rotateY(0deg); }
+            to { transform: perspective(1000px) rotateX(1deg) rotateY(360deg); }
         }
         
         /* Линия траектории */
@@ -359,11 +433,12 @@
             position: absolute;
             width: 2px;
             height: 400px; 
-            background: rgba(255, 140, 0, 0.5);
+            background: rgba(75, 0, 130, 0.5); /* Изменен цвет */
             border-radius: 1px;
-            box-shadow: 0 0 4px rgba(255, 140, 0, 0.5);
+            box-shadow: 0 0 4px rgba(75, 0, 130, 0.5);
             pointer-events: none;
             z-index: 1;
+            animation: fadeIn 1s;
         }
         
         /* Оверлей для меню (Настройки, Магазин, Награды, Рейтинг) */
@@ -379,6 +454,7 @@
             align-items: center;
             z-index: 2000;
             padding: 10px;
+            animation: fadeIn 1s;
         }
         
         .menu-content {
@@ -392,6 +468,12 @@
             overflow-y: auto;
             color: #ffcc00; /* Золотистый цвет текста */
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            animation: slideIn 1s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         /* Кнопка закрытия меню */
@@ -432,7 +514,7 @@
         }
         
         .menu-tab.active {
-            background: #ff6600;
+            background: #6a11cb;
             color: white;
         }
         
@@ -460,7 +542,7 @@
         }
         
         .reward-tab.active {
-            background: #ff6600;
+            background: #6a11cb;
             color: white;
         }
         
@@ -469,6 +551,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            animation: fadeIn 1s;
         }
         
         .stat-item {
@@ -478,6 +561,7 @@
             background: #444;
             border-radius: 10px;
             color: #ffcc00;
+            animation: fadeIn 1s;
         }
         
         /* Элементы магазина */
@@ -487,6 +571,7 @@
             gap: 15px;
             max-height: 400px;
             overflow-y: auto;
+            animation: fadeIn 1s;
         }
         
         .shop-item {
@@ -497,10 +582,12 @@
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             transition: transform 0.2s;
+            animation: fadeIn 1s;
         }
         
         .shop-item:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
         }
         
         .shop-item div {
@@ -513,12 +600,14 @@
             color: white;
             font-weight: bold;
             margin-bottom: 10px;
+            animation: pulse 2s infinite;
         }
         
         .shop-item p {
             margin-bottom: 10px;
             font-size: 14px;
             color: #ffcc00;
+            animation: fadeIn 1.5s;
         }
         
         .buy-btn, .apply-btn {
@@ -528,15 +617,16 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            background: #ff6600;
+            background: #6a11cb;
             color: white;
             font-size: 14px;
             transition: background 0.3s, transform 0.2s;
             font-weight: bold;
+            animation: none; /* Убрана анимация прыжка */
         }
         
         .buy-btn:hover:not(.disabled) {
-            background: #ff4500;
+            background: #2575fc;
             transform: scale(1.05);
         }
         
@@ -600,7 +690,7 @@
         }
         
         .progress {
-            background: #ff6600;
+            background: #6a11cb;
             height: 100%;
             transition: width 0.3s;
         }
@@ -618,16 +708,17 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
             font-size: 14px;
             transition: transform 0.2s, background 0.3s;
             font-weight: bold;
+            animation: none; /* Убрана анимация */
         }
 
         .claim-btn:hover:not(:disabled) {
             transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
         }
 
         /* Адаптивность для мобильных устройств */
@@ -635,7 +726,7 @@
             #gameContainer {
                 width: 95%;
                 height: 500px;
-                border: 6px solid rgba(255, 140, 0, 0.7);
+                border: 6px solid rgba(75, 0, 130, 0.7);
             }
 
             #splashScreen h1 {
@@ -664,7 +755,7 @@
             #collectionContainer {
                 gap: 8px;
                 padding: 6px;
-                max-width: 85%;
+                max-width: 95%;
             }
 
             .collectionItem {
@@ -723,6 +814,7 @@
             margin-bottom: 15px;
             font-size: 24px;
             color: #ffcc00;
+            animation: fadeIn 1s;
         }
 
         #leaderboardList {
@@ -732,6 +824,7 @@
             border-radius: 10px;
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            animation: fadeIn 1s;
         }
 
         .leaderboard-item {
@@ -740,6 +833,7 @@
             padding: 8px 12px;
             border-bottom: 1px solid #555;
             color: white;
+            animation: fadeIn 1s;
         }
 
         .leaderboard-item:last-child {
@@ -751,6 +845,7 @@
             justify-content: center;
             gap: 20px;
             margin-top: 20px;
+            animation: fadeIn 1.5s;
         }
 
         .podium-place {
@@ -759,12 +854,57 @@
             align-items: center;
             color: #ffcc00;
             font-weight: bold;
+            animation: none; /* Убраны анимации */
         }
 
         .podium-place img {
             width: 50px;
             height: 50px;
             margin-bottom: 5px;
+            /* Убрана анимация вращения */
+        }
+
+        /* Дополнительные стили для кнопки "Статистика" */
+        .leaderboard-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            animation: fadeIn 1s;
+        }
+
+        .leaderboard-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: #6a11cb;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-weight: bold;
+        }
+
+        .leaderboard-btn:hover {
+            background: #2575fc;
+            transform: scale(1.05);
+        }
+
+        /* Кнопка статистики */
+        .stats-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: #ffcc00;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .stats-btn:hover {
+            background: #ffaa00;
+            transform: scale(1.05);
         }
 
         /* Дополнительные стили для настройки фона */
@@ -779,15 +919,16 @@
             margin-top: 10px;
             font-weight: bold;
             width: 100%;
+            animation: fadeIn 1s;
         }
 
         .toggle-btn.active {
-            background: #ff6600;
+            background: #6a11cb;
             color: white;
         }
 
         .toggle-btn:hover {
-            background: #ff4500;
+            background: #2575fc;
             color: white;
         }
     </style>
@@ -877,11 +1018,12 @@
                 <div class="leaderboard-buttons">
                     <button class="leaderboard-btn" onclick="showTop10()">ТОП 10</button>
                     <button class="leaderboard-btn" onclick="showMyRating()">МОЙ РЕЙТИНГ</button>
+                    <button class="stats-btn" onclick="showStatistics()">Статистика</button>
                 </div>
                 <div id="leaderboardList">
                     <!-- Рейтинги будут динамически добавляться сюда -->
                 </div>
-                <button onclick="downloadLeaderboard()" style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 15px; background: #ff6600; color: white; cursor: pointer; transition: background 0.3s;">
+                <button onclick="downloadLeaderboard()" style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 15px; background: #6a11cb; color: white; cursor: pointer; transition: background 0.3s;">
                     Скачать рейтинг
                 </button>
                 <div class="podium">
@@ -976,7 +1118,7 @@
         // Баланс пользователя
         let balance = parseInt(localStorage.getItem('balance')) || 1000; 
         
-        // Массив тем магазина с фонами через CSS
+        // Массив тем магазина с фонами через CSS (расширен до 30)
         const shopItems = {
             themes: [
                 {id: 'theme1', type: 'theme', name: 'Градиент Космоса', price: 100, gradient: 'linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)', purchased: false, active: false},
@@ -988,7 +1130,28 @@
                 {id: 'theme7', type: 'theme', name: 'Градиент Цветущей Сакуры', price: 700, gradient: 'linear-gradient(135deg, #ee9ca7, #ffdde1)', purchased: false, active: false},
                 {id: 'theme8', type: 'theme', name: 'Градиент Неонового Города', price: 800, gradient: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)', purchased: false, active: false},
                 {id: 'theme9', type: 'theme', name: 'Градиент Глубокого Космоса', price: 900, gradient: 'linear-gradient(135deg, #000000, #434343)', purchased: false, active: false},
-                {id: 'theme10', type: 'theme', name: 'Градиент Радужной Магии', price: 1000, gradient: 'linear-gradient(135deg, #12c2e9, #c471ed, #f64f59)', purchased: false, active: false}
+                {id: 'theme10', type: 'theme', name: 'Градиент Радужной Магии', price: 1000, gradient: 'linear-gradient(135deg, #12c2e9, #c471ed, #f64f59)', purchased: false, active: false},
+                {id: 'theme11', type: 'theme', name: 'Градиент Рассвета', price: 1100, gradient: 'linear-gradient(135deg, #ff7e5f, #feb47b)', purchased: false, active: false},
+                {id: 'theme12', type: 'theme', name: 'Градиент Водопада', price: 1200, gradient: 'linear-gradient(135deg, #00b4db, #0072ff)', purchased: false, active: false},
+                {id: 'theme13', type: 'theme', name: 'Градиент Глубокого Леса', price: 1300, gradient: 'linear-gradient(135deg, #004d40, #26a69a)', purchased: false, active: false},
+                {id: 'theme14', type: 'theme', name: 'Градиент Горы', price: 1400, gradient: 'linear-gradient(135deg, #b993d6, #8ca6db)', purchased: false, active: false},
+                {id: 'theme15', type: 'theme', name: 'Градиент Розового Заката', price: 1500, gradient: 'linear-gradient(135deg, #ff9a9e, #fad0c4)', purchased: false, active: false},
+                {id: 'theme16', type: 'theme', name: 'Градиент Темного Неба', price: 1600, gradient: 'linear-gradient(135deg, #000428, #004e92)', purchased: false, active: false},
+                {id: 'theme17', type: 'theme', name: 'Градиент Синего Моря', price: 1700, gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)', purchased: false, active: false},
+                {id: 'theme18', type: 'theme', name: 'Градиент Лавандового Поля', price: 1800, gradient: 'linear-gradient(135deg, #d4fc79, #96e6a1)', purchased: false, active: false},
+                {id: 'theme19', type: 'theme', name: 'Градиент Розового Гриба', price: 1900, gradient: 'linear-gradient(135deg, #ffecd2, #fcb69f)', purchased: false, active: false},
+                {id: 'theme20', type: 'theme', name: 'Градиент Пурпурного Заката', price: 2000, gradient: 'linear-gradient(135deg, #c31432, #240b36)', purchased: false, active: false},
+                // Добавьте дополнительные темы до 30 аналогично
+                {id: 'theme21', type: 'theme', name: 'Градиент Морской Волны', price: 2100, gradient: 'linear-gradient(135deg, #00b4db, #0083b0)', purchased: false, active: false},
+                {id: 'theme22', type: 'theme', name: 'Градиент Зеленого Луга', price: 2200, gradient: 'linear-gradient(135deg, #a8e063, #56ab2f)', purchased: false, active: false},
+                {id: 'theme23', type: 'theme', name: 'Градиент Лазурного Неба', price: 2300, gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)', purchased: false, active: false},
+                {id: 'theme24', type: 'theme', name: 'Градиент Тропического Заката', price: 2400, gradient: 'linear-gradient(135deg, #ff9a9e, #fecfef)', purchased: false, active: false},
+                {id: 'theme25', type: 'theme', name: 'Градиент Фиолетового Океана', price: 2500, gradient: 'linear-gradient(135deg, #654ea3, #eaafc8)', purchased: false, active: false},
+                {id: 'theme26', type: 'theme', name: 'Градиент Золотого Солнца', price: 2600, gradient: 'linear-gradient(135deg, #f7971e, #ffd200)', purchased: false, active: false},
+                {id: 'theme27', type: 'theme', name: 'Градиент Сияющего Бриллианта', price: 2700, gradient: 'linear-gradient(135deg, #1f4037, #99f2c8)', purchased: false, active: false},
+                {id: 'theme28', type: 'theme', name: 'Градиент Розового Рассвета', price: 2800, gradient: 'linear-gradient(135deg, #ffafbd, #ffc3a0)', purchased: false, active: false},
+                {id: 'theme29', type: 'theme', name: 'Градиент Серебряного Луны', price: 2900, gradient: 'linear-gradient(135deg, #bdc3c7, #2c3e50)', purchased: false, active: false},
+                {id: 'theme30', type: 'theme', name: 'Градиент Янтарного Солнца', price: 3000, gradient: 'linear-gradient(135deg, #fceabb, #f8b500)', purchased: false, active: false}
             ]
         };
         
@@ -997,14 +1160,16 @@
             daily: [
                 { id: 'day1', name: 'День 1', reward: 100, claimed: false },
                 { id: 'day2', name: 'День 2', reward: 200, claimed: false },
-                { id: 'day3', name: 'День 3', reward: 300, claimed: false }
+                { id: 'day3', name: 'День 3', reward: 300, claimed: false },
+                // Добавьте дополнительные ежедневные награды, если необходимо
             ],
             achievements: [
                 { id: 'score100', name: 'Набрать 100 очков', reward: 50, progress: 0, target: 100, completed: false },
                 { id: 'score500', name: 'Набрать 500 очков', reward: 150, progress: 0, target: 500, completed: false },
                 { id: 'matches10', name: 'Соединить 10 пар', reward: 100, progress: 0, target: 10, completed: false },
                 { id: 'score1000', name: 'Набрать 1000 очков', reward: 200, progress: 0, target: 1000, completed: false },
-                { id: 'matches20', name: 'Соединить 20 пар', reward: 200, progress: 0, target: 20, completed: false }
+                { id: 'matches20', name: 'Соединить 20 пар', reward: 200, progress: 0, target: 20, completed: false },
+                // Добавьте дополнительные достижения до 30, если необходимо
             ]
         };
         
@@ -1030,9 +1195,14 @@
                     </div>
                     <p>${item.price}💲</p>
                     ${item.purchased ? 
-                        `<button class="apply-btn ${item.active ? 'active' : ''}" data-id="${item.id}">
+                        `
+                        <button class="apply-btn ${item.active ? 'active' : ''}" data-id="${item.id}">
                             ${item.active ? 'Активно' : 'Применить'}
-                        </button>` :
+                        </button>
+                        <button class="disable-bg-btn" data-id="${item.id}" style="margin-top: 5px; padding: 5px 10px; font-size: 12px; background: #444; color: #ffcc00; border: none; border-radius: 15px; cursor: pointer;">
+                            Отключить фон
+                        </button>
+                        ` :
                         `<button class="buy-btn ${balance >= item.price ? '' : 'disabled'}" ${balance >= item.price ? '' : 'disabled'} data-id="${item.id}">
                             ${balance >= item.price ? 'Купить' : 'Недостаточно💲'}
                         </button>`
@@ -1058,7 +1228,7 @@
         }
         
         // Функция для применения темы
-        function toggleItem(item) {
+        function applyTheme(item) {
             if (!item.purchased) return;
         
             // Деактивируем все темы
@@ -1080,6 +1250,23 @@
             localStorage.setItem('activeTheme', item.id);
             
             renderShopItems(); // Обновляем магазин, чтобы отразить изменения
+        }
+        
+        // Функция для отключения фона на конкретном товаре
+        function disableBackgroundOnItem(itemId) {
+            const item = shopItems.themes.find(theme => theme.id === itemId);
+            if (item && item.active) {
+                item.active = false;
+                const gameContainer = document.getElementById('gameContainer');
+                if (gameContainer) {
+                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)'; // Возвращаем прозрачный фон
+                }
+                showNotification(`Фон для "${item.name}" отключен.`);
+                localStorage.removeItem('activeTheme');
+                renderShopItems();
+            } else {
+                showNotification(`Фон для "${item.name}" уже отключен.`);
+            }
         }
         
         // Инициализация магазина
@@ -1105,6 +1292,8 @@
                 
                 const rewardElement = document.createElement('div');
                 rewardElement.className = 'reward-item';
+                rewardElement.style.marginBottom = '15px';
+                rewardElement.style.animation = 'fadeIn 1s';
                 
                 if (type === 'daily') {
                     // Задания на день с задержкой открытия
@@ -1154,33 +1343,34 @@
                         renderShopItems(); // Обновляем баланс
                         renderRewards(rewardType);
                         localStorage.setItem('balance', balance);
-                        updateBalanceInGame();
-                        updateScoreDisplay();
                     }
                 });
             });
         }
         
-        // Инициализация обработчиков магазина
+        // Инициализация обработчиков магазина и отключения фона
         function initShopHandlers() {
             const shopItemsContainer = document.querySelector('.shop-items');
             if (!shopItemsContainer) return;
             
             shopItemsContainer.addEventListener('click', (e) => {
                 const button = e.target;
-                if (!button.matches('.buy-btn, .apply-btn')) return;
-        
-                const itemContainer = button.closest('.shop-item');
-                if (!itemContainer) return;
-        
-                const itemId = itemContainer.dataset.id;
-                const itemIndex = shopItems.themes.findIndex(item => item.id === itemId);
-                const item = shopItems.themes[itemIndex];
-        
-                if (button.classList.contains('buy-btn')) {
-                    buyItem(item, itemIndex);
-                } else if (button.classList.contains('apply-btn')) {
-                    toggleItem(item);
+                if (button.matches('.buy-btn')) {
+                    const itemId = button.dataset.id;
+                    const item = shopItems.themes.find(t => t.id === itemId);
+                    const itemIndex = shopItems.themes.findIndex(t => t.id === itemId);
+                    if (item) {
+                        buyItem(item, itemIndex);
+                    }
+                } else if (button.matches('.apply-btn')) {
+                    const itemId = button.dataset.id;
+                    const item = shopItems.themes.find(t => t.id === itemId);
+                    if (item) {
+                        applyTheme(item);
+                    }
+                } else if (button.matches('.disable-bg-btn')) {
+                    const itemId = button.dataset.id;
+                    disableBackgroundOnItem(itemId);
                 }
             });
         }
@@ -1201,14 +1391,6 @@
             }, 3000);
         }
         
-        // Функция обновления баланса в магазине
-        function updateBalanceInGame() {
-            const balanceElement = document.getElementById('balance');
-            if (balanceElement) {
-                balanceElement.textContent = `Баланс: ${balance}💲`;
-            }
-        }
-
         // Инициализация игры
         function initGame() {
             initShop();
@@ -1238,7 +1420,7 @@
             if (savedThemeId) {
                 const savedTheme = shopItems.themes.find(theme => theme.id === savedThemeId);
                 if (savedTheme && savedTheme.purchased) {
-                    toggleItem(savedTheme);
+                    applyTheme(savedTheme);
                 }
             }
 
@@ -1289,7 +1471,7 @@
             initGame();
         }
         
-        // Массив фруктов с уникальными цветами
+        // Массив фруктов с уникальными цветами (расширен до 30)
         const fruits = [
             { name: 'Фрукт 1', color: '#ff6b6b', size: 40, score: 10, density: 0.001 },
             { name: 'Фрукт 2', color: '#ff69b4', size: 45, score: 20, density: 0.002 },
@@ -1300,7 +1482,27 @@
             { name: 'Фрукт 7', color: '#ffd700', size: 70, score: 70, density: 0.007 },
             { name: 'Фрукт 8', color: '#00ced1', size: 75, score: 80, density: 0.008 },
             { name: 'Фрукт 9', color: '#dda0dd', size: 80, score: 90, density: 0.009 },
-            { name: 'Фрукт 10', color: '#ff4500', size: 85, score: 100, density: 0.010 }
+            { name: 'Фрукт 10', color: '#ff4500', size: 85, score: 100, density: 0.010 },
+            { name: 'Фрукт 11', color: '#a29bfe', size: 90, score: 110, density: 0.011 },
+            { name: 'Фрукт 12', color: '#74b9ff', size: 95, score: 120, density: 0.012 },
+            { name: 'Фрукт 13', color: '#55efc4', size: 100, score: 130, density: 0.013 },
+            { name: 'Фрукт 14', color: '#ffeaa7', size: 105, score: 140, density: 0.014 },
+            { name: 'Фрукт 15', color: '#fab1a0', size: 110, score: 150, density: 0.015 },
+            { name: 'Фрукт 16', color: '#ff7675', size: 115, score: 160, density: 0.016 },
+            { name: 'Фрукт 17', color: '#fdcb6e', size: 120, score: 170, density: 0.017 },
+            { name: 'Фрукт 18', color: '#55efc4', size: 125, score: 180, density: 0.018 },
+            { name: 'Фрукт 19', color: '#81ecec', size: 130, score: 190, density: 0.019 },
+            { name: 'Фрукт 20', color: '#74b9ff', size: 135, score: 200, density: 0.020 },
+            { name: 'Фрукт 21', color: '#a29bfe', size: 140, score: 210, density: 0.021 },
+            { name: 'Фрукт 22', color: '#dfe6e9', size: 145, score: 220, density: 0.022 },
+            { name: 'Фрукт 23', color: '#00b894', size: 150, score: 230, density: 0.023 },
+            { name: 'Фрукт 24', color: '#fdcb6e', size: 155, score: 240, density: 0.024 },
+            { name: 'Фрукт 25', color: '#ffeaa7', size: 160, score: 250, density: 0.025 },
+            { name: 'Фрукт 26', color: '#ff7675', size: 165, score: 260, density: 0.026 },
+            { name: 'Фрукт 27', color: '#a29bfe', size: 170, score: 270, density: 0.027 },
+            { name: 'Фрукт 28', color: '#55efc4', size: 175, score: 280, density: 0.028 },
+            { name: 'Фрукт 29', color: '#74b9ff', size: 180, score: 290, density: 0.029 },
+            { name: 'Фрукт 30', color: '#dfe6e9', size: 185, score: 300, density: 0.030 }
         ];
         
         // Индексы текущего и следующего фруктов
@@ -1522,8 +1724,12 @@
                                 updateCollection();
                             }
                             
-                            updateBalance(newIndex);
-                            updateAchievements(fruits[newIndex].score);
+                            // Убираем получение денег за объединение
+                            // balance += fruits[newIndex].score;
+                            // localStorage.setItem('balance', balance);
+                            // updateBalanceInGame();
+                            
+                            // Добавляем только деньги за достижение (будет реализовано через награды)
                         }
                     }
                 }
@@ -1535,17 +1741,9 @@
             return Math.max(...Array.from(unlockedFruits));
         }
         
-        // Обновление баланса и очков
-        function updateBalance(newIndex) {
-            balance += fruits[newIndex].score;
-            localStorage.setItem('balance', balance);
-            updateBalanceInGame();
-            updateScoreDisplay();
-            showNotification(`Вы заработали ${fruits[newIndex].score}💲!`);
-        }
-        
         // Обновление достижений
         function updateAchievements(points) {
+            // Логика обновления достижений
             const scoreAchievements = rewards.achievements.filter(a => a.id.startsWith('score'));
             scoreAchievements.forEach(achievement => {
                 if (!achievement.completed) {
@@ -1661,7 +1859,8 @@
             shopOpen = false;
             leaderboardOpen = false;
             document.getElementById('menuOverlay').style.display = 'none';
-            document.getElementById('leaderboardContent').style.display = 'none'; // Убедитесь, что скрываем соответствующий контент
+            document.getElementById('leaderboardContent').style.display = 'none'; // Скрываем соответствующий контент
+            document.getElementById('statsContent')?.style.display = 'none'; // Скрываем статистику, если она была открыта
         });
         
         // Обработчики для вкладок меню
@@ -1772,21 +1971,11 @@
 
         // Обновление статистики
         function updateStats() {
-            // Добавьте элементы для отображения статистики, если необходимо
-            // Пример:
-            /*
-            <div class="stats-container">
-                <div class="stat-item">
-                    <span>Всего игр:</span>
-                    <span id="totalGames">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Лучший результат:</span>
-                    <span id="bestScore">0💲</span>
-                </div>
-            </div>
-            */
-            // В текущем коде такие элементы отсутствуют, поэтому этот функционал можно удалить или добавить соответствующие элементы в HTML.
+            // Добавим отображение максимального количества очков
+            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            if (leaderboard.length === 0) return;
+            const maxScore = Math.max(...leaderboard.map(player => player.score));
+            showNotification(`Ваш лучший результат: ${maxScore}💲`);
         }
 
         // Функция для скачивания рейтинга как TXT-файл
@@ -1853,34 +2042,9 @@
             leaderboardList.appendChild(userElement);
         }
 
-        // Система уведомлений (toasts) уже реализована выше
-
-        // Функция для отключения фона на конкретном товаре
-        function disableBackgroundOnItem(itemId) {
-            const item = shopItems.themes.find(theme => theme.id === itemId);
-            if (item && item.active) {
-                item.active = false;
-                const gameContainer = document.getElementById('gameContainer');
-                if (gameContainer) {
-                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)'; // Возвращаем прозрачный фон
-                }
-                showNotification(`Фон для "${item.name}" отключен.`);
-                localStorage.removeItem('activeTheme');
-                renderShopItems();
-            }
-        }
-
-        // Функция для обновления системы очков
-        function updateScoreDisplay() {
-            // В текущем коде отсутствует отображение очков вне магазина.
-            // Если необходимо, можно добавить счётчик в интерфейс.
-            // Например, восстановить скрытый элемент #score:
-            /*
-            const scoreElement = document.getElementById('score');
-            if (scoreElement) {
-                scoreElement.textContent = `Баланс: ${balance}💲`;
-            }
-            */
+        // Функция отображения статистики
+        function showStatistics() {
+            updateStats();
         }
 
         // Функция для рендеринга наград при переключении вкладок
@@ -1891,15 +2055,6 @@
                 }
             });
         });
-
-        // Функция для рендеринга наград при загрузке страницы
-        function renderInitialRewards() {
-            // Это уже реализовано в initGame()
-        }
-
-        // Функция отображения ТОП 10 и Мой рейтинг уже реализованы выше
-
-        // Функция отключения фона при применении темы добавлена выше
 
         // Инициализация всех функций
         function initializeGame() {
