@@ -21,7 +21,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            background: url('https://i.imgur.com/YourHalloweenBackground.jpg') no-repeat center center fixed; /* Реалистичный фон */
+            background: url('https://i.imgur.com/YourHalloweenBackground.jpg') no-repeat center center fixed; /* Замените на URL вашего фона */
             background-size: cover;
             touch-action: none;
             font-family: 'Creepster', cursive; /* Шрифт в стиле Хэллоуина */
@@ -98,9 +98,26 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
             margin-top: 20px;
-            border: 8px solid rgba(255, 140, 0, 0.7); /* Теплый оранжевый бордер */
+            border: 8px solid rgba(0, 140, 0, 0.7); /* Зеленый бордер */
             perspective: 1000px;
             transition: background 0.5s ease;
+        }
+        
+        /* Система очков */
+        #scoreDisplay {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 140, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 15px;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            text-align: center;
         }
         
         /* Анимации для элементов интерфейса */
@@ -114,196 +131,6 @@
             0% { box-shadow: 0 0 5px rgba(255,140,0,0.5); }
             50% { box-shadow: 0 0 20px rgba(255,140,0,0.8); }
             100% { box-shadow: 0 0 5px rgba(255,140,0,0.5); }
-        }
-        
-        /* Счетчик очков */
-        #score {
-            display: none; /* Скрыт из игрового интерфейса */
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 165, 0, 0.9); /* Оранжевый фон */
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 15px;
-            color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 2;
-            animation: pulse 0.3s ease;
-        }
-        
-        /* Текущий фрукт */
-        #currentFruit {
-            position: absolute;
-            top: 70px;
-            padding: 10px;
-            background: transparent; 
-            border-radius: 15px;
-            text-align: center;
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-        #currentFruit img {
-            width: 30px; 
-            height: 30px; 
-            display: block;
-            margin: 0 auto;
-            background: transparent; 
-        }
-        
-        /* Следующий фрукт */
-        #nextFruit {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 10px; 
-            background: rgba(0,0,0,0.7);
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            text-align: center;
-            transform: scale(0.6);
-            transform-origin: top right;
-        }
-        
-        #nextFruit img {
-            width: 30px; 
-            height: 30px; 
-            display: block;
-            margin: 0 auto 5px; 
-        }
-        
-        #nextFruit span {
-            font-size: 12px; 
-            font-weight: bold;
-            color: #ffcc00;
-            display: block;
-        }
-        
-        /* Контейнер для коллекции фруктов (Полоска ниже) */
-        #collectionContainer {
-            position: absolute;
-            bottom: 60px; /* Отступ снизу для размещения стрелок */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;  /* Уменьшено расстояние между фруктами */
-            background: rgba(0,0,0,0.7);
-            padding: 8px;  /* Уменьшено внутренние отступы */
-            border-radius: 15px;  
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            z-index: 1000;
-            overflow: hidden; /* Убираем стандартный скролл */
-            max-width: 85%; /* Ограничение максимальной ширины */
-        }
-        
-        /* Контейнер для списка фруктов */
-        .collectionList {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-        
-        /* Кнопки навигации для коллекции фруктов */
-        .collection-nav {
-            position: absolute;
-            bottom: 20px; /* Размещены ниже коллекции фруктов */
-            width: 30px;
-            height: 30px;
-            background: rgba(255, 140, 0, 0.8);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            transition: background 0.3s, transform 0.2s;
-        }
-        
-        .collection-nav:hover {
-            background: rgba(255, 165, 0, 0.9);
-            transform: scale(1.1);
-        }
-        
-        .left-nav {
-            left: 10px; /* Смещены внутрь контейнера */
-        }
-        
-        .right-nav {
-            right: 10px; /* Смещены внутрь контейнера */
-        }
-        
-        .collectionItem {
-            width: 30px;  /* Уменьшено размер */
-            height: 30px;
-            border-radius: 50%;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #666;
-            transition: transform 0.2s;
-            flex-shrink: 0;
-            position: relative;
-        }
-        
-        .collectionItem:hover {
-            transform: scale(1.1); 
-        }
-        
-        .collectionItem.locked {
-            background: #ddd;
-            cursor: not-allowed;
-        }
-        
-        /* Экран окончания игры */
-        #gameOverScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            z-index: 3000;
-            text-align: center;
-        }
-        
-        #gameOverScreen h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            animation: fadeInText 1s forwards;
-        }
-        
-        #gameOverScreen p {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        
-        #gameOverScreen button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.2s, background 0.3s;
-        }
-        
-        #gameOverScreen button:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
         }
         
         /* Контролы игры */
@@ -653,133 +480,61 @@
         }
 
         /* Адаптивность для мобильных устройств */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
+            /* Скрыть кнопки настроек, магазина и рейтинга */
+            #controls {
+                display: none;
+            }
+            
+            /* Игровое окно занимает весь экран */
             #gameContainer {
-                width: 95%;
-                height: 500px;
-                border: 6px solid rgba(255, 140, 0, 0.7);
+                width: 100%;
+                max-width: none;
+                height: 100vh;
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
             }
-
-            #score {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
-
-            #nextFruit {
-                width: 50px;
-                height: 50px;
-                transform: scale(0.5);
-            }
-
-            #nextFruit img {
-                width: 25px;
-                height: 25px;
-            }
-
-            #collectionContainer {
-                gap: 8px;
-                padding: 6px;
-                max-width: 85%;
-            }
-
-            .collectionItem {
-                width: 25px;
-                height: 25px;
-            }
-
-            .shop-item div {
-                height: 80px;
-            }
-
-            .shop-item p {
-                font-size: 12px;
-            }
-
-            .buy-btn, .apply-btn {
-                padding: 6px;
-                font-size: 12px;
-            }
-
-            .menu-content {
-                padding: 15px;
-            }
-
-            .menu-tab, .reward-tab {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-
-            .stat-item {
-                padding: 8px;
-                font-size: 14px;
-            }
-
-            .claim-btn {
-                font-size: 12px;
-                padding: 6px;
-            }
-
+            
+            /* Скрыть стрелки навигации коллекции */
             .collection-nav {
-                width: 25px;
-                height: 25px;
-                font-size: 16px;
+                display: none;
+            }
+            
+            /* Корректировка размера коллекции */
+            #collectionContainer {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                gap: 5px;
+                padding: 5px;
             }
         }
 
-        /* Стилизация системы рейтинга */
-        #leaderboard {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        #leaderboard h3 {
-            margin-bottom: 15px;
-            font-size: 24px;
-            color: #ffcc00;
-        }
-
-        #leaderboardList {
-            width: 100%;
-            max-width: 400px;
-            background: #444;
-            border-radius: 10px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
-
-        .leaderboard-item {
+        /* Стилизация кнопок рейтинга */
+        .leaderboard-buttons {
             display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            border-bottom: 1px solid #555;
-            color: white;
-        }
-
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-
-        .podium {
-            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
             justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
         }
 
-        .podium-place {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .leaderboard-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: #555;
             color: #ffcc00;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
             font-weight: bold;
         }
 
-        .podium-place img {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 5px;
+        .leaderboard-btn:hover {
+            background: #ff6600;
+            transform: scale(1.05);
+            color: white;
         }
     </style>
 </head>
@@ -793,6 +548,7 @@
 
     <!-- Контейнер игры -->
     <div id="gameContainer">
+        <div id="scoreDisplay">Очки: 0</div> <!-- Система очков в зеленой рамке -->
         <div id="boundary"></div>
         <div class="frame-3d"></div>
         <div id="controls">
@@ -800,7 +556,6 @@
             <button id="shopBtn" class="control-btn">🛍️</button>
             <button id="leaderboardBtn" class="control-btn">🏆</button>
         </div>
-        <div id="score">Баланс: 1000💲</div>
         <div id="currentFruit"></div>
         <div id="nextFruit"></div>
         <!-- Стрелки навигации для коллекции фруктов -->
@@ -814,32 +569,8 @@
         <div id="trajectoryLine"></div>
         <div id="gameOverScreen">
             <h2>Игра окончена!</h2>
-            <p>Ваши очки: <span id="finalScore">0💲</span></p>
+            <p>Ваш баланс: <span id="finalScore">0💲</span></p>
             <button onclick="restartGame()">Играть снова</button>
-        </div>
-        <!-- Система рейтинга -->
-        <div id="leaderboard">
-            <h3>Лучшие игроки</h3>
-            <div id="leaderboardList">
-                <!-- Рейтинги будут динамически добавляться сюда -->
-            </div>
-            <button onclick="downloadLeaderboard()" style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 15px; background: #ff6600; color: white; cursor: pointer; transition: background 0.3s;">
-                Скачать рейтинг
-            </button>
-            <div class="podium">
-                <div class="podium-place">
-                    <img src="https://i.imgur.com/1stPlace.png" alt="1 место">
-                    <span>1 место</span>
-                </div>
-                <div class="podium-place">
-                    <img src="https://i.imgur.com/2ndPlace.png" alt="2 место">
-                    <span>2 место</span>
-                </div>
-                <div class="podium-place">
-                    <img src="https://i.imgur.com/3rdPlace.png" alt="3 место">
-                    <span>3 место</span>
-                </div>
-            </div>
         </div>
     </div>
     
@@ -854,7 +585,7 @@
                 <button class="menu-tab active" data-tab="settings">⚙️ Настройки</button>
                 <button class="menu-tab" data-tab="shop">🛍️ Магазин</button>
                 <button class="menu-tab" data-tab="rewards">🏆 Награды</button>
-                <button class="menu-tab" data-tab="stats">📊 Рейтинг</button>
+                <button class="menu-tab" data-tab="leaderboard">🏅 Рейтинг</button>
             </div>
             
             <!-- Настройки -->
@@ -863,6 +594,7 @@
                 <div class="settings-options">
                     <button class="setting-btn" id="musicToggle">🎵 Музыка</button>
                     <button class="setting-btn" id="soundToggle">🔊 Звуки</button>
+                    <button class="toggle-btn" id="backgroundToggle">🖼️ Отключить фон</button>
                 </div>
             </div>
             
@@ -884,17 +616,31 @@
                 <div class="rewards-content"></div>
             </div>
             
-            <!-- Статистика -->
-            <div class="tab-content" id="statsContent" style="display: none">
-                <h3>Статистика</h3>
-                <div class="stats-container">
-                    <div class="stat-item">
-                        <span class="stat-label">Лучший счет:</span>
-                        <span class="stat-value" id="bestScore">0💲</span>
+            <!-- Рейтинг -->
+            <div class="tab-content" id="leaderboardContent" style="display: none">
+                <h3>Рейтинг</h3>
+                <div class="leaderboard-buttons">
+                    <button class="leaderboard-btn" onclick="showTop10()">ТОП 10</button>
+                    <button class="leaderboard-btn" onclick="showMyRating()">МОЙ РЕЙТИНГ</button>
+                </div>
+                <div id="leaderboardList">
+                    <!-- Рейтинги будут динамически добавляться сюда -->
+                </div>
+                <button onclick="downloadLeaderboard()" style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 15px; background: #ff6600; color: white; cursor: pointer; transition: background 0.3s;">
+                    Скачать рейтинг
+                </button>
+                <div class="podium">
+                    <div class="podium-place">
+                        <img src="https://i.imgur.com/1stPlace.png" alt="1 место">
+                        <span>1 место</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Всего игр:</span>
-                        <span class="stat-value" id="totalGames">0</span>
+                    <div class="podium-place">
+                        <img src="https://i.imgur.com/2ndPlace.png" alt="2 место">
+                        <span>2 место</span>
+                    </div>
+                    <div class="podium-place">
+                        <img src="https://i.imgur.com/3rdPlace.png" alt="3 место">
+                        <span>3 место</span>
                     </div>
                 </div>
             </div>
@@ -947,9 +693,26 @@
             showNotification(`Звуки ${isSoundOn ? 'включены' : 'выключены'}`);
         }
 
+        // Переключение фона
+        function toggleBackground() {
+            const body = document.body;
+            const backgroundToggleBtn = document.getElementById('backgroundToggle');
+            if (body.style.backgroundImage) {
+                body.style.backgroundImage = '';
+                backgroundToggleBtn.textContent = '🖼️ Включить фон';
+                showNotification('Фон отключён');
+            } else {
+                body.style.backgroundImage = "url('https://i.imgur.com/YourHalloweenBackground.jpg')"; // Замените на URL вашего фона
+                body.style.backgroundSize = 'cover';
+                backgroundToggleBtn.textContent = '🖼️ Отключить фон';
+                showNotification('Фон включён');
+            }
+        }
+
         // Обработчики кнопок настроек
         document.getElementById('musicToggle').addEventListener('click', toggleMusic);
         document.getElementById('soundToggle').addEventListener('click', toggleSound);
+        document.getElementById('backgroundToggle').addEventListener('click', toggleBackground);
 
         // Баланс пользователя
         let balance = parseInt(localStorage.getItem('balance')) || 1000; 
@@ -1126,6 +889,7 @@
                         renderRewards(rewardType);
                         showNotification(`Вы получили ${reward.reward}💲!`);
                         localStorage.setItem('balance', balance);
+                        updateScore(reward.reward); // Обновляем очки при получении награды
                     }
                 });
             });
@@ -1172,6 +936,13 @@
             }, 3000);
         }
         
+        // Функция обновления системы очков
+        function updateScore(points) {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            if (!scoreDisplay) return;
+            scoreDisplay.textContent = `Очки: ${balance}`;
+        }
+        
         // Инициализация игры
         function initGame() {
             initShop();
@@ -1179,6 +950,7 @@
             renderRewards('daily');
             updateNextFruit();
             updateCollection();
+            updateScore(0); // Инициализация очков
             
             // Автоматический выбор первой вкладки
             const firstTab = document.querySelector('.menu-tab');
@@ -1195,6 +967,29 @@
         
             // Инициализация обработчиков магазина
             initShopHandlers();
+
+            // Применение сохранённой темы
+            const savedThemeId = localStorage.getItem('activeTheme');
+            if (savedThemeId) {
+                const savedTheme = shopItems.themes.find(theme => theme.id === savedThemeId);
+                if (savedTheme && savedTheme.purchased) {
+                    toggleItem(savedTheme);
+                }
+            }
+
+            // Восстановление состояния наград
+            const savedRewards = JSON.parse(localStorage.getItem('rewards')) || rewards;
+            Object.keys(savedRewards).forEach(type => {
+                savedRewards[type].forEach((reward, index) => {
+                    rewards[type][index].claimed = reward.claimed;
+                    rewards[type][index].progress = reward.progress;
+                    rewards[type][index].completed = reward.completed;
+                });
+            });
+            localStorage.setItem('rewards', JSON.stringify(rewards));
+            if (document.querySelector('.reward-tab.active')) {
+                renderRewards(document.querySelector('.reward-tab.active').dataset.type);
+            }
         }
 
         // Запуск инициализации при загрузке страницы
@@ -1246,7 +1041,6 @@
         // Индексы текущего и следующего фруктов
         let currentFruitIndex = 0;
         let nextFruitIndex = 1;
-        let score = 0;
         let canDrop = true;
         let unlockedFruits = new Set([0, 1, 2, 3, 4]); // Начинаем с первых 5 фруктов
 
@@ -1364,16 +1158,6 @@
             document.getElementById('currentFruit').style.animation = 'glow 2s infinite'; 
         }
         
-        // Обновление счета
-        function updateScore(points) {
-            score += points;
-            const scoreElement = document.getElementById('score');
-            scoreElement.style.animation = 'none';
-            scoreElement.offsetHeight; 
-            scoreElement.style.animation = 'pulse 0.3s ease';
-            scoreElement.innerHTML = `Баланс: ${score}💲`;
-        }
-        
         // Обновление коллекции фруктов
         function updateCollection() {
             const collectionList = document.querySelector('.collectionList');
@@ -1471,7 +1255,8 @@
                                 updateCollection();
                             }
                             
-                            updateScore(fruits[newIndex].score);
+                            balance += fruits[newIndex].score; // Увеличиваем баланс
+                            updateScore(fruits[newIndex].score); // Обновляем очки
                             updateAchievements(fruits[newIndex].score);
                         }
                     }
@@ -1510,6 +1295,9 @@
             if (activeTab?.dataset.type === 'achievements') {
                 renderRewards('achievements');
             }
+
+            // Сохранение состояния наград
+            localStorage.setItem('rewards', JSON.stringify(rewards));
         }
         
         // Проверка окончания игры
@@ -1536,16 +1324,7 @@
         // Функция окончания игры
         function gameOver() {
             const gameOverScreen = document.getElementById('gameOverScreen');
-            document.getElementById('finalScore').textContent = `${score}💲`;
-            
-            const bestScoreElement = document.getElementById('bestScore');
-            if (bestScoreElement) {
-                const currentBest = parseInt(bestScoreElement.textContent) || 0;
-                if (score > currentBest) {
-                    bestScoreElement.textContent = `${score}💲`;
-                    showNotification('Новый рекорд!');
-                }
-            }
+            document.getElementById('finalScore').textContent = `${balance}💲`;
             
             gameOverScreen.style.display = 'flex';
             canDrop = false;
@@ -1554,7 +1333,8 @@
             updateStats();
             
             // Добавляем текущего пользователя в рейтинг
-            addToLeaderboard('Игрок', score); // Убираем отображение ника пользователя
+            const username = localStorage.getItem('username') || 'Игрок';
+            addToLeaderboard(username, balance);
         }
         
         // Функция перезапуска игры
@@ -1566,13 +1346,11 @@
                 }
             });
             
-            score = 0;
             canDrop = true;
             currentFruitIndex = getRandomFruitIndex();
             nextFruitIndex = getRandomFruitIndex();
             unlockedFruits = new Set([0, 1, 2, 3, 4]); // Сброс доступных фруктов, только первые 5
             
-            updateScore(0);
             updateNextFruit();
             updateCollection();
             document.getElementById('gameOverScreen').style.display = 'none';
@@ -1604,7 +1382,8 @@
             shopOpen = false;
             leaderboardOpen = false;
             document.getElementById('menuOverlay').style.display = 'none';
-            document.getElementById('leaderboard').style.display = 'none';
+            // Скрыть контент рейтинга
+            document.getElementById('leaderboardContent').style.display = 'none';
         });
         
         // Обработчики для вкладок меню
@@ -1624,7 +1403,10 @@
                 }
         
                 // Отображение баланса только в магазине
-                document.getElementById('balance').style.display = tab.dataset.tab === 'shop' ? 'block' : 'none';
+                const balanceDisplay = document.getElementById('balance');
+                if (balanceDisplay) {
+                    balanceDisplay.style.display = tab.dataset.tab === 'shop' ? 'block' : 'none';
+                }
             });
         });
         
@@ -1641,7 +1423,8 @@
             const collectionList = document.querySelector('.collectionList');
             const totalItems = collectionList.children.length;
             const itemWidth = 40; // Ширина элемента + отступ
-            const visibleItems = Math.floor(document.querySelector('#collectionContainer').clientWidth / itemWidth);
+            const containerWidth = document.querySelector('#collectionContainer').clientWidth;
+            const visibleItems = Math.floor(containerWidth / itemWidth);
             
             if (direction === 'left') {
                 collectionOffset = Math.min(collectionOffset + itemWidth, 0);
@@ -1656,13 +1439,13 @@
         function showLeaderboard() {
             leaderboardOpen = true;
             document.getElementById('menuOverlay').style.display = 'flex';
-            document.getElementById('leaderboard').style.display = 'flex';
-            fetchLeaderboard();
+            document.querySelector('[data-tab="leaderboard"]').click();
         }
 
         // Функция получения данных рейтинга (симуляция)
         function fetchLeaderboard() {
             const leaderboardList = document.getElementById('leaderboardList');
+            if (!leaderboardList) return;
             leaderboardList.innerHTML = '';
 
             // Получаем данные из localStorage
@@ -1695,7 +1478,7 @@
             });
         }
 
-        // Функция добавления игрока в рейтинг
+        // Функция для добавления игрока в рейтинг
         function addToLeaderboard(username, score) {
             const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
             leaderboard.push({ username, score });
@@ -1713,19 +1496,21 @@
             const totalGamesElement = document.getElementById('totalGames');
             const bestScoreElement = document.getElementById('bestScore');
 
-            let totalGames = parseInt(localStorage.getItem('totalGames')) || 0;
-            let bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
+            if (totalGamesElement && bestScoreElement) {
+                let totalGames = parseInt(localStorage.getItem('totalGames')) || 0;
+                let bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
 
-            totalGames += 1;
-            if (score > bestScore) {
-                bestScore = score;
+                totalGames += 1;
+                if (balance > bestScore) {
+                    bestScore = balance;
+                }
+
+                localStorage.setItem('totalGames', totalGames);
+                localStorage.setItem('bestScore', bestScore);
+
+                totalGamesElement.textContent = totalGames;
+                bestScoreElement.textContent = `${bestScore}💲`;
             }
-
-            localStorage.setItem('totalGames', totalGames);
-            localStorage.setItem('bestScore', bestScore);
-
-            totalGamesElement.textContent = totalGames;
-            bestScoreElement.textContent = `${bestScore}💲`;
         }
 
         // Функция для обновления баланса в магазине
@@ -1757,6 +1542,47 @@
             a.download = 'leaderboard.txt';
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        // Функция отображения ТОП 10
+        function showTop10() {
+            fetchLeaderboard();
+        }
+
+        // Функция отображения моего рейтинга
+        function showMyRating() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            if (!leaderboardList) return;
+            leaderboardList.innerHTML = '';
+
+            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            const username = localStorage.getItem('username') || 'Игрок';
+            // Сортируем по убыванию очков
+            leaderboard.sort((a, b) => b.score - a.score);
+            // Найти текущего пользователя
+            const userIndex = leaderboard.findIndex(player => player.username === username);
+            if (userIndex === -1) {
+                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
+                return;
+            }
+            const user = leaderboard[userIndex];
+            const rank = userIndex + 1;
+
+            const userElement = document.createElement('div');
+            userElement.className = 'leaderboard-item';
+            userElement.innerHTML = `
+                <span>${rank}. ${user.username}</span>
+                <span>${user.score}💲</span>
+            `;
+            // Выделение места пользователя
+            if (rank === 1) {
+                userElement.style.color = '#FFD700'; // Золотой
+            } else if (rank === 2) {
+                userElement.style.color = '#C0C0C0'; // Серебряный
+            } else if (rank === 3) {
+                userElement.style.color = '#CD7F32'; // Бронзовый
+            }
+            leaderboardList.appendChild(userElement);
         }
     </script>
 </body>
