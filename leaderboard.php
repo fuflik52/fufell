@@ -1,21 +1,73 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+// Разрешаем доступ только с определенного домена (для предотвращения CORS-проблем)
+header("Access-Control-Allow-Origin: https://fuflik52.github.io");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-// Путь к файлу рейтинга
-$leaderboardFile = 'leaderboard.txt';
+// Определяем путь к файлу для хранения данных рейтинга
+$file_path = 'leaderboard.txt';
 
-// Функция для получения рейтинга
-function getLeaderboard($file) {
-    if (!file_exists($file)) {
-        return [];
+// Проверяем, был ли получен POST-запрос с данными игрока
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Получаем JSON-данные из POST-запроса
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    // Проверяем, есть ли нужные данные
+    if (isset($input['username']) && isset($input['score'])) {
+        $username = htmlspecialchars($input['username']); // Экранируем данные для безопасности
+        $score = (int)$input['score']; // Убедимся, что очки - это целое число
+
+        // Считываем текущий рейтинг из файла
+        $leaderboard = [];
+        if (file_exists($file_path)) {
+            $lines = file($file_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                list($name, $points) = explode(":", $line);
+                $leaderboard[$name] = (int)$points;
+            }
+        }
+
+        // Обновляем очки игрока или добавляем его в рейтинг
+        if (isset($leaderboard[$username])) {
+            // Если у игрока уже есть запись, обновляем, если новый результат выше
+            if ($leaderboard[$username] < $score) {
+                $leaderboard[$username] = $score;
+            }
+        } else {
+            // Если игрока еще нет в рейтинге, добавляем
+            $leaderboard[$username] = $score;
+        }
+
+        // Сортируем рейтинг по убыванию очков
+        arsort($leaderboard);
+
+        // Сохраняем обновленный рейтинг в файл
+        $file_content = '';
+        foreach ($leaderboard as $name => $points) {
+            $file_content .= "$name:$points\n";
+        }
+        file_put_contents($file_path, $file_content);
     }
-    $data = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+}
+
+// Отправляем данные рейтинга в формате JSON
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $leaderboard = [];
-    foreach ($data as $line) {
-        list($username, $score) = explode(',', $line);
-        $leaderboard[] = ['username' => trim($username), 'score' => intval(trim($score))];
+
+    // Считываем данные из файла рейтинга
+    if (file_exists($file_path)) {
+        $lines = file($file_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            list($name, $points) = explode(":", $line);
+            $leaderboard[] = [
+                'username' => $name,
+                'score' => (int)$points
+            ];
+        }
     }
-    // Сортировка по убыванию очков
-    usort($leaderboard, function($a, $b) {
-       
+
+    // Возвращаем JSON-ответ
+    header('Content-Type: application/json');
+    echo json_encode($leaderboard);
+}
+?>
