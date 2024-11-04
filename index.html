@@ -100,8 +100,6 @@
             overflow: hidden;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
-            /* Убрана оранжевая обводка */
-            /* border: 8px solid rgba(255, 140, 0, 0.7); */ 
             perspective: 1000px;
             transition: background 0.5s ease;
         }
@@ -113,7 +111,7 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.7);
-            padding: 15px 15;
+            padding: 15px 15px;
             border-radius: 15px;
             color: #ffcc00;
             font-size: 24px;
@@ -160,9 +158,9 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            padding: 10px; 
+            padding: 25px; 
             background: rgba(0,0,0,0.7);
-            border-radius: 15px;
+            border-radius: 25px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
             text-align: center;
             transform: scale(0.6);
@@ -177,7 +175,7 @@
         }
         
         #nextFruit span {
-            font-size: 12px; 
+            font-size: 20px; 
             font-weight: bold;
             color: #ffcc00;
             display: block;
@@ -313,10 +311,9 @@
         .control-btn {
             background: rgba(0,0,0,0.7);
             border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
             color: white;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
@@ -324,10 +321,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-width: 80px;
+            text-align: center;
         }
         
         .control-btn:hover {
-            transform: scale(1.1);    
+            transform: scale(1.05);    
             background: rgba(255, 140, 0, 0.9); /* Оранжевый оттенок при наведении */
         }
         
@@ -449,6 +448,8 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
+            min-width: 100px;
+            text-align: center;
         }
         
         .menu-tab.active {
@@ -655,8 +656,6 @@
             #gameContainer {
                 width: 95%;
                 height: 500px;
-                /* Убрана оранжевая обводка */
-                /* border: 6px solid rgba(255, 140, 0, 0.7); */
             }
 
             #splashScreen h1 {
@@ -733,9 +732,10 @@
 
             /* Увеличение размеров кнопок контролов для удобства на мобильных */
             .control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 24px;
+                width: 100px;
+                height: 40px;
+                font-size: 16px;
+                padding: 10px;
             }
 
             /* Увеличение зоны кликабельности кнопок настроек, магазина и рейтинга */
@@ -839,9 +839,7 @@
         <div id="boundary"></div>
         <div class="frame-3d"></div>
         <div id="controls">
-            <button id="settingsBtn" class="control-btn">⚙️</button>
-            <button id="shopBtn" class="control-btn">🛍️</button>
-            <button id="leaderboardBtn" class="control-btn">🏆</button>
+            <button id="settingsBtn" class="control-btn">Настройки</button>
         </div>
         <div id="currentFruit"></div>
         <div id="nextFruit"></div>
@@ -869,10 +867,10 @@
         <div class="menu-content">
             <button class="close-btn">✕</button>
             <div class="menu-tabs">
-                <button class="menu-tab active" data-tab="settings">⚙️ Настройки</button>
-                <button class="menu-tab" data-tab="shop">🛍️ Магазин</button>
-                <button class="menu-tab" data-tab="rewards">🏆 Награды</button>
-                <button class="menu-tab" data-tab="leaderboard">🏅 Рейтинг</button>
+                <button class="menu-tab active" data-tab="settings">Настройки</button>
+                <button class="menu-tab" data-tab="shop">Магазин</button>
+                <button class="menu-tab" data-tab="rewards">Награды</button>
+                <button class="menu-tab" data-tab="leaderboard">Рейтинг</button>
             </div>
             
             <!-- Настройки -->
@@ -1987,4 +1985,3 @@
     </script>
 </body>
 </html>
-
