@@ -832,8 +832,8 @@
         <div id="currentFruit"></div>
         <div id="nextFruit"></div>
         <!-- Стрелки навигации для коллекции фруктов -->
-        <button class="collection-nav left-nav" onclick="scrollCollection('left')">◀️</button>
-        <button class="collection-nav right-nav" onclick="scrollCollection('right')">▶️</button>
+        <button class="collection-nav left-nav">◀️</button>
+        <button class="collection-nav right-nav">▶️</button>
         <div id="collectionContainer">
             <div class="collectionList">
                 <!-- Фрукты будут динамически добавляться сюда -->
@@ -1708,7 +1708,7 @@
         // Обработчик открытия меню
         const menuBtn = document.getElementById('menuBtn');
         if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
+            menuBtn.addEventListener('pointerdown', () => {
                 toggleMenu();
             });
         } else {
@@ -1718,7 +1718,7 @@
         // Обработчик закрытия меню
         const closeBtn = document.querySelector('.close-btn');
         if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
+            closeBtn.addEventListener('pointerdown', () => {
                 toggleMenu();
             });
         } else {
@@ -1740,7 +1740,7 @@
         const menuTabs = document.querySelectorAll('.menu-tab');
         if (menuTabs.length > 0) {
             menuTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
+                tab.addEventListener('pointerdown', () => {
                     document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
                     
@@ -2071,13 +2071,13 @@
             const soundToggleBtn = document.getElementById('soundToggle');
             const backgroundToggleBtn = document.getElementById('backgroundToggle');
 
-            if (musicToggleBtn) musicToggleBtn.addEventListener('click', toggleMusic);
+            if (musicToggleBtn) musicToggleBtn.addEventListener('pointerdown', toggleMusic);
             else console.warn('Element with ID "musicToggle" not found.');
 
-            if (soundToggleBtn) soundToggleBtn.addEventListener('click', toggleSound);
+            if (soundToggleBtn) soundToggleBtn.addEventListener('pointerdown', toggleSound);
             else console.warn('Element with ID "soundToggle" not found.');
 
-            if (backgroundToggleBtn) backgroundToggleBtn.addEventListener('click', toggleBackground);
+            if (backgroundToggleBtn) backgroundToggleBtn.addEventListener('pointerdown', toggleBackground);
             else console.warn('Element with ID "backgroundToggle" not found.');
         });
     </script>
@@ -2098,7 +2098,7 @@
             // Обработчик кнопки "Начать игру"
             const startGameBtn = document.getElementById('startGameBtn');
             if (startGameBtn) {
-                startGameBtn.addEventListener('click', () => {
+                startGameBtn.addEventListener('pointerdown', () => {
                     startGame();
                 });
             } else {
