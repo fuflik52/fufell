@@ -22,7 +22,7 @@
             align-items: center;
             justify-content: center; /* Центрирование по вертикали */
             min-height: 100vh;
-            background: url('https://i.imgur.com/YourHalloweenBackground.jpg') no-repeat center center fixed; /* Реалистичный фон */
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* Градиент */
             background-size: cover;
             touch-action: manipulation;
             font-family: 'Creepster', cursive; /* Шрифт в стиле Хэллоуина */
@@ -1806,158 +1806,159 @@
             
             collectionList.style.transform = `translateX(${collectionOffset}px)`;
         }
+// Функция показа рейтинга
+function showLeaderboard() {
+    leaderboardOpen = true;
+    const menuOverlay = document.getElementById('menuOverlay');
+    const leaderboardTab = document.querySelector('[data-tab="leaderboard"]');
+    if (menuOverlay && leaderboardTab) {
+        menuOverlay.style.display = 'flex';
+        leaderboardTab.click();
+        fetchLeaderboard();
+    } else {
+        console.error('Элемент menuOverlay или вкладка "leaderboard" не найдены.');
+    }
+}
 
-        // Функция показа рейтинга
-        function showLeaderboard() {
-            leaderboardOpen = true;
-            const menuOverlay = document.getElementById('menuOverlay');
-            const leaderboardTab = document.querySelector('[data-tab="leaderboard"]');
-            if (menuOverlay && leaderboardTab) {
-                menuOverlay.style.display = 'flex';
-                leaderboardTab.click();
-                fetchLeaderboard();
-            } else {
-                console.error('Элемент menuOverlay или вкладка "leaderboard" не найдены.');
-            }
+// Функция получения данных рейтинга
+function fetchLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    if (!leaderboardList) {
+        console.error('Элемент leaderboardList не найден.');
+        return;
+    }
+    leaderboardList.innerHTML = '';
+
+    // Получаем данные из localStorage
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    // Сортируем по убыванию очков
+    leaderboard.sort((a, b) => b.score - a.score);
+    // Присваиваем ранги
+    leaderboard.forEach((player, index) => {
+        player.rank = index + 1;
+    });
+
+    // Отображаем всех игроков, а не только одного
+    leaderboard.forEach(player => {
+        const item = document.createElement('div');
+        item.className = 'leaderboard-item';
+        item.innerHTML = `
+            <span>${player.rank}. ${player.username}</span>
+            <span>${player.score}💲</span>
+        `;
+        // Выделение первых трех мест
+        if (player.rank === 1) {
+            item.style.color = '#FFD700'; // Золотой
+        } else if (player.rank === 2) {
+            item.style.color = '#C0C0C0'; // Серебряный
+        } else if (player.rank === 3) {
+            item.style.color = '#CD7F32'; // Бронзовый
         }
+        leaderboardList.appendChild(item);
+    });
+}
 
-        // Функция получения данных рейтинга (симуляция)
-        function fetchLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
+// Функция для добавления игрока в рейтинг
+function addToLeaderboard(username, score) {
+    // Получаем текущий список игроков из localStorage или создаем новый массив
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
-            // Получаем данные из localStorage
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-            // Берём топ-10
-            const top10 = leaderboard.slice(0, 10);
+    // Проверяем, есть ли уже игрок с этим ником
+    const existingPlayerIndex = leaderboard.findIndex(player => player.username === username);
 
-            top10.forEach(player => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                item.innerHTML = `
-                    <span>${player.rank}. ${player.username}</span>
-                    <span>${player.score}💲</span>
-                `;
-                // Выделение первых трех мест
-                if (player.rank === 1) {
-                    item.style.color = '#FFD700'; // Золотой
-                } else if (player.rank === 2) {
-                    item.style.color = '#C0C0C0'; // Серебряный
-                } else if (player.rank === 3) {
-                    item.style.color = '#CD7F32'; // Бронзовый
-                }
-                leaderboardList.appendChild(item);
-            });
+    if (existingPlayerIndex !== -1) {
+        // Обновляем очки, если новый результат выше текущего
+        if (leaderboard[existingPlayerIndex].score < score) {
+            leaderboard[existingPlayerIndex].score = score;
         }
+    } else {
+        // Добавляем нового игрока
+        leaderboard.push({ username, score });
+    }
 
-        // Функция для добавления игрока в рейтинг
-        function addToLeaderboard(username, score) {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.push({ username, score });
-            // Сортируем и присваиваем ранги
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-            // Сохраняем обратно
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        }
+    // Сортируем по убыванию очков
+    leaderboard.sort((a, b) => b.score - a.score);
 
-        // Обновление статистики
-        function updateStats() {
-            // Добавьте элементы для отображения статистики, если необходимо
-            // Пример:
-            /*
-            <div class="stats-container">
-                <div class="stat-item">
-                    <span>Всего игр:</span>
-                    <span id="totalGames">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Лучший результат:</span>
-                    <span id="bestScore">0💲</span>
-                </div>
-            </div>
-            */
-            // В текущем коде такие элементы отсутствуют, поэтому этот функционал можно удалить или добавить соответствующие элементы в HTML.
-        }
+    // Присваиваем ранги
+    leaderboard.forEach((player, index) => {
+        player.rank = index + 1;
+    });
 
-        // Функция для скачивания рейтинга как TXT-файл
-        function downloadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-            const top10 = leaderboard.slice(0, 10);
+    // Сохраняем обратно в localStorage
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+}
 
-            let content = 'Топ-10 игроков:\n';
-            top10.forEach(player => {
-                content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
-            });
+// Обновление статистики
+function updateStats() {
+    // Здесь можно добавить элементы для отображения статистики, если необходимо
+}
 
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'leaderboard.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+// Функция для скачивания рейтинга как TXT-файл
+function downloadLeaderboard() {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard.forEach((player, index) => {
+        player.rank = index + 1;
+    });
 
-        // Функция отображения ТОП 10
-        function showTop10() {
-            fetchLeaderboard();
-        }
+    let content = 'Топ игроков:\n';
+    leaderboard.forEach(player => {
+        content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
+    });
 
-        // Функция отображения моего рейтинга
-        function showMyRating() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'leaderboard.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            const username = localStorage.getItem('username') || 'Игрок';
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Найти текущего пользователя
-            const userIndex = leaderboard.findIndex(player => player.username === username);
-            if (userIndex === -1) {
-                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
-                return;
-            }
-            const user = leaderboard[userIndex];
-            const rank = userIndex + 1;
+// Функция отображения ТОП 10
+function showTop10() {
+    fetchLeaderboard();
+}
 
-            const userElement = document.createElement('div');
-            userElement.className = 'leaderboard-item';
-            userElement.innerHTML = `
-                <span>${rank}. ${user.username}</span>
-                <span>${user.score}💲</span>
-            `;
-            // Выделение места пользователя
-            if (rank === 1) {
-                userElement.style.color = '#FFD700'; // Золотой
-            } else if (rank === 2) {
-                userElement.style.color = '#C0C0C0'; // Серебряный
-            } else if (rank === 3) {
-                userElement.style.color = '#CD7F32'; // Бронзовый
-            }
-            leaderboardList.appendChild(userElement);
-        }
+// Функция отображения моего рейтинга
+function showMyRating() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    if (!leaderboardList) {
+        console.error('Элемент leaderboardList не найден.');
+        return;
+    }
+    leaderboardList.innerHTML = '';
+
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    const username = localStorage.getItem('username') || 'Игрок';
+    // Сортируем по убыванию очков
+    leaderboard.sort((a, b) => b.score - a.score);
+    // Найти текущего пользователя
+    const userIndex = leaderboard.findIndex(player => player.username === username);
+    if (userIndex === -1) {
+        leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
+        return;
+    }
+    const user = leaderboard[userIndex];
+    const rank = userIndex + 1;
+
+    const userElement = document.createElement('div');
+    userElement.className = 'leaderboard-item';
+    userElement.innerHTML = `
+        <span>${rank}. ${user.username}</span>
+        <span>${user.score}💲</span>
+    `;
+    // Выделение места пользователя
+    if (rank === 1) {
+        userElement.style.color = '#FFD700'; // Золотой
+    } else if (rank === 2) {
+        userElement.style.color = '#C0C0C0'; // Серебряный
+    } else if (rank === 3) {
+        userElement.style.color = '#CD7F32'; // Бронзовый
+    }
+    leaderboardList.appendChild(userElement);
+}
+
 
         // Функция для отключения фона на конкретном товаре
         function disableBackgroundOnItem(itemId) {
