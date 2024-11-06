@@ -549,6 +549,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             transition: transform 0.2s;
             flex-shrink: 0;
+            position: relative;
         }
         
         .shop-item:hover {
@@ -573,7 +574,7 @@
             color: #ffcc00;
         }
         
-        .buy-btn, .apply-btn {
+        .buy-btn, .activate-btn, .apply-btn {
             width: 100%;
             padding: 8px;
             margin-top: 10px;
@@ -589,6 +590,11 @@
         
         .buy-btn:hover:not(.disabled) {
             background: #ff4500;
+            transform: scale(1.05);
+        }
+        
+        .activate-btn:hover:not(.active) {
+            background: #ffaa00;
             transform: scale(1.05);
         }
         
@@ -853,6 +859,27 @@
             width: 40px;
             height: 40px;
         }
+
+        /* Анимация объединения фруктов */
+        .combine-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff6600;
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0;
+            animation: combineEffect 0.5s forwards;
+            pointer-events: none;
+            z-index: 4000;
+        }
+
+        @keyframes combineEffect {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -885,7 +912,7 @@
         <div id="gameOverScreen">
             <h2>Игра окончена!</h2>
             <p>Ваш баланс: <span id="finalScore">0💲</span></p>
-            <button onclick="restartGame()">Играть снова</button>
+            <button id="restartGameBtn">Играть снова</button>
         </div>
     </div>
     
@@ -910,7 +937,8 @@
                 <div class="settings-options">
                     <button class="setting-btn" id="musicToggle">🎵 Музыка</button>
                     <button class="setting-btn" id="soundToggle">🔊 Звуки</button>
-                    <button class="toggle-btn" id="backgroundToggle">🖼️ Отключить фон</button>
+                    <button class="toggle-btn" id="vibrationToggle">📱 Вибрация</button>
+                    <button class="toggle-btn" id="playAgainBtn">🔄 Играть заново</button>
                 </div>
             </div>
             
@@ -975,13 +1003,25 @@
         </div>
     </div>
 
+    <!-- Аудио элементы -->
+    <audio id="backgroundMusic" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-energy.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+    <audio id="combineSound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-16.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+
     <!-- Подключение библиотеки Matter.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
     <script>
         // Переменные для аудио
-        let bgMusic;
+        let bgMusic = document.getElementById('backgroundMusic');
+        let combineSound = document.getElementById('combineSound');
         let isMusicPlaying = false;
         let isSoundOn = true;
+        let isVibrationOn = true;
 
         // Баланс пользователя
         let balance = parseInt(localStorage.getItem('balance')) || 1000; 
@@ -991,7 +1031,7 @@
 
         // Массив тем магазина с фонами через CSS
         const shopItemsData = {
-            themes: [
+            themes: JSON.parse(localStorage.getItem('shopThemes')) || [
                 {id: 'theme1', type: 'theme', name: 'Градиент Космоса', price: 100, gradient: 'linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)', purchased: false, active: false},
                 {id: 'theme2', type: 'theme', name: 'Градиент Заката', price: 200, gradient: 'linear-gradient(135deg, #ff7f00, #ff4c4c)', purchased: false, active: false},
                 {id: 'theme3', type: 'theme', name: 'Градиент Океана', price: 300, gradient: 'linear-gradient(135deg, #004e92, #000428)', purchased: false, active: false},
@@ -1007,12 +1047,12 @@
         
         // Массив наград
         const rewardsData = {
-            daily: [
+            daily: JSON.parse(localStorage.getItem('dailyRewards')) || [
                 { id: 'day1', name: 'День 1', reward: 100, claimed: false },
                 { id: 'day2', name: 'День 2', reward: 200, claimed: false },
                 { id: 'day3', name: 'День 3', reward: 300, claimed: false }
             ],
-            achievements: [
+            achievements: JSON.parse(localStorage.getItem('achievementRewards')) || [
                 { id: 'score100', name: 'Набрать 100 очков', reward: 50, progress: 0, target: 100, completed: false },
                 { id: 'score500', name: 'Набрать 500 очков', reward: 150, progress: 0, target: 500, completed: false },
                 { id: 'matches10', name: 'Соединить 10 пар', reward: 100, progress: 0, target: 10, completed: false },
@@ -1036,7 +1076,12 @@
         let myPrizes = JSON.parse(localStorage.getItem('myPrizes')) || [];
 
         // Эффекты активных кейсов
-        let activeEffects = {};
+        let activeEffects = JSON.parse(localStorage.getItem('activeEffects')) || {};
+
+        // Функция для сохранения состояния магазина в localStorage
+        function saveShopData() {
+            localStorage.setItem('shopThemes', JSON.stringify(shopItemsData.themes));
+        }
 
         // Функция для рендеринга элементов магазина
         function renderShopItems() {
@@ -1063,8 +1108,8 @@
                     </div>
                     <p>${item.price}💲</p>
                     ${item.purchased ? 
-                        `<button class="apply-btn ${item.active ? 'active' : ''}" data-id="${item.id}">
-                            ${item.active ? 'Активно' : 'Применить'}
+                        `<button class="activate-btn ${item.active ? 'active' : ''}" data-id="${item.id}">
+                            ${item.active ? 'Активно' : 'Активировать'}
                         </button>` :
                         `<button class="buy-btn ${balance >= item.price ? '' : 'disabled'}" ${balance >= item.price ? '' : 'disabled'} data-id="${item.id}">
                             ${balance >= item.price ? 'Купить' : 'Недостаточно💲'}
@@ -1085,6 +1130,7 @@
                 renderShopItems();
                 updateBalanceInGame(); // Обновляем баланс в магазине
                 localStorage.setItem('balance', balance);
+                saveShopData(); // Сохраняем состояние магазина
             } else {
                 showNotification('Недостаточно средств для покупки.');
             }
@@ -1094,25 +1140,43 @@
         function toggleItem(item) {
             if (!item.purchased) return;
         
-            // Деактивируем все темы
-            shopItemsData.themes.forEach(theme => theme.active = false);
-            
-            // Активируем выбранную тему
-            item.active = true;
-            
-            // Применяем тему к контейнеру игры
-            const gameContainer = document.getElementById('gameContainer');
-            if (gameContainer) {
-                gameContainer.style.background = `${item.gradient}`;
+            if (!item.active) {
+                // Деактивируем все темы
+                shopItemsData.themes.forEach(theme => theme.active = false);
+                
+                // Активируем выбранную тему
+                item.active = true;
+                
+                // Применяем тему к контейнеру игры
+                const gameContainer = document.getElementById('gameContainer');
+                if (gameContainer) {
+                    gameContainer.style.background = `${item.gradient}`;
+                }
+                
+                // Показ уведомления о применении темы
+                showNotification(`Тема "${item.name}" применена.`);
+                
+                // Сохранение активной темы в localStorage
+                localStorage.setItem('activeTheme', item.id);
+            } else {
+                // Деактивируем тему
+                item.active = false;
+                
+                // Возвращаем стандартный фон
+                const gameContainer = document.getElementById('gameContainer');
+                if (gameContainer) {
+                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)';
+                }
+                
+                // Показ уведомления о деактивации темы
+                showNotification(`Тема "${item.name}" деактивирована.`);
+                
+                // Удаление активной темы из localStorage
+                localStorage.removeItem('activeTheme');
             }
             
-            // Показ уведомления о применении темы
-            showNotification(`Тема "${item.name}" применена.`);
-            
-            // Сохранение активной темы в localStorage
-            localStorage.setItem('activeTheme', item.id);
-            
             renderShopItems(); // Обновляем магазин, чтобы отразить изменения
+            saveShopData(); // Сохраняем состояние магазина
         }
         
         // Инициализация магазина
@@ -1193,7 +1257,7 @@
                         if (rewardType === 'daily') {
                             balance += reward.reward;
                         } else if (rewardType === 'achievements') {
-                            points += reward.reward; // Добавляем очки за достижения
+                            points += reward.reward * pointsMultiplier; // Добавляем очки за достижения с учетом множителя
                         }
                         reward.claimed = true;
                         showNotification(`Вы получили ${reward.reward}💲!`);
@@ -1202,6 +1266,12 @@
                         localStorage.setItem('balance', balance);
                         localStorage.setItem('points', points);
                         updatePointsDisplay(); // Обновляем отображение очков
+                        // Сохранение наград
+                        if (rewardType === 'daily') {
+                            localStorage.setItem('dailyRewards', JSON.stringify(rewardsData.daily));
+                        } else if (rewardType === 'achievements') {
+                            localStorage.setItem('achievementRewards', JSON.stringify(rewardsData.achievements));
+                        }
                     }
                 });
             });
@@ -1217,7 +1287,7 @@
             
             shopItemsContainer.addEventListener('click', (e) => {
                 const button = e.target;
-                if (!button.matches('.buy-btn, .apply-btn')) return;
+                if (!button.matches('.buy-btn, .activate-btn')) return;
         
                 const itemContainer = button.closest('.shop-item');
                 if (!itemContainer) {
@@ -1236,7 +1306,7 @@
         
                 if (button.classList.contains('buy-btn')) {
                     buyItem(item, itemIndex);
-                } else if (button.classList.contains('apply-btn')) {
+                } else if (button.classList.contains('activate-btn')) {
                     toggleItem(item);
                 }
             });
@@ -1382,25 +1452,30 @@
             initGame();
         }
 
-        // Массив фруктов с уникальными цветами
+        // Массив фруктов с уникальными цветами (увеличено до 15)
         const fruits = [
-            { name: 'Фрукт 1', color: '#FF3D00', size: 40, score: 10, density: 0.001 }, // Яркий неоновый красный
-            { name: 'Фрукт 2', color: '#FF4081', size: 50, score: 20, density: 0.002 }, // Яркий неоновый розовый
-            { name: 'Фрукт 3', color: '#00B0FF', size: 60, score: 30, density: 0.003 }, // Яркий неоновый голубой
-            { name: 'Фрукт 4', color: '#800000', size: 70, score: 40, density: 0.004 }, // Яркий неоновый желтый
-            { name: 'Фрукт 5', color: '#D4E157', size: 80, score: 50, density: 0.005 }, // Яркий неоновый зеленый
-            { name: 'Фрукт 6', color: '#76FF03', size: 90, score: 60, density: 0.006 }, // Яркий неоновый лаймовый
-            { name: 'Фрукт 7', color: '#FFD600', size: 100, score: 70, density: 0.007 }, // Яркий неоновый желтый
-            { name: 'Фрукт 8', color: '#00E5FF', size: 160, score: 80, density: 0.108 }, // Яркий неоновый циановый
-            { name: 'Фрукт 9', color: '#D5006D', size: 170, score: 90, density: 0.109 }, // Яркий неоновый пурпурный
-            { name: 'Фрукт 10', color: '#FF1744', size: 185, score: 100, density: 0.110 } // Яркий неоновый красный
+            { name: 'Фрукт 1', color: '#FF3D00', size: 40, score: 10, density: 0.001 },
+            { name: 'Фрукт 2', color: '#FF4081', size: 50, score: 20, density: 0.002 },
+            { name: 'Фрукт 3', color: '#00B0FF', size: 60, score: 30, density: 0.003 },
+            { name: 'Фрукт 4', color: '#800000', size: 70, score: 40, density: 0.004 },
+            { name: 'Фрукт 5', color: '#D4E157', size: 80, score: 50, density: 0.005 },
+            { name: 'Фрукт 6', color: '#76FF03', size: 90, score: 60, density: 0.006 },
+            { name: 'Фрукт 7', color: '#FFD600', size: 100, score: 70, density: 0.007 },
+            { name: 'Фрукт 8', color: '#00E5FF', size: 160, score: 80, density: 0.08 },
+            { name: 'Фрукт 9', color: '#D5006D', size: 170, score: 90, density: 0.09 },
+            { name: 'Фрукт 10', color: '#FF1744', size: 185, score: 100, density: 0.10 },
+            { name: 'Фрукт 11', color: '#8E44AD', size: 190, score: 110, density: 0.11 },
+            { name: 'Фрукт 12', color: '#2ECC71', size: 200, score: 120, density: 0.12 },
+            { name: 'Фрукт 13', color: '#F1C40F', size: 210, score: 130, density: 0.13 },
+            { name: 'Фрукт 14', color: '#E67E22', size: 220, score: 140, density: 0.14 },
+            { name: 'Фрукт 15', color: '#34495E', size: 230, score: 150, density: 0.15 }
         ];
         
         // Индексы текущего и следующего фруктов
         let currentFruitIndex = 0;
         let nextFruitIndex = 1;
         let canDrop = true;
-        let unlockedFruits = new Set([0, 1, 2, 3, 4]); // Начинаем с первых 5 фруктов
+        let unlockedFruits = new Set([0, 1, 2, 3, 4]); // Ограничение только первыми 5 фруктами
 
         // Настройка Matter.js
         const Engine = Matter.Engine,
@@ -1411,6 +1486,7 @@
             Events = Matter.Events;
         
         const engineInstance = Engine.create();
+        engineInstance.gravity.y = 1.2; // Увеличенная гравитация для усложнения игры
         const runner = Runner.create();
         Runner.run(runner, engineInstance); // Используем Matter.Runner.run вместо Engine.run
 
@@ -1464,7 +1540,7 @@
             if (!fruit) return null;
             
             const circle = Bodies.circle(x, y, (fruit.size / 2), {
-                restitution: 0.5,
+                restitution: 0.3, // Уменьшенная упругость для усложнения игры
                 friction: 0.8,
                 density: fruit.density,
                 fruitIndex: fruitIndex,
@@ -1630,11 +1706,32 @@
                 if (bodyA.fruitIndex !== undefined && bodyB.fruitIndex !== undefined) {
                     if (bodyA.fruitIndex === bodyB.fruitIndex) {
                         const newIndex = bodyA.fruitIndex + 1;
-                        if (newIndex < fruits.length) {
+                        if (newIndex < fruits.length && newIndex < 15) { // Ограничение до 15 фруктов
                             const midX = (bodyA.position.x + bodyB.position.x) / 2;
                             const midY = (bodyA.position.y + bodyB.position.y) / 2;
                             
                             World.remove(engineInstance.world, [bodyA, bodyB]);
+
+                            // Создание элемента анимации объединения
+                            const combineAnimation = document.createElement('div');
+                            combineAnimation.className = 'combine-animation';
+                            combineAnimation.textContent = 'Объединение!';
+                            document.body.appendChild(combineAnimation);
+                            setTimeout(() => {
+                                combineAnimation.remove();
+                            }, 500); // Длительность анимации
+
+                            // Воспроизведение звука объединения
+                            if (isSoundOn) {
+                                combineSound.currentTime = 0;
+                                combineSound.play();
+                            }
+
+                            // Вибрация при объединении
+                            if (isVibrationOn && navigator.vibrate) {
+                                navigator.vibrate(100); // Вибрация на 100 мс
+                            }
+                            
                             const newFruit = createFruit(midX, midY, newIndex);
                             if (newFruit) {
                                 World.add(engineInstance.world, newFruit);
@@ -1645,7 +1742,7 @@
                             }
                             
                             // Добавляем новый фрукт в коллекцию только если предыдущий уже открыт
-                            if (newIndex === getLastUnlockedIndex() + 1) {
+                            if (newIndex === getLastUnlockedIndex() + 1 && newIndex < 15) {
                                 unlockedFruits.add(newIndex);
                                 updateCollection();
                                 saveUnlockedFruits();
@@ -1666,7 +1763,7 @@
         
         // Обновление баланса и очков
         function updateBalance(newIndex) {
-            balance += fruits[newIndex].score;
+            balance += fruits[newIndex].score * pointsMultiplier;
             localStorage.setItem('balance', balance);
             updateBalanceInGame();
         }
@@ -1701,7 +1798,8 @@
             }
 
             // Сохранение состояния наград
-            localStorage.setItem('rewards', JSON.stringify(rewardsData));
+            localStorage.setItem('dailyRewards', JSON.stringify(rewardsData.daily));
+            localStorage.setItem('achievementRewards', JSON.stringify(rewardsData.achievements));
         }
         
         // Проверка окончания игры
@@ -1767,7 +1865,7 @@
             canDrop = true;
             currentFruitIndex = getRandomFruitIndex();
             nextFruitIndex = getRandomFruitIndex();
-            unlockedFruits = new Set([0, 1, 2, 3, 4]); // Сброс доступных фруктов, только первые 5
+            // Не сбрасываем unlockedFruits
             myPrizes = [];
             saveMyPrizes();
             
@@ -1781,12 +1879,15 @@
                 console.error('Элемент gameOverScreen не найден.');
             }
             
-            showNotification('Игра перезапущена.');
+            showNotification('Очки сброшены.');
             
-            // Если нужно сбросить очки при перезапуске:
-            // points = 0;
-            // localStorage.setItem('points', points);
-            // updatePointsDisplay();
+            // Деактивация всех эффектов
+            deactivateAllEffects();
+            
+            // Сброс очков при перезапуске:
+            points = 0;
+            localStorage.setItem('points', points);
+            updatePointsDisplay();
             
             // Удаление сохраненных фруктов
             localStorage.removeItem('savedFruits');
@@ -1865,6 +1966,16 @@
             document.querySelectorAll('.control-btn').forEach(btn => {
                 btn.style.touchAction = 'manipulation';
             });
+
+            // Обработчик кнопки "Играть заново" в настройках
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            if (playAgainBtn) {
+                playAgainBtn.addEventListener('pointerdown', () => {
+                    restartGame();
+                });
+            } else {
+                console.warn('Элемент playAgainBtn не найден.');
+            }
         }
 
         // Обработчики событий Matter.js
@@ -1894,7 +2005,9 @@
                         body.velocity.x = fruitData.velocity.x;
                         body.velocity.y = fruitData.velocity.y;
                         World.add(engineInstance.world, body);
-                        unlockedFruits.add(fruitData.fruitIndex);
+                        if (fruitData.fruitIndex < 15) { // Ограничение до 15 фруктов
+                            unlockedFruits.add(fruitData.fruitIndex);
+                        }
                     }
                 });
                 updateCollection();
@@ -1910,7 +2023,7 @@
         function loadUnlockedFruits() {
             const savedUnlocked = JSON.parse(localStorage.getItem('unlockedFruits'));
             if (savedUnlocked && Array.isArray(savedUnlocked)) {
-                unlockedFruits = new Set(savedUnlocked);
+                unlockedFruits = new Set(savedUnlocked.filter(index => index < 15)); // Ограничение до 15
                 updateCollection();
             }
         }
@@ -2118,7 +2231,7 @@
             leaderboardList.appendChild(userElement);
         }
 
-        // Функция для отключения фона на конкретном товаре
+        // Функция отключения фона на конкретном товаре
         function disableBackgroundOnItem(itemId) {
             const item = shopItemsData.themes.find(theme => theme.id === itemId);
             if (item && item.active) {
@@ -2130,63 +2243,33 @@
                 showNotification(`Фон для "${item.name}" отключен.`);
                 localStorage.removeItem('activeTheme');
                 renderShopItems();
+                saveShopData();
             }
         }
 
-        // Функция для обновления системы очков
-        function updatePointsDisplay() {
-            const pointsElement = document.getElementById('points');
-            if (pointsElement) {
-                pointsElement.textContent = `Очки: ${points}`;
-            } else {
-                console.error('Элемент очков не найден.');
-            }
-        }
-
-        // Функция для рендеринга наград при переключении вкладок
-        // Уже реализовано выше в initGame()
-
-        // Функция отключения фона при применении темы добавлена выше
-
-        // Инициализация всех функций
-        // Уже выполнено в initGame()
-
-        // Функция инициализации физики (если требуется дополнительные настройки)
-        function initPhysics() {
-            // Здесь можно добавить дополнительные настройки физики, если необходимо
-        }
-
-        // Функция добавления события столкновения уже реализована выше
-
-        // Сохранение фруктов перед выгрузкой страницы
-        window.addEventListener('beforeunload', () => {
-            saveFruits();
-            saveUnlockedFruits();
-            saveActiveEffects();
-            localStorage.setItem('myPrizes', JSON.stringify(myPrizes));
-        });
-    </script>
-    <script>
         // Инициализация аудио и обработка кнопок настроек
         document.addEventListener('DOMContentLoaded', () => {
             // Переменные для аудио
-            let bgMusic;
+            let bgMusic = document.getElementById('backgroundMusic');
+            let combineSound = document.getElementById('combineSound');
             let isMusicPlaying = false;
             let isSoundOn = true;
+            let isVibrationOn = true;
 
             // Инициализация аудио
             function initAudio() {
-                if (!bgMusic) {
-                    bgMusic = new Audio('https://opengameart.org/sites/default/files/Casual%20Game%20BGM%205.mp3'); // Замените на ваш URL аудио
-                    bgMusic.loop = true;
+                if (bgMusic) {
                     bgMusic.volume = 0.3;
+                }
+                if (combineSound) {
+                    combineSound.volume = 0.5;
                 }
             }
 
+            initAudio();
+
             // Переключение музыки
             function toggleMusic() {
-                initAudio();
-                
                 if (isMusicPlaying) {
                     bgMusic.pause();
                     isMusicPlaying = false;
@@ -2213,13 +2296,19 @@
                 showNotification(`Звуки ${isSoundOn ? 'включены' : 'выключены'}`);
             }
 
+            // Переключение вибрации
+            function toggleVibration() {
+                isVibrationOn = !isVibrationOn;
+                showNotification(`Вибрация ${isVibrationOn ? 'включена' : 'выключена'}`);
+            }
+
             // Переключение фона
             function toggleBackground() {
                 const gameContainer = document.getElementById('gameContainer');
                 const backgroundToggleBtn = document.getElementById('backgroundToggle');
                 const activeThemeId = localStorage.getItem('activeTheme');
                 const activeTheme = shopItemsData.themes.find(theme => theme.id === activeThemeId);
-
+    
                 if (activeTheme && activeTheme.active) {
                     // Отключаем активную тему
                     activeTheme.active = false;
@@ -2228,15 +2317,23 @@
                     showNotification('Фон отключён');
                     localStorage.removeItem('activeTheme');
                     renderShopItems();
+                    saveShopData();
                 } else {
                     showNotification('Нет активного фона для отключения.');
                 }
             }
 
+            // Переключение вибрации
+            function toggleVibration() {
+                isVibrationOn = !isVibrationOn;
+                showNotification(`Вибрация ${isVibrationOn ? 'включена' : 'выключена'}`);
+            }
+
             // Обработчики кнопок настроек
             const musicToggleBtn = document.getElementById('musicToggle');
             const soundToggleBtn = document.getElementById('soundToggle');
-            const backgroundToggleBtn = document.getElementById('backgroundToggle');
+            const vibrationToggleBtn = document.getElementById('vibrationToggle');
+            const playAgainBtn = document.getElementById('playAgainBtn');
 
             if (musicToggleBtn) musicToggleBtn.addEventListener('pointerdown', toggleMusic);
             else console.warn('Element with ID "musicToggle" not found.');
@@ -2244,11 +2341,18 @@
             if (soundToggleBtn) soundToggleBtn.addEventListener('pointerdown', toggleSound);
             else console.warn('Element with ID "soundToggle" not found.');
 
-            if (backgroundToggleBtn) backgroundToggleBtn.addEventListener('pointerdown', toggleBackground);
-            else console.warn('Element with ID "backgroundToggle" not found.');
+            if (vibrationToggleBtn) vibrationToggleBtn.addEventListener('pointerdown', toggleVibration);
+            else console.warn('Element with ID "vibrationToggle" not найден.');
+
+            if (playAgainBtn) {
+                playAgainBtn.addEventListener('pointerdown', () => {
+                    restartGame();
+                });
+            } else {
+                console.warn('Элемент playAgainBtn не найден.');
+            }
         });
-    </script>
-    <script>
+
         // Добавление обработчика загрузки страницы
         document.addEventListener('DOMContentLoaded', () => {
             // Проверяем, сохранён ли никнейм
@@ -2271,9 +2375,18 @@
             } else {
                 console.warn('Элемент startGameBtn не найден.');
             }
+
+            // Обработчик кнопки "Играть снова"
+            const restartGameBtn = document.getElementById('restartGameBtn');
+            if (restartGameBtn) {
+                restartGameBtn.addEventListener('pointerdown', () => {
+                    restartGame();
+                });
+            } else {
+                console.warn('Элемент restartGameBtn не найден.');
+            }
         });
-    </script>
-    <script>
+
         // Функции для кейсов
         function initCaseHandlers() {
             // Здесь можно добавить дополнительные обработчики, если необходимо
@@ -2350,12 +2463,12 @@
                     showNotification('Эффект "Дополнительная Жизнь" активирован на 15 секунд!');
                     break;
                 case 'slowMotion':
-                    engineInstance.gravity.y = 0.1; // Замедление
+                    engineInstance.gravity.y = 0.6; // Замедление
                     activeEffects.slowMotion = Date.now() + 15000;
                     showNotification('Эффект "Замедление" активирован на 15 секунд!');
                     break;
                 case 'fastDrop':
-                    engineInstance.gravity.y = 1; // Ускорение падения
+                    engineInstance.gravity.y = 2.0; // Ускорение падения
                     activeEffects.fastDrop = Date.now() + 15000;
                     showNotification('Эффект "Быстрое Падение" активирован на 15 секунд!');
                     break;
@@ -2389,11 +2502,11 @@
                     showNotification('Эффект "Дополнительная Жизнь" деактивирован.');
                     break;
                 case 'slowMotion':
-                    engineInstance.gravity.y = 1; // Восстановление нормального падения
+                    engineInstance.gravity.y = 1.2; // Восстановление нормального падения
                     showNotification('Эффект "Замедление" деактивирован.');
                     break;
                 case 'fastDrop':
-                    engineInstance.gravity.y = 0.5; // Восстановление нормального падения
+                    engineInstance.gravity.y = 1.2; // Восстановление нормального падения
                     showNotification('Эффект "Быстрое Падение" деактивирован.');
                     break;
                 case 'shield':
@@ -2465,36 +2578,97 @@
             applyEffect(wonItem.effect);
         }
 
-        // Функция для рендеринга моих призов
-        function renderMyPrizes() {
-            const myPrizesContainer = document.getElementById('myPrizes');
-            if (!myPrizesContainer) {
-                console.error('Элемент myPrizes не найден.');
-                return;
+        // Функция для деактивации всех эффектов при перезапуске
+        function deactivateAllEffects() {
+            for (const effect of Object.keys(activeEffects)) {
+                deactivateEffect(effect);
             }
+        }
 
-            myPrizesContainer.innerHTML = '<h4>Мои призы:</h4>';
+        // Функция для рендеринга и сохранения фруктов после изменения
+        function saveFruits() {
+            const bodies = Matter.Composite.allBodies(engineInstance.world);
+            const fruitsData = bodies
+                .filter(body => body.fruitIndex !== undefined)
+                .map(body => ({
+                    fruitIndex: body.fruitIndex,
+                    position: body.position,
+                    velocity: body.velocity
+                }));
+            localStorage.setItem('savedFruits', JSON.stringify(fruitsData));
+        }
 
-            if (myPrizes.length === 0) {
-                myPrizesContainer.innerHTML += '<p>Нет призов.</p>';
-                return;
+        // Функция для загрузки фруктов из localStorage
+        function loadFruits() {
+            const savedFruits = JSON.parse(localStorage.getItem('savedFruits'));
+            if (savedFruits && Array.isArray(savedFruits)) {
+                savedFruits.forEach(fruitData => {
+                    const body = createFruit(fruitData.position.x, fruitData.position.y, fruitData.fruitIndex);
+                    if (body) {
+                        body.velocity.x = fruitData.velocity.x;
+                        body.velocity.y = fruitData.velocity.y;
+                        World.add(engineInstance.world, body);
+                        if (fruitData.fruitIndex < 15) { // Ограничение до 15 фруктов
+                            unlockedFruits.add(fruitData.fruitIndex);
+                        }
+                    }
+                });
+                updateCollection();
             }
+        }
 
-            myPrizes.forEach((prize, index) => {
-                const prizeElement = document.createElement('div');
-                prizeElement.className = 'prize-item';
-                prizeElement.innerHTML = `
-                    <img src="https://via.placeholder.com/40?text=${encodeURIComponent(prize.name.charAt(0))}" alt="${prize.name}">
-                    <span>${prize.name}</span>
-                `;
-                myPrizesContainer.appendChild(prizeElement);
+        // Функция перезапуска игры
+        function restartGame() {
+            const bodies = Matter.Composite.allBodies(engineInstance.world);
+            bodies.forEach(body => {
+                if (!body.isStatic) {
+                    World.remove(engineInstance.world, body);
+                }
             });
+            
+            canDrop = true;
+            currentFruitIndex = getRandomFruitIndex();
+            nextFruitIndex = getRandomFruitIndex();
+            // Не сбрасываем unlockedFruits
+            myPrizes = [];
+            saveMyPrizes();
+            
+            updateNextFruit();
+            updateCollection();
+            renderMyPrizes();
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            if (gameOverScreen) {
+                gameOverScreen.style.display = 'none';
+            } else {
+                console.error('Элемент gameOverScreen не найден.');
+            }
+            
+            showNotification('Очки сброшены.');
+            
+            // Деактивация всех эффектов
+            deactivateAllEffects();
+            
+            // Сброс очков при перезапуске:
+            points = 0;
+            localStorage.setItem('points', points);
+            updatePointsDisplay();
+            
+            // Удаление сохраненных фруктов
+            localStorage.removeItem('savedFruits');
         }
 
-        // Функция сохранения моих призов
-        function saveMyPrizes() {
+        // Обработчики событий Matter.js
+        Events.on(engineInstance, 'collisionStart', checkCollision);
+        Events.on(engineInstance, 'afterUpdate', checkGameOver);
+        
+        // Функция для сохранения фруктов перед выгрузкой страницы
+        window.addEventListener('beforeunload', () => {
+            saveFruits();
+            saveUnlockedFruits();
+            saveActiveEffects();
             localStorage.setItem('myPrizes', JSON.stringify(myPrizes));
-        }
+            saveShopData();
+        });
     </script>
 </body>
 </html>
