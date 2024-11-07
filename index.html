@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -1078,6 +1078,9 @@
         // Эффекты активных кейсов
         let activeEffects = JSON.parse(localStorage.getItem('activeEffects')) || {};
 
+        // Множитель очков
+        let pointsMultiplier = 1;
+
         // Функция для сохранения состояния магазина в localStorage
         function saveShopData() {
             localStorage.setItem('shopThemes', JSON.stringify(shopItemsData.themes));
@@ -1695,13 +1698,19 @@
             }
         }
         
-        // Обработка столкновений
+        // Обработчик столкновений
         function checkCollision(event) {
             const pairs = event.pairs;
+            const processedBodies = new Set(); // Набор для отслеживания обработанных тел
             
             pairs.forEach(pair => {
                 const bodyA = pair.bodyA;
                 const bodyB = pair.bodyB;
+                
+                // Проверяем, были ли уже обработаны эти тела
+                if (processedBodies.has(bodyA) || processedBodies.has(bodyB)) {
+                    return; // Пропускаем, если уже обработаны
+                }
                 
                 if (bodyA.fruitIndex !== undefined && bodyB.fruitIndex !== undefined) {
                     if (bodyA.fruitIndex === bodyB.fruitIndex) {
@@ -1710,9 +1719,10 @@
                             const midX = (bodyA.position.x + bodyB.position.x) / 2;
                             const midY = (bodyA.position.y + bodyB.position.y) / 2;
                             
+                            // Удаляем объединяемые тела
                             World.remove(engineInstance.world, [bodyA, bodyB]);
 
-                            // Создание элемента анимации объединения
+                            // Создаем анимацию объединения
                             const combineAnimation = document.createElement('div');
                             combineAnimation.className = 'combine-animation';
                             combineAnimation.textContent = 'Объединение!';
@@ -1732,6 +1742,7 @@
                                 navigator.vibrate(100); // Вибрация на 100 мс
                             }
                             
+                            // Создаем новый фрукт
                             const newFruit = createFruit(midX, midY, newIndex);
                             if (newFruit) {
                                 World.add(engineInstance.world, newFruit);
@@ -1741,15 +1752,20 @@
                                 return;
                             }
                             
-                            // Добавляем новый фрукт в коллекцию только если предыдущий уже открыт
+                            // Добавляем новый фрукт в коллекцию, если он новый
                             if (newIndex === getLastUnlockedIndex() + 1 && newIndex < 15) {
                                 unlockedFruits.add(newIndex);
                                 updateCollection();
                                 saveUnlockedFruits();
                             }
                             
+                            // Обновляем баланс и достижения
                             updateBalance(newIndex);
                             updateAchievements(fruits[newIndex].score);
+                            
+                            // Помечаем тела как обработанные
+                            processedBodies.add(bodyA);
+                            processedBodies.add(bodyB);
                         }
                     }
                 }
@@ -1889,7 +1905,7 @@
             localStorage.setItem('points', points);
             updatePointsDisplay();
             
-            // Удаление сохраненных фруктов
+            // Удаление сохранённых фруктов
             localStorage.removeItem('savedFruits');
         }
         
@@ -2017,15 +2033,6 @@
         // Сохранение открытых фруктов
         function saveUnlockedFruits() {
             localStorage.setItem('unlockedFruits', JSON.stringify(Array.from(unlockedFruits)));
-        }
-
-        // Загрузка открытых фруктов
-        function loadUnlockedFruits() {
-            const savedUnlocked = JSON.parse(localStorage.getItem('unlockedFruits'));
-            if (savedUnlocked && Array.isArray(savedUnlocked)) {
-                unlockedFruits = new Set(savedUnlocked.filter(index => index < 15)); // Ограничение до 15
-                updateCollection();
-            }
         }
 
         // Функция сохранения активных эффектов
@@ -2342,7 +2349,7 @@
             else console.warn('Element with ID "soundToggle" not found.');
 
             if (vibrationToggleBtn) vibrationToggleBtn.addEventListener('pointerdown', toggleVibration);
-            else console.warn('Element with ID "vibrationToggle" not найден.');
+            else console.warn('Element with ID "vibrationToggle" не найден.');
 
             if (playAgainBtn) {
                 playAgainBtn.addEventListener('pointerdown', () => {
@@ -2521,64 +2528,7 @@
             saveActiveEffects();
         }
 
-        // Переменная для множителя очков
-        let pointsMultiplier = 1;
-
-        // Функция для рендеринга и сохранения фруктов после изменения
-        function saveFruits() {
-            const bodies = Matter.Composite.allBodies(engineInstance.world);
-            const fruitsData = bodies
-                .filter(body => body.fruitIndex !== undefined)
-                .map(body => ({
-                    fruitIndex: body.fruitIndex,
-                    position: body.position,
-                    velocity: body.velocity
-                }));
-            localStorage.setItem('savedFruits', JSON.stringify(fruitsData));
-        }
-
-        // Функция для сохранения открытых фруктов
-        function saveUnlockedFruits() {
-            localStorage.setItem('unlockedFruits', JSON.stringify(Array.from(unlockedFruits)));
-        }
-
-        // Функция для сохранения активных эффектов
-        function saveActiveEffects() {
-            const savedActiveEffects = {};
-            for (const [effect, expiry] of Object.entries(activeEffects)) {
-                if (Date.now() < expiry) {
-                    savedActiveEffects[effect] = expiry;
-                }
-            }
-            localStorage.setItem('activeEffects', JSON.stringify(savedActiveEffects));
-        }
-
-        // Функция для открытия кейса
-        function openCase() {
-            if (balance < 500) { // Предполагаемая стоимость кейса
-                showNotification('Недостаточно средств для открытия кейса.');
-                return;
-            }
-
-            balance -= 500;
-            updateBalanceInGame();
-            showNotification('Кейс открыт!');
-
-            // Случайный выбор предмета
-            const randomIndex = Math.floor(Math.random() * casesData.items.length);
-            const wonItem = casesData.items[randomIndex];
-
-            // Добавление предмета в мои призы
-            myPrizes.push({ ...wonItem, obtainedAt: Date.now() });
-            saveMyPrizes();
-            renderMyPrizes();
-            showNotification(`Вы выиграли: ${wonItem.name}!`);
-
-            // Применение эффекта
-            applyEffect(wonItem.effect);
-        }
-
-        // Функция для деактивации всех эффектов при перезапуске
+        // Функция деактивации всех эффектов при перезапуске
         function deactivateAllEffects() {
             for (const effect of Object.keys(activeEffects)) {
                 deactivateEffect(effect);
@@ -2617,50 +2567,115 @@
             }
         }
 
-        // Функция перезапуска игры
-        function restartGame() {
-            const bodies = Matter.Composite.allBodies(engineInstance.world);
-            bodies.forEach(body => {
-                if (!body.isStatic) {
-                    World.remove(engineInstance.world, body);
-                }
-            });
-            
-            canDrop = true;
-            currentFruitIndex = getRandomFruitIndex();
-            nextFruitIndex = getRandomFruitIndex();
-            // Не сбрасываем unlockedFruits
-            myPrizes = [];
-            saveMyPrizes();
-            
-            updateNextFruit();
-            updateCollection();
-            renderMyPrizes();
-            const gameOverScreen = document.getElementById('gameOverScreen');
-            if (gameOverScreen) {
-                gameOverScreen.style.display = 'none';
-            } else {
-                console.error('Элемент gameOverScreen не найден.');
-            }
-            
-            showNotification('Очки сброшены.');
-            
-            // Деактивация всех эффектов
-            deactivateAllEffects();
-            
-            // Сброс очков при перезапуске:
-            points = 0;
-            localStorage.setItem('points', points);
-            updatePointsDisplay();
-            
-            // Удаление сохраненных фруктов
-            localStorage.removeItem('savedFruits');
+        // Функция для сохранения открытых фруктов
+        function saveUnlockedFruits() {
+            localStorage.setItem('unlockedFruits', JSON.stringify(Array.from(unlockedFruits)));
         }
 
-        // Обработчики событий Matter.js
-        Events.on(engineInstance, 'collisionStart', checkCollision);
-        Events.on(engineInstance, 'afterUpdate', checkGameOver);
+        // Функция для загрузки открытых фруктов
+        function loadUnlockedFruits() {
+            const savedUnlocked = JSON.parse(localStorage.getItem('unlockedFruits'));
+            if (savedUnlocked && Array.isArray(savedUnlocked)) {
+                unlockedFruits = new Set(savedUnlocked.filter(index => index < 15)); // Ограничение до 15
+                updateCollection();
+            }
+        }
+
+        // Функция для скачивания рейтинга как TXT-файл
+        function downloadLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard.forEach((player, index) => {
+                player.rank = index + 1;
+            });
         
+            let content = 'Топ игроков:\n';
+            leaderboard.forEach(player => {
+                content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
+            });
+        
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'leaderboard.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Функция отображения ТОП 10
+        function showTop10() {
+            fetchLeaderboard();
+        }
+
+        // Функция отображения моего рейтинга
+        function showMyRating() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            if (!leaderboardList) {
+                console.error('Элемент leaderboardList не найден.');
+                return;
+            }
+            leaderboardList.innerHTML = '';
+        
+            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            const username = localStorage.getItem('username') || 'Игрок';
+            // Сортируем по убыванию очков
+            leaderboard.sort((a, b) => b.score - a.score);
+            // Найти текущего пользователя
+            const userIndex = leaderboard.findIndex(player => player.username === username);
+            if (userIndex === -1) {
+                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
+                return;
+            }
+            const user = leaderboard[userIndex];
+            const rank = userIndex + 1;
+        
+            const userElement = document.createElement('div');
+            userElement.className = 'leaderboard-item';
+            userElement.innerHTML = `
+                <span>${rank}. ${user.username}</span>
+                <span>${user.score}💲</span>
+            `;
+            // Выделение места пользователя
+            if (rank === 1) {
+                userElement.style.color = '#FFD700'; // Золотой
+            } else if (rank === 2) {
+                userElement.style.color = '#C0C0C0'; // Серебряный
+            } else if (rank === 3) {
+                userElement.style.color = '#CD7F32'; // Бронзовый
+            }
+            leaderboardList.appendChild(userElement);
+        }
+
+        // Функция для рендеринга и сохранения фруктов после изменения
+        function saveFruits() {
+            const bodies = Matter.Composite.allBodies(engineInstance.world);
+            const fruitsData = bodies
+                .filter(body => body.fruitIndex !== undefined)
+                .map(body => ({
+                    fruitIndex: body.fruitIndex,
+                    position: body.position,
+                    velocity: body.velocity
+                }));
+            localStorage.setItem('savedFruits', JSON.stringify(fruitsData));
+        }
+
+        // Функция для сохранения открытых фруктов
+        function saveUnlockedFruits() {
+            localStorage.setItem('unlockedFruits', JSON.stringify(Array.from(unlockedFruits)));
+        }
+
+        // Функция для сохранения активных эффектов
+        function saveActiveEffects() {
+            const savedActiveEffects = {};
+            for (const [effect, expiry] of Object.entries(activeEffects)) {
+                if (Date.now() < expiry) {
+                    savedActiveEffects[effect] = expiry;
+                }
+            }
+            localStorage.setItem('activeEffects', JSON.stringify(savedActiveEffects));
+        }
+
         // Функция для сохранения фруктов перед выгрузкой страницы
         window.addEventListener('beforeunload', () => {
             saveFruits();
