@@ -1,3189 +1,1500 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <base href="https://script.google.com/macros/library/">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Моя Игра</title>
-    <!-- Добавление favicon для предотвращения ошибки 404 -->
-    <link rel="icon" href="https://via.placeholder.com/32" type="image/png">
-    <style>
-        /* Сброс стилей и базовая настройка */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        /* Общие стили для тела страницы */
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; /* Центрирование по вертикали */
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* Градиент */
-            background-size: cover;
-            touch-action: manipulation;
-            font-family: 'Creepster', cursive; /* Шрифт в стиле Хэллоуина */
-        }
-        
-        /* Подключение шрифта Creepster */
-        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
-        
-        /* Заставка игры */
-        #splashScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: #ffcc00;
-            z-index: 3000;
-            font-size: 24px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        #splashScreen h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            animation: fadeInText 2s forwards;
-        }
-        
-        #splashScreen input {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            outline: none;
-            width: 80%;
-            max-width: 300px;
-        }
-        
-        #splashScreen button {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 30px;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.2s, background 0.3s;
-        }
-        
-        #splashScreen button:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
-        }
-        
-        @keyframes fadeInText {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Контейнер игры */
-        #gameContainer {
-            width: 100%; /* Полноэкранный режим */
-            max-width: 100vw;
-            height: 100vh;
-            background: rgba(255, 255, 255, 0.1); /* Прозрачный фон для лучшего видения реального фона */
-            border-radius: 0; /* Убираем скругление для полного экрана */
-            position: relative;
-            overflow: hidden;
-            box-shadow: none; /* Убираем тень для полного экрана */
-            backdrop-filter: blur(10px);
-            perspective: 1000px;
-            transition: background 0.5s ease;
-        }
-        
-        /* Элемент очков */
-        #points {
-            position: absolute;
-            top: 10px; /* Отступ сверху */
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 10px 20px;
-            border-radius: 15px;
-            color: #ffcc00;
-            font-size: 24px;
-            font-weight: bold;
-            z-index: 2;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Добавлена тень для лучшей видимости */
-        }
-        
-        /* Анимации для элементов интерфейса */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(255,140,0,0.5); }
-            50% { box-shadow: 0 0 20px rgba(255,140,0,0.8); }
-            100% { box-shadow: 0 0 5px rgba(255,140,0,0.5); }
-        }
-        
-        /* Текущий фрукт */
-        #currentFruit {
-            position: absolute;
-            top: 70px;
-            padding: 10px;
-            background: transparent; 
-            border-radius: 15px;
-            text-align: center;
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-        #currentFruit img {
-            width: 30px; 
-            height: 30px; 
-            display: block;
-            margin: 0 auto;
-            background: transparent; 
-        }
-        
-        /* Следующий фрукт */
-        #nextFruit {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 10px; 
-            background: rgba(0,0,0,0.7);
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            text-align: center;
-            transform: scale(0.6);
-            transform-origin: top right;
-            z-index: 2;
-        }
-        
-        #nextFruit img {
-            width: 30px; 
-            height: 30px; 
-            display: block;
-            margin: 0 auto 5px; 
-        }
-        
-        #nextFruit span {
-            font-size: 12px; 
-            font-weight: bold;
-            color: #ffcc00;
-            display: block;
-        }
-        
-        /* Контейнер для коллекции фруктов */
-        #collectionContainer {
-            position: absolute;
-            bottom: 20px; /* Отступ снизу */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 10px;  /* Расстояние между фруктами */
-            background: rgba(0,0,0,0.7);
-            padding: 10px;  /* Внутренние отступы */
-            border-radius: 15px;  
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            z-index: 1000;
-            overflow: hidden; /* Убираем стандартный скролл */
-            max-width: 90%; /* Ограничение максимальной ширины */
-        }
-        
-        /* Контейнер для списка фруктов */
-        .collectionList {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-        
-        /* Стилевой скролл для коллекции фруктов */
-        .collectionList::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .collectionList::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        .collectionList::-webkit-scrollbar-thumb {
-            background: #ff6600;
-            border-radius: 4px;
-        }
-        
-        /* Стрелки навигации для коллекции фруктов */
-        .collection-nav {
-            position: absolute;
-            bottom: 20px; /* Размещены ниже коллекции фруктов */
-            width: 30px;
-            height: 30px;
-            background: rgba(255, 140, 0, 0.8);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            transition: background 0.3s, transform 0.2s;
-        }
-        
-        .collection-nav:hover {
-            background: rgba(255, 165, 0, 0.9);
-            transform: scale(1.1);
-        }
-        
-        .left-nav {
-            left: 10px; /* Смещены внутрь контейнера */
-        }
-        
-        .right-nav {
-            right: 10px; /* Смещены внутрь контейнера */
-        }
-        
-        .collectionItem {
-            width: 30px;  /* Размер элемента */
-            height: 30px;
-            border-radius: 50%;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #666;
-            transition: transform 0.2s;
-            flex-shrink: 0;
-            position: relative;
-            pointer-events: none; /* Отключено взаимодействие */
-        }
-        
-        /* Экран окончания игры */
-        #gameOverScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            z-index: 3000;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        #gameOverScreen h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            animation: fadeInText 1s forwards;
-        }
-        
-        #gameOverScreen p {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        
-        #gameOverScreen button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.2s, background 0.3s;
-        }
-        
-        #gameOverScreen button:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
-        }
-        
-        /* Контролы игры */
-        #controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 3;
-        }
-        
-        .control-btn {
-            background: rgba(0,0,0,0.7);
-            border: none;
-            border-radius: 10px;
-            padding: 10px 15px;
-            font-size: 16px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: transform 0.2s, background 0.2s; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 80px;
-            text-align: center;
-        }
-        
-        .control-btn:hover {
-            transform: scale(1.05);    
-            background: rgba(255, 140, 0, 0.9); /* Оранжевый оттенок при наведении */
-        }
-        
-        #currentFruit img, #nextFruit img {
-            background: transparent;
-        }
-        
-        .fruit {
-            position: absolute;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        /* Граница для проверки окончания игры */
-        #boundary {
-            position: absolute;
-            top: 100px; 
-            left: 0;
-            width: 100%;
-            height: 2px; /* Уменьшена высота границы */
-            background: linear-gradient(90deg, 
-                rgba(0, 255, 0, 0.2) 0%,
-                rgba(0, 255, 0, 0.8) 50%,
-                rgba(0, 255, 0, 0.2) 100%
-            );
-            box-shadow: 0 0 10px rgba(0,255,0,0.5);
-            z-index: 1;
-        }
-        
-        /* 3D рамка */
-        .frame-3d {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            border: 2px solid rgba(255, 140, 0, 0.7); /* Оранжевый бордер */
-            transform-style: preserve-3d;
-            transform: perspective(1000px) rotateX(1deg);
-            box-shadow: 
-                inset 0 0 50px rgba(255,140,0,0.1),
-                0 0 20px rgba(255,140,0,0.2);
-        }
-        
-        /* Линия траектории */
-        #trajectoryLine {
-            display: none;
-            position: absolute;
-            width: 2px;
-            height: 400px; 
-            background: rgba(255, 140, 0, 0.5);
-            border-radius: 1px;
-            box-shadow: 0 0 4px rgba(255,140,0,0.5);
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        /* Оверлей для меню (Настройки, Магазин, Награды, Рейтинг, Кейсы) */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 10px;
-        }
-        
-        .menu-content {
-            background: #333; /* Темный фон для Хэллоуина */
-            padding: 20px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-            max-height: 80vh;
-            overflow-y: auto;
-            color: #ffcc00; /* Золотистый цвет текста */
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        
-        /* Кнопка закрытия меню */
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #ffcc00;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .close-btn:hover {
-            color: #ff6600;
-        }
-        
-        /* Вкладки меню */
-        .menu-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .menu-tab {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            background: #555;
-            color: #ffcc00;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-            min-width: 100px;
-            text-align: center;
-        }
-        
-        .menu-tab.active {
-            background: #ff6600;
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        /* Вкладки наград */
-        .rewards-tabs {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            justify-content: center;
-        }
-        
-        .reward-tab {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            background: #555;
-            color: #ffcc00;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-        
-        .reward-tab.active {
-            background: #ff6600;
-            color: white;
-        }
-        
-        /* Контейнер статистики */
-        .stats-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: #444;
-            border-radius: 10px;
-            color: #ffcc00;
-        }
-        
-        /* Элементы магазина */
-        .shop-items {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-        
-        .shop-items::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .shop-items::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        .shop-items::-webkit-scrollbar-thumb {
-            background: #ff6600;
-            border-radius: 4px;
-        }
-        
-        .shop-item {
-            min-width: 120px;
-            padding: 10px;
-            border-radius: 10px;
-            background: #555;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-            flex-shrink: 0;
-            position: relative;
-        }
-        
-        .shop-item:hover {
-            transform: scale(1.05);
-        }
-        
-        .shop-item div {
-            width: 100%;
-            height: 100px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .shop-item p {
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #ffcc00;
-        }
-        
-        .buy-btn, .activate-btn, .apply-btn {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            background: #ff6600;
-            color: white;
-            font-size: 14px;
-            transition: background 0.3s, transform 0.2s;
-            font-weight: bold;
-        }
-        
-        .buy-btn:hover:not(.disabled) {
-            background: #ff4500;
-            transform: scale(1.05);
-        }
-        
-        .activate-btn:hover:not(.active) {
-            background: #ffaa00;
-            transform: scale(1.05);
-        }
-        
-        .apply-btn.active {
-            background: #ffcc00;
-            color: #333;
-        }
-        
-        .apply-btn:hover:not(.active) {
-            background: #ffaa00;
-            transform: scale(1.05);
-        }
-        
-        /* Отключенные кнопки "Купить" */
-        .buy-btn.disabled {
-            background: #888;
-            cursor: not-allowed;
-            color: #ccc;
-        }
-        
-        /* Стилизация уведомлений */
-        #notificationContainer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 3000;
-        }
-        
-        .notification {
-            background: #28a745; /* Зеленый фон */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeIn 0.5s forwards, fadeOut 0.5s forwards 2.5s;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-        
-        /* Прогресс-бар для достижений */
-        .progress-bar {
-            background: #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-            height: 10px;
-            margin: 5px 0;
-        }
-        
-        .progress {
-            background: #ff6600;
-            height: 100%;
-            transition: width 0.3s;
-        }
-        
-        .progress-text {
-            font-size: 12px;
-            color: #ffcc00;
-        }
+<html><head><base href="." />
+<title>JustCord - Simple Chat Platform</title>
+<style>
+:root {
+  --bg-primary: #36393f;
+  --bg-secondary: #2f3136;
+  --bg-tertiary: #202225;
+  --text-primary: #dcddde;
+  --text-secondary: #72767d;
+  --accent: #7289da;
+  --red: #ed4245;
+}
 
-        /* Стилизация кнопки "Получить" */
-        .claim-btn {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            background: linear-gradient(45deg, #ff7518, #ff6600);
-            color: white;
-            font-size: 14px;
-            transition: transform 0.2s, background 0.3s;
-            font-weight: bold;
-        }
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
 
-        .claim-btn:hover:not(:disabled) {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #ff4500, #ff3300);
-        }
+.container {
+  display: grid;
+  grid-template-columns: 72px 240px 1fr;
+  height: 100vh;
+}
 
-        /* Адаптивность для мобильных устройств */
-        @media (max-width: 768px) {
-            #gameContainer {
-                width: 100vw;
-                height: 100vh;
-                border-radius: 0;
-            }
+.servers {
+  background: var(--bg-tertiary);
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg-tertiary);
+}
 
-            #points {
-                font-size: 20px;
-                padding: 8px 16px;
-            }
+.servers::-webkit-scrollbar {
+  width: 6px;
+}
 
-            .menu-content {
-                padding: 15px;
-            }
+.servers::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
 
-            .menu-tab, .reward-tab, .case-tab {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
+.servers::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
 
-            .stat-item {
-                padding: 8px;
-                font-size: 14px;
-            }
+.server-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-radius 0.2s;
+  color: var(--accent);
+}
 
-            .claim-btn {
-                font-size: 12px;
-                padding: 6px;
-            }
+.server-icon.custom-icon {
+  background-size: cover;
+  background-position: center;
+  color: transparent;
+}
 
-            .collection-nav {
-                width: 25px;
-                height: 25px;
-                font-size: 16px;
-            }
+.server-icon:hover {
+  border-radius: 16px;
+  background: var(--accent);
+  color: white;
+}
 
-            /* Увеличение размеров кнопок контролов для удобства на мобильных */
-            .control-btn {
-                width: 100px;
-                height: 40px;
-                font-size: 16px;
-                padding: 10px;
-            }
-        }
+.server-icon.add {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
 
-        /* Стилизация системы рейтинга */
-        #leaderboard {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
+.server-icon.add:hover {
+  opacity: 1;
+  background: #3ba55d;
+}
 
-        #leaderboard h3 {
-            margin-bottom: 15px;
-            font-size: 24px;
-            color: #ffcc00;
-        }
+.channels {
+  background: var(--bg-secondary);
+  padding: 12px;
+  overflow-y: auto;
+}
 
-        #leaderboardList {
-            width: 100%;
-            max-width: 400px;
-            background: #444;
-            border-radius: 10px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            overflow-y: auto;
-            max-height: 300px;
-        }
+.channels h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
 
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            border-bottom: 1px solid #555;
-            color: white;
-        }
+.online-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
 
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
+.online-user:hover {
+  background: rgba(79, 84, 92, 0.16);
+}
 
-        .podium {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
+.status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3ba55d;
+}
 
-        .podium-place {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #ffcc00;
-            font-weight: bold;
-        }
+.chat {
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  grid-column: 3;
+}
 
-        .podium-place img {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 5px;
-        }
+.messages {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 80px;
+  overflow-y: auto;
+  height: calc(100vh - 140px);
+  margin-bottom: 60px;
+}
 
-        /* Дополнительные стили для настройки фона */
-        .toggle-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            background: #555;
-            color: #ffcc00;
-            cursor: pointer;
-            transition: background 0.3s, color 0.3s;
-            margin-top: 10px;
-            font-weight: bold;
-            width: 100%;
-        }
+.message {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+}
 
-        .toggle-btn.active {
-            background: #ff6600;
-            color: white;
-        }
+.message.justai .username {
+  color: #ffae42;
+}
 
-        .toggle-btn:hover {
-            background: #ff4500;
-            color: white;
-        }
+.message.justai.typing .message-text {
+  font-style: italic;
+}
 
-        /* Стилизация кнопки "Открыть кейс" */
-        .open-case-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #8e2de2, #4a00e0);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
-            margin-top: 20px;
-            font-weight: bold;
-        }
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+}
 
-        .open-case-btn:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #5e35b1, #1a237e);
-        }
+.message-content {
+  flex: 1;
+}
 
-        /* Стилизация секции "Мои призы" */
-        #myPrizes {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
 
-        .prize-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: #555;
-            border-radius: 10px;
-            color: #ffcc00;
-        }
+.username {
+  font-weight: 500;
+  color: white;
+}
 
-        .prize-item img {
-            width: 40px;
-            height: 40px;
-        }
+.timestamp {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
 
-        /* Анимация объединения фруктов */
-        .combine-animation {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff6600;
-            font-size: 24px;
-            font-weight: bold;
-            opacity: 0;
-            animation: combineEffect 0.5s forwards, starsEffect 0.5s forwards;
-            pointer-events: none;
-            z-index: 4000;
-        }
+.message-actions {
+  visibility: hidden;
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
 
-        @keyframes combineEffect {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-        }
+.message:hover .message-actions {
+  visibility: visible;
+}
 
-        /* Новая анимация звездочек */
-        @keyframes starsEffect {
-            0% { box-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 15px #FFD700; }
-            50% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700; }
-            100% { box-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 15px #FFD700; }
-        }
-    </style>
+.reply-btn, .delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.reply-btn:hover, .delete-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.reply-preview {
+  background: var(--bg-secondary);
+  padding: 8px;
+  border-left: 4px solid var(--accent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.reply-preview span {
+  color: var(--text-secondary);
+}
+
+.cancel-reply-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.delete-btn:hover {
+  background: rgba(237, 66, 69, 0.1);
+}
+
+.input-area {
+  padding: 16px;
+  position: fixed;
+  bottom: 0;
+  left: 312px; 
+  right: 0;
+  background: var(--bg-primary);
+  border-top: 1px solid rgba(79, 84, 92, 0.48);
+  z-index: 10;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.upload-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-btn:hover {
+  opacity: 0.9;
+}
+
+.message-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: #40444b;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1rem;
+  outline: none;
+}
+
+.message-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.server-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1000;
+}
+
+.server-modal .preview-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 10px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: border-radius 0.2s;
+}
+
+.server-modal .preview-icon:hover {
+  border-radius: 16px;
+}
+
+.server-modal .upload-hint {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  background: var(--bg-primary);
+  border: none;
+  border-radius: 4px;
+  color: var(--text-primary);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-button.create {
+  background: var(--accent);
+  color: white;
+}
+
+.modal-button.cancel {
+  background: var(--red);
+  color: white;
+}
+
+.user-settings {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 72px;
+  background: var(--bg-tertiary);
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-modal {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 80px;
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  min-width: 300px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: rgba(79, 84, 92, 0.16);
+  border-radius: 4px;
+}
+
+.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f2f3f5;
+  --bg-tertiary: #e3e5e8;
+  --text-primary: #2e3338;
+  --text-secondary: #747f8d;
+}
+
+.store-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  min-width: 300px;
+  max-height: 80vh; 
+  overflow-y: auto;  
+}
+
+.store-items {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.store-item {
+  background: var(--bg-primary);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.store-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.store-btn:hover {
+  opacity: 0.9;
+}
+
+.justbucks-display {
+  margin-top: 20px;
+  padding: 10px;
+  background: var(--bg-primary);
+  border-radius: 5px;
+  text-align: center;
+  font-size: 1.2em;
+  color: var(--accent);
+}
+
+.replied-message {
+  background: var(--bg-secondary);
+  padding: 8px;
+  border-left: 4px solid var(--accent);
+  margin-bottom: 8px;
+}
+
+.replied-username {
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.replied-text {
+  color: var(--text-secondary);
+}
+
+.message-text a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: text-decoration 0.2s;
+}
+
+.message-text a:hover {
+  text-decoration: underline;
+}
+
+.message-text a:visited {
+  color: var(--accent);
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr !important; /* Force single column */
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .servers {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    padding: 10px !important;
+    flex-direction: row;
+    justify-content: flex-start;
+    z-index: 100;
+    border-top: 1px solid rgba(79, 84, 92, 0.48);
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 0;
+    background: var(--bg-tertiary);
+  }
+
+  .channels {
+    display: none; /* Hidden by default on mobile */
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 240px;
+    height: calc(100vh - 110px);
+    z-index: 90;
+    background: var(--bg-secondary);
+  }
+
+  .chat {
+    grid-column: 1;
+    padding-top: 50px;
+    padding-bottom: 120px;
+    height: 100vh;
+  }
+
+  .messages {
+    height: calc(100vh - 170px);
+    padding-bottom: 0;
+  }
+
+  .input-area {
+    left: 0;
+    right: 0;
+    bottom: 60px;
+    padding: 10px;
+  }
+
+  .mobile-nav {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: var(--bg-tertiary);
+    z-index: 95;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    border-bottom: 1px solid rgba(79, 84, 92, 0.48);
+  }
+
+  .server-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin: 0 5px;
+  }
+
+  .user-settings {
+    display: none; /* Hide settings on mobile */
+  }
+
+  /* Fix modal positioning for mobile */
+  .settings-modal,
+  .server-modal,
+  .store-modal {
+    width: 90%;
+    max-width: 320px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.mobile-nav {
+  display: none;
+}
+</style>
 </head>
 <body>
-    <!-- Заставка игры -->
-    <div id="splashScreen">
-        <h1>Добро пожаловать!</h1>
-        <input type="text" id="usernameInput" placeholder="Введите ваш никнейм">
-        <button id="startGameBtn">Начать игру</button>
+
+<div class="container">
+  <div class="mobile-nav">
+    <button class="mobile-nav-btn" id="toggleChannels">☰</button>
+    <span>JustCord</span>
+  </div>
+
+  <div class="servers" id="servers">
+    <div class="server-icon active" data-server="main">JC</div>
+    <div class="server-icon add" id="addServer">+</div>
+  </div>
+
+  <div class="channels" id="onlineUsers" style="background: var(--bg-secondary);">
+    <h3>Online — 0</h3>
+    <!-- Online users will be populated here -->
+  </div>
+
+  <div class="chat">
+    <div class="messages" id="messages">
+      <!-- Messages will be populated here -->
     </div>
 
-    <!-- Контейнер игры -->
-    <div id="gameContainer">
-        <div id="points">Очки: 0</div> <!-- Перемещён элемент для отображения очков в верхнюю часть -->
-        <div id="boundary"></div>
-        <div class="frame-3d"></div>
-        <div id="controls">
-            <button id="menuBtn" class="control-btn">Меню</button>
-        </div>
-        <div id="currentFruit"></div>
-        <div id="nextFruit"></div>
-        <!-- Стрелки навигации для коллекции фруктов -->
-        <button class="collection-nav left-nav">◀️</button>
-        <button class="collection-nav right-nav">▶️</button>
-        <div id="collectionContainer">
-            <div class="collectionList">
-                <!-- Фрукты будут динамически добавляться сюда -->
-            </div>
-        </div>
-        <div id="trajectoryLine"></div>
-        <div id="gameOverScreen">
-            <h2>Игра окончена!</h2>
-            <p>Ваш баланс: <span id="finalScore">0💲</span></p>
-            <button id="restartGameBtn">Играть снова</button>
-        </div>
+    <div class="input-area">
+      <div class="input-wrapper">
+        <button class="upload-btn" id="uploadBtn">+</button>
+        <input type="file" id="fileInput" accept="image/*,video/*" style="display:none">
+        <input type="text" class="message-input" id="messageInput" placeholder="Send a message..." />
+      </div>
     </div>
-    
-    <!-- Контейнер для уведомлений -->
-    <div id="notificationContainer"></div>
-    
-    <!-- Оверлей для меню (Настройки, Магазин, Награды, Рейтинг, Кейсы) -->
-    <div id="menuOverlay" class="overlay">
-        <div class="menu-content">
-            <button class="close-btn">✕</button>
-            <div class="menu-tabs">
-                <button class="menu-tab active" data-tab="settings">Настройки</button>
-                <button class="menu-tab" data-tab="shop">Магазин</button>
-                <button class="menu-tab" data-tab="rewards">Награды</button>
-                <button class="menu-tab" data-tab="leaderboard">Рейтинг</button>
-                <button class="menu-tab" data-tab="cases">Кейсы</button>
-            </div>
-            
-            <!-- Настройки -->
-            <div class="tab-content" id="settingsContent">
-                <h3>Настройки</h3>
-                <div class="settings-options">
-                    <button class="setting-btn" id="musicToggle">🎵 Музыка</button>
-                    <button class="setting-btn" id="soundToggle">🔊 Звуки</button>
-                    <button class="toggle-btn" id="vibrationToggle">📱 Вибрация</button>
-                    <button class="toggle-btn" id="playAgainBtn">🔄 Играть заново</button>
-                </div>
-            </div>
-            
-            <!-- Магазин -->
-            <div class="tab-content" id="shopContent" style="display: none">
-                <h3>Магазин</h3>
-                <!-- Баланс отображается только в магазине -->
-                <div id="balance">Баланс: 1000💲</div>
-                <div class="shop-items">
-                    <!-- Фрукты будут динамически добавляться сюда -->
-                </div>
-            </div>
-            
-            <!-- Награды -->
-            <div class="tab-content" id="rewardsContent" style="display: none">
-                <h3>Награды</h3>
-                <div class="rewards-tabs">
-                    <button class="reward-tab active" data-type="daily">Сегодня</button>
-                    <button class="reward-tab" data-type="achievements">Достижения</button>
-                </div>
-                <div class="rewards-content"></div>
-            </div>
-            
-            <!-- Рейтинг -->
-            <div class="tab-content" id="leaderboardContent" style="display: none">
-                <h3>Рейтинг</h3>
-                <div class="leaderboard-buttons">
-                    <button class="leaderboard-btn" onclick="showTop10()">ТОП 10</button>
-                    <button class="leaderboard-btn" onclick="showMyRating()">МОЙ РЕЙТИНГ</button>
-                </div>
-                <div id="leaderboardList">
-                    <!-- Рейтинги будут динамически добавляться сюда -->
-                </div>
-                <button onclick="downloadLeaderboard()" style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 15px; background: #ff6600; color: white; cursor: pointer; transition: background 0.3s;">
-                    Скачать рейтинг
-                </button>
-                <div class="podium">
-                    <div class="podium-place">
-                        <img src="https://i.imgur.com/1stPlace.png" alt="1 место">
-                        <span>1 место</span>
-                    </div>
-                    <div class="podium-place">
-                        <img src="https://i.imgur.com/2ndPlace.png" alt="2 место">
-                        <span>2 место</span>
-                    </div>
-                    <div class="podium-place">
-                        <img src="https://i.imgur.com/3rdPlace.png" alt="3 место">
-                        <span>3 место</span>
-                    </div>
-                </div>
-            </div>
+  </div>
+</div>
 
-            <!-- Кейсы -->
-            <div class="tab-content" id="casesContent" style="display: none">
-                <h3>Кейсы</h3>
-                <button class="open-case-btn" onclick="openCase()">Открыть кейс</button>
-                <div id="myPrizes">
-                    <h4>Мои призы:</h4>
-                    <!-- Призы будут динамически добавляться сюда -->
-                </div>
-            </div>
-        </div>
+<div class="user-settings">
+  <div class="server-icon" id="userSettingsBtn">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 12a6 6 0 1 1 12 0 6 6 0 0 1-12 0z"/>
+    </svg>
+  </div>
+</div>
+
+<div class="settings-modal" id="settingsModal">
+  <h3>User Settings</h3>
+  <div class="justbucks-display">
+    <span id="justbucksDisplay">JustBucks: 0</span>
+  </div>
+  <div class="theme-toggle">
+    <input type="checkbox" id="themeToggle">
+    <label for="themeToggle">Light Mode</label>
+  </div>
+  <div class="store-toggle">
+    Store
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay"></div>
+<div class="server-modal" id="serverModal">
+  <h3>Create a New Server</h3>
+  <div class="preview-icon" id="serverIconPreview">
+    Click to upload icon
+  </div>
+  <p class="upload-hint">Click icon to upload custom image</p>
+  <input type="file" id="serverIconInput" accept="image/*" style="display: none">
+  <input type="text" class="modal-input" id="serverName" placeholder="Server Name">
+  <div class="modal-buttons">
+    <button class="modal-button cancel" id="cancelServer">Cancel</button>
+    <button class="modal-button create" id="createServer">Create</button>
+  </div>
+</div>
+
+<div class="store-modal" id="storeModal">
+  <h3>JustCord Store</h3>
+  <div class="store-items">
+    <div class="store-item">
+      <h4>Premium Colors</h4>
+      <p>Unlock custom username colors</p>
+      <button class="store-btn" data-item="colors" data-price="100">100 JustBucks</button>
     </div>
-
-    <!-- Аудио элементы -->
-    <audio id="backgroundMusic" loop>
-        <source src="https://www.bensound.com/bensound-music/bensound-energy.mp3" type="audio/mpeg">
-        Ваш браузер не поддерживает аудио.
-    </audio>
-    <audio id="combineSound">
-        <source src="https://www.soundjay.com/buttons/sounds/button-16.mp3" type="audio/mpeg">
-        Ваш браузер не поддерживает аудио.
-    </audio>
-
-    <!-- Подключение библиотеки Matter.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
-    <script>
-        // Переменные для аудио
-        let bgMusic = document.getElementById('backgroundMusic');
-        let combineSound = document.getElementById('combineSound');
-        let isMusicPlaying = true; // Включена по умолчанию
-        let isSoundOn = true;
-        let isVibrationOn = true;
-
-        // Баланс пользователя
-        let balance = parseInt(localStorage.getItem('balance')) || 1000; 
-        
-        // Очки пользователя
-        let points = parseInt(localStorage.getItem('points')) || 0;
-
-        // Массив тем магазина с фонами через CSS
-        const shopItemsData = {
-            themes: JSON.parse(localStorage.getItem('shopThemes')) || [
-                {id: 'theme1', type: 'theme', name: 'Градиент Космоса', price: 100, gradient: 'linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)', purchased: false, active: false},
-                {id: 'theme2', type: 'theme', name: 'Градиент Заката', price: 200, gradient: 'linear-gradient(135deg, #ff7f00, #ff4c4c)', purchased: false, active: false},
-                {id: 'theme3', type: 'theme', name: 'Градиент Океана', price: 300, gradient: 'linear-gradient(135deg, #004e92, #000428)', purchased: false, active: false},
-                {id: 'theme4', type: 'theme', name: 'Градиент Леса', price: 400, gradient: 'linear-gradient(135deg, #134e5e, #71b7e6)', purchased: false, active: false},
-                {id: 'theme5', type: 'theme', name: 'Градиент Пустыни', price: 500, gradient: 'linear-gradient(135deg, #b79891, #94716b)', purchased: false, active: false},
-                {id: 'theme6', type: 'theme', name: 'Градиент Северного Сияния', price: 600, gradient: 'linear-gradient(135deg, #2c5364, #203a43, #0f2027)', purchased: false, active: false},
-                {id: 'theme7', type: 'theme', name: 'Градиент Цветущей Сакуры', price: 700, gradient: 'linear-gradient(135deg, #ee9ca7, #ffdde1)', purchased: false, active: false},
-                {id: 'theme8', type: 'theme', name: 'Градиент Неонового Города', price: 800, gradient: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)', purchased: false, active: false},
-                {id: 'theme9', type: 'theme', name: 'Градиент Глубокого Космоса', price: 900, gradient: 'linear-gradient(135deg, #000000, #434343)', purchased: false, active: false},
-                {id: 'theme10', type: 'theme', name: 'Градиент Радужной Магии', price: 1000, gradient: 'linear-gradient(135deg, #12c2e9, #c471ed, #f64f59)', purchased: false, active: false}
-            ]
-        };
-        
-        // Массив наград
-        const rewardsData = {
-            daily: JSON.parse(localStorage.getItem('dailyRewards')) || [
-                { id: 'day1', name: 'День 1', reward: 100, claimed: false },
-                { id: 'day2', name: 'День 2', reward: 200, claimed: false },
-                { id: 'day3', name: 'День 3', reward: 300, claimed: false }
-            ],
-            achievements: JSON.parse(localStorage.getItem('achievementRewards')) || [
-                { id: 'score100', name: 'Набрать 100 очков', reward: 50, progress: 0, target: 100, completed: false },
-                { id: 'score500', name: 'Набрать 500 очков', reward: 150, progress: 0, target: 500, completed: false },
-                { id: 'matches10', name: 'Соединить 10 пар', reward: 100, progress: 0, target: 10, completed: false },
-                { id: 'score1000', name: 'Набрать 1000 очков', reward: 200, progress: 0, target: 1000, completed: false },
-                { id: 'matches20', name: 'Соединить 20 пар', reward: 200, progress: 0, target: 20, completed: false }
-            ]
-        };
-
-        // Массив кейсов
-        const casesData = {
-            items: [
-                { id: 'doublePoints', name: 'Удвоение Очков', effect: 'doublePoints', duration: 15000 },
-                { id: 'extraLife', name: 'Дополнительная Жизнь', effect: 'extraLife', duration: 15000 },
-                { id: 'slowMotion', name: 'Замедление', effect: 'slowMotion', duration: 15000 },
-                { id: 'fastDrop', name: 'Быстрое Падение', effect: 'fastDrop', duration: 15000 },
-                { id: 'shield', name: 'Щит', effect: 'shield', duration: 15000 }
-            ]
-        };
-
-        // Мои призы
-        let myPrizes = JSON.parse(localStorage.getItem('myPrizes')) || [];
-
-        // Эффекты активных кейсов
-        let activeEffects = JSON.parse(localStorage.getItem('activeEffects')) || {};
-
-        // Множитель очков
-        let pointsMultiplier = 1;
-
-        // Массив фруктов с уникальными цветами (ограничено до 5)
-        const fruits = [
-            { name: 'Фрукт 1', color: '#FF3D00', size: 40, score: 10, density: 0.001 },
-            { name: 'Фрукт 2', color: '#FF4081', size: 50, score: 20, density: 0.002 },
-            { name: 'Фрукт 3', color: '#00B0FF', size: 60, score: 30, density: 0.003 },
-            { name: 'Фрукт 4', color: '#800000', size: 70, score: 40, density: 0.004 },
-            { name: 'Фрукт 5', color: '#D4E157', size: 80, score: 50, density: 0.005 }
-        ];
-        
-        // Индексы текущего и следующего фруктов
-        let currentFruitIndex = 0;
-        let nextFruitIndex = 1;
-        let canDrop = true;
-        let unlockedFruits = new Set([0, 1, 2, 3, 4]); // Ограничено первыми 5 фруктами
-
-        // Инициализация магазина
-        function initShop() {
-            const shopItemsContainer = document.querySelector('.shop-items');
-            if (!shopItemsContainer) {
-                console.error('Контейнер магазина не найден.');
-                return;
-            }
-            
-            renderShopItems();
-        }
-
-        // Обновление баланса и очков в реальном времени
-        function updateBalanceInGame() {
-            const balanceElement = document.getElementById('balance');
-            if (balanceElement) {
-                balanceElement.textContent = `Баланс: ${balance}💲`;
-            } else {
-                console.error('Элемент баланса не найден.');
-            }
-            const pointsElement = document.getElementById('points');
-            if (pointsElement) {
-                pointsElement.textContent = `Очки: ${points}`;
-            } else {
-                console.error('Элемент очков не найден.');
-            }
-        }
-
-        // Функция для создания SVG изображения фрукта
-        function createFruitSVG(fruit) {
-            return `
-                <svg width="${fruit.size}" height="${fruit.size}" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="${fruit.size / 2}" cy="${fruit.size / 2}" r="${fruit.size / 2}" fill="${fruit.color}" />
-                    <circle cx="${fruit.size * 0.3}" cy="${fruit.size * 0.3}" r="${fruit.size * 0.15}" fill="white" />
-                </svg>
-            `;
-        }
-
-        // Функция для создания тела фрукта в Matter.js
-        function createFruit(x, y, fruitIndex) {
-            if (fruitIndex === undefined || !fruits[fruitIndex]) {
-                fruitIndex = 0;
-            }
-            
-            const fruit = fruits[fruitIndex];
-            if (!fruit) return null;
-            
-            const circle = Bodies.circle(x, y, (fruit.size / 2), {
-                restitution: 0.3, // Уменьшенная упругость для усложнения игры
-                friction: 0.8,
-                density: fruit.density,
-                fruitIndex: fruitIndex,
-                render: {
-                    sprite: {
-                        texture: `data:image/svg+xml,${encodeURIComponent(createFruitSVG(fruits[fruitIndex]))}`,
-                        xScale: 1,
-                        yScale: 1
-                    }
-                }
-            });
-            return circle;
-        }
-
-        // Функция для случайного выбора индекса фрукта (ограничено первыми 5)
-        function getRandomFruitIndex() {
-            return Math.floor(Math.random() * unlockedFruits.size);
-        }
-
-        // Инициализация текущего и следующего фруктов
-        currentFruitIndex = getRandomFruitIndex();
-        nextFruitIndex = getRandomFruitIndex();
-
-        // Обновление отображения следующего фрукта
-        function updateNextFruit() {
-            const nextFruitHTML = `
-                <img src="data:image/svg+xml,${encodeURIComponent(createFruitSVG(fruits[nextFruitIndex]))}" alt="${fruits[nextFruitIndex].name}">
-                <span>${fruits[nextFruitIndex].name}</span>
-            `;
-            const nextFruitDiv = document.getElementById('nextFruit');
-            if (nextFruitDiv) {
-                nextFruitDiv.innerHTML = nextFruitHTML;
-            } else {
-                console.error('Элемент nextFruit не найден.');
-            }
-            
-            const currentFruitHTML = `
-                <img src="data:image/svg+xml,${encodeURIComponent(createFruitSVG(fruits[currentFruitIndex]))}" alt="${fruits[currentFruitIndex].name}">
-            `;
-            const currentFruitDiv = document.getElementById('currentFruit');
-            if (currentFruitDiv) {
-                currentFruitDiv.innerHTML = currentFruitHTML;
-                currentFruitDiv.style.animation = 'glow 2s infinite'; 
-            } else {
-                console.error('Элемент currentFruit не найден.');
-            }
-        }
-
-        // Обновление коллекции фруктов
-        function updateCollection() {
-            const collectionList = document.querySelector('.collectionList');
-            if (!collectionList) {
-                console.error('Элемент collectionList не найден.');
-                return;
-            }
-            collectionList.innerHTML = '';
-            
-            unlockedFruits.forEach(index => {
-                const fruit = fruits[index];
-                const item = document.createElement('div');
-                item.className = 'collectionItem';
-                item.innerHTML = `
-                    <img src="data:image/svg+xml,${encodeURIComponent(createFruitSVG(fruit))}" alt="${fruit.name}" style="width: 100%; height: 100%; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); pointer-events: none;">
-                `;
-                collectionList.appendChild(item);
-            });
-        }
-
-        // Настройка Matter.js
-        const Engine = Matter.Engine,
-            Runner = Matter.Runner,
-            Render = Matter.Render,
-            World = Matter.World,
-            Bodies = Matter.Bodies,
-            Events = Matter.Events;
-        
-        const engineInstance = Engine.create();
-        engineInstance.gravity.y = 1.2; // Увеличенная гравитация для усложнения игры
-        const runner = Runner.create();
-        Runner.run(runner, engineInstance); // Используем Matter.Runner.run вместо Engine.run
-
-        const container = document.getElementById('gameContainer');
-        if (!container) {
-            console.error('Элемент gameContainer не найден.');
-        }
-        const containerWidth = container ? container.clientWidth : 600; // Увеличено на 1.5 раза
-        const containerHeight = container ? container.clientHeight : 600;
-        
-        const renderInstance = Render.create({
-            element: container,
-            engine: engineInstance,
-            options: {
-                width: containerWidth,
-                height: containerHeight,
-                wireframes: false,
-                background: 'transparent'
-            }
-        });
-        
-        // Добавление стен
-        const walls = [
-            Bodies.rectangle(containerWidth / 2, containerHeight - 30, containerWidth, 60, { isStatic: true }),
-            Bodies.rectangle(-30, containerHeight / 2, 60, containerHeight, { isStatic: true }),
-            Bodies.rectangle(containerWidth + 30, containerHeight / 2, 60, containerHeight, { isStatic: true })
-        ];
-        
-        World.add(engineInstance.world, walls);
-        
-        // Запуск рендера
-        Render.run(renderInstance);
-        
-        // Обновление линии траектории при перетаскивании
-        function updateTrajectoryLine(x) {
-            const line = document.getElementById('trajectoryLine');
-            const currentFruitElement = document.getElementById('currentFruit');
-            
-            if (!line || !currentFruitElement) {
-                console.warn('Элемент линии траектории или текущего фрукта не найден.');
-                return;
-            }
-            
-            line.style.display = 'block';
-            line.style.left = `${x}px`;
-            line.style.top = '150px';
-            
-            const fruitWidth = fruits[currentFruitIndex].size;
-            currentFruitElement.style.left = `${x - fruitWidth / 2}px`;
-        }
-
-        // Обработчики событий для перетаскивания
-        let isDragging = false;
-        let currentX = containerWidth / 2;
-        let menuOpen = false;
-        let collectionOffset = 0; // Смещение коллекции
-
-        container.addEventListener('mousedown', startDrag);
-        container.addEventListener('mousemove', drag);
-        container.addEventListener('mouseup', endDrag);
-        container.addEventListener('touchstart', e => {
-            e.preventDefault();
-            startDrag(e.touches[0]);
-        });
-        container.addEventListener('touchmove', e => {
-            e.preventDefault();
-            drag(e.touches[0]);
-        });
-        container.addEventListener('touchend', endDrag);
-
-        // Начало перетаскивания
-        function startDrag(e) {
-            if (!canDrop || menuOpen) return;
-            isDragging = true;
-            const rect = container.getBoundingClientRect();
-            currentX = Math.min(Math.max(e.clientX - rect.left, fruits[currentFruitIndex].size / 2), containerWidth - fruits[currentFruitIndex].size / 2);
-            updateTrajectoryLine(currentX);
-        }
-
-        // Перетаскивание
-        function drag(e) {
-            if (!isDragging || !canDrop || menuOpen) return;
-            const rect = container.getBoundingClientRect();
-            currentX = Math.min(Math.max(e.clientX - rect.left, fruits[currentFruitIndex].size / 2), containerWidth - fruits[currentFruitIndex].size / 2);
-            updateTrajectoryLine(currentX);
-        }
-
-        // Завершение перетаскивания
-        function endDrag() {
-            if (!isDragging || !canDrop || menuOpen) return;
-            isDragging = false;
-            const line = document.getElementById('trajectoryLine');
-            if (line) {
-                line.style.display = 'none';
-            } else {
-                console.warn('Элемент trajectoryLine не найден.');
-            }
-        
-            if (canDrop) {
-                const newFruit = createFruit(currentX, 150, currentFruitIndex);
-                if (newFruit) {
-                    World.add(engineInstance.world, newFruit);
-                    saveFruits();
-                } else {
-                    console.error('Не удалось создать новый фрукт.');
-                    return;
-                }
-                
-                canDrop = false;
-                setTimeout(() => {
-                    canDrop = true;
-                    currentFruitIndex = nextFruitIndex;
-                    nextFruitIndex = getRandomFruitIndex();
-                    updateNextFruit();
-                }, 500);
-            }
-        }
-
-        // Обработчик столкновений
-        function checkCollision(event) {
-            const pairs = event.pairs;
-            const processedBodies = new Set(); // Набор для отслеживания обработанных тел
-            
-            pairs.forEach(pair => {
-                const bodyA = pair.bodyA;
-                const bodyB = pair.bodyB;
-                
-                // Проверяем, были ли уже обработаны эти тела
-                if (processedBodies.has(bodyA) || processedBodies.has(bodyB)) {
-                    return; // Пропускаем, если уже обработаны
-                }
-                
-                if (bodyA.fruitIndex !== undefined && bodyB.fruitIndex !== undefined) {
-                    if (bodyA.fruitIndex === bodyB.fruitIndex) {
-                        const newIndex = bodyA.fruitIndex + 1;
-                        if (newIndex < fruits.length && newIndex < 5) { // Ограничение до 5 фруктов
-                            const midX = (bodyA.position.x + bodyB.position.x) / 2;
-                            const midY = (bodyA.position.y + bodyB.position.y) / 2;
-                            
-                            // Удаляем объединяемые тела
-                            World.remove(engineInstance.world, [bodyA, bodyB]);
-
-                            // Создаем анимацию объединения с эффектом звездочек
-                            const combineAnimation = document.createElement('div');
-                            combineAnimation.className = 'combine-animation';
-                            combineAnimation.innerHTML = '✨ Объединение! ✨'; // Добавлены звездочки
-                            document.body.appendChild(combineAnimation);
-                            setTimeout(() => {
-                                combineAnimation.remove();
-                            }, 500); // Длительность анимации
-
-                            // Воспроизведение звука объединения
-                            if (isSoundOn) {
-                                combineSound.currentTime = 0;
-                                combineSound.play();
-                            }
-
-                            // Вибрация при объединении
-                            if (isVibrationOn && navigator.vibrate) {
-                                navigator.vibrate(100); // Вибрация на 100 мс
-                            }
-                            
-                            // Создаем новый фрукт
-                            const newFruit = createFruit(midX, midY, newIndex);
-                            if (newFruit) {
-                                World.add(engineInstance.world, newFruit);
-                                saveFruits();
-                            } else {
-                                console.error('Не удалось создать объединённый фрукт.');
-                                return;
-                            }
-                            
-                            // Обновляем баланс и достижения
-                            updateBalance(newIndex);
-                            updateAchievements(fruits[newIndex].score);
-                            
-                            // Помечаем тела как обработанные
-                            processedBodies.add(bodyA);
-                            processedBodies.add(bodyB);
-                        }
-                    }
-                }
-            });
-        }
-
-        // Функция обновления баланса и очков
-        function updateBalance(newIndex) {
-            points += fruits[newIndex].score * pointsMultiplier; // Обновление очков
-            balance += fruits[newIndex].score * pointsMultiplier; // Обновление баланса
-            localStorage.setItem('balance', balance);
-            localStorage.setItem('points', points);
-            updateBalanceInGame();
-        }
-
-        // Обновление достижений
-        function updateAchievements(pointsEarned) {
-            const scoreAchievements = rewardsData.achievements.filter(a => a.id.startsWith('score'));
-            scoreAchievements.forEach(achievement => {
-                if (!achievement.completed) {
-                    achievement.progress += pointsEarned;
-                    if (achievement.progress >= achievement.target) {
-                        achievement.completed = true;
-                        showNotification(`Достижение "${achievement.name}" выполнено!`);
-                    }
-                }
-            });
-            
-            const matchesAchievements = rewardsData.achievements.filter(a => a.id.startsWith('matches'));
-            matchesAchievements.forEach(achievement => {
-                if (!achievement.completed) {
-                    achievement.progress += 1; // Предполагается, что каждое соединение пары увеличивает прогресс
-                    if (achievement.progress >= achievement.target) {
-                        achievement.completed = true;
-                        showNotification(`Достижение "${achievement.name}" выполнено!`);
-                    }
-                }
-            });
-            
-            const activeTab = document.querySelector('.reward-tab.active');
-            if (activeTab?.dataset.type === 'achievements') {
-                renderRewards('achievements');
-            }
-
-            // Сохранение состояния наград
-            localStorage.setItem('dailyRewards', JSON.stringify(rewardsData.daily));
-            localStorage.setItem('achievementRewards', JSON.stringify(rewardsData.achievements));
-        }
-
-        // Проверка окончания игры
-        function checkGameOver() {
-            const bodies = Matter.Composite.allBodies(engineInstance.world);
-            const boundary = document.getElementById('boundary');
-            
-            for (let body of bodies) {
-                if (body.position.y < 100 && !body.isStatic) {
-                    if (boundary) {
-                        boundary.style.background = 'rgba(255,0,0,0.8)';
-                        boundary.style.boxShadow = '0 0 20px red';
-                        
-                        setTimeout(() => {
-                            boundary.style.background = 'linear-gradient(90deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 255, 0, 0.8) 50%, rgba(0, 255, 0, 0.2) 100%)';
-                            boundary.style.boxShadow = '0 0 10px rgba(0,255,0,0.5)';
-                        }, 300);
-                    }
-                    
-                    gameOver();
-                    break;
-                }
-            }
-        }
-
-        // Функция окончания игры
-        function gameOver() {
-            const gameOverScreen = document.getElementById('gameOverScreen');
-            const finalScoreElement = document.getElementById('finalScore');
-            if (finalScoreElement) {
-                finalScoreElement.textContent = `${balance}💲`;
-            } else {
-                console.error('Элемент finalScore не найден.');
-            }
-            
-            if (gameOverScreen) {
-                gameOverScreen.style.display = 'flex';
-            } else {
-                console.error('Элемент gameOverScreen не найден.');
-            }
-            canDrop = false;
-            
-            // Обновляем общую статистику
-            updateStats();
-            
-            // Добавляем текущего пользователя в рейтинг
-            const username = localStorage.getItem('username') || 'Игрок';
-            addToLeaderboard(username, balance);
-            
-            // Сохраняем очки
-            localStorage.setItem('points', points);
-        }
-
-        // Функция перезапуска игры
-        function restartGame() {
-            const bodies = Matter.Composite.allBodies(engineInstance.world);
-            bodies.forEach(body => {
-                if (!body.isStatic) {
-                    World.remove(engineInstance.world, body);
-                }
-            });
-            
-            canDrop = true;
-            currentFruitIndex = getRandomFruitIndex();
-            nextFruitIndex = getRandomFruitIndex();
-            // Не сбрасываем unlockedFruits
-            myPrizes = [];
-            saveMyPrizes();
-            
-            updateNextFruit();
-            updateCollection();
-            renderMyPrizes();
-            const gameOverScreen = document.getElementById('gameOverScreen');
-            if (gameOverScreen) {
-                gameOverScreen.style.display = 'none';
-            } else {
-                console.error('Элемент gameOverScreen не найден.');
-            }
-            
-            showNotification('Очки сброшены.');
-            
-            // Деактивация всех эффектов
-            deactivateAllEffects();
-            
-            // Сброс очков при перезапуске:
-            points = 0;
-            balance = 1000; // Сброс баланса до начального значения
-            localStorage.setItem('balance', balance);
-            localStorage.setItem('points', points);
-            updateBalanceInGame();
-            
-            // Удаление сохранённых фруктов
-            localStorage.removeItem('savedFruits');
-        }
-
-        // Обработчик открытия меню
-        const menuBtn = document.getElementById('menuBtn');
-        if (menuBtn) {
-            menuBtn.addEventListener('pointerdown', () => {
-                toggleMenu();
-            });
-        } else {
-            console.warn('Элемент menuBtn не найден.');
-        }
-
-        // Обработчик закрытия меню
-        const closeBtn = document.querySelector('.close-btn');
-        if (closeBtn) {
-            closeBtn.addEventListener('pointerdown', () => {
-                toggleMenu();
-            });
-        } else {
-            console.warn('Кнопка закрытия меню не найдена.');
-        }
-
-        // Функция переключения меню
-        function toggleMenu() {
-            const menuOverlay = document.getElementById('menuOverlay');
-            if (!menuOverlay) {
-                console.error('Элемент menuOverlay не найден.');
-                return;
-            }
-            menuOverlay.style.display = menuOverlay.style.display === 'flex' ? 'none' : 'flex';
-            menuOpen = !menuOpen;
-        }
-
-        // Обработчики для вкладок меню
-        const menuTabs = document.querySelectorAll('.menu-tab');
-        if (menuTabs.length > 0) {
-            menuTabs.forEach(tab => {
-                tab.addEventListener('pointerdown', () => {
-                    document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-                    
-                    tab.classList.add('active');
-                    const contentId = `${tab.dataset.tab}Content`;
-                    const content = document.getElementById(contentId);
-                    if (content) {
-                        content.style.display = 'block';
-                        if (tab.dataset.tab === 'rewards') {
-                            renderRewards('daily');
-                        }
-                        if (tab.dataset.tab === 'cases') {
-                            renderMyPrizes();
-                        }
-                    } else {
-                        console.warn(`Контент вкладки "${tab.dataset.tab}" не найден.`);
-                    }
-            
-                    // Отображение баланса только в магазине
-                    const balanceDisplay = document.getElementById('balance');
-                    if (balanceDisplay) {
-                        balanceDisplay.style.display = tab.dataset.tab === 'shop' ? 'block' : 'none';
-                    } else {
-                        console.warn('Элемент баланса не найден.');
-                    }
-                });
-            });
-        } else {
-            console.warn('Вкладки меню не найдены.');
-        }
-
-        // Функция инициализации обработчиков меню для мобильных устройств
-        function initMenuHandlers() {
-            // Увеличение зоны кликабельности кнопок настроек, магазина и рейтинга
-            document.querySelectorAll('.control-btn').forEach(btn => {
-                btn.style.touchAction = 'manipulation';
-            });
-
-            // Обработчик кнопки "Играть заново" в настройках
-            const playAgainBtn = document.getElementById('playAgainBtn');
-            if (playAgainBtn) {
-                playAgainBtn.addEventListener('pointerdown', () => {
-                    restartGame();
-                });
-            } else {
-                console.warn('Элемент playAgainBtn не найден.');
-            }
-        }
-
-        // Система уведомлений (toasts)
-        function showNotification(message) {
-            const notificationContainer = document.getElementById('notificationContainer');
-            if (!notificationContainer) {
-                console.error('Контейнер уведомлений не найден.');
-                return;
-            }
-            
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            notificationContainer.appendChild(notification);
-            
-            // Удаление уведомления через 3 секунды
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Функция для рендеринга элементов магазина
-        function renderShopItems() {
-            const shopItemsContainer = document.querySelector('.shop-items');
-            const balanceElement = document.getElementById('balance');
-            if (!shopItemsContainer || !balanceElement) {
-                console.error('Контейнер магазина или баланс не найден.');
-                return;
-            }
-            
-            // Обновление баланса с эмодзи
-            balanceElement.textContent = `Баланс: ${balance}💲`;
-            
-            shopItemsContainer.innerHTML = '';
-            
-            shopItemsData.themes.slice(0,5).forEach((item, index) => { // Ограничение до первых 5 тем
-                const itemElement = document.createElement('div');
-                itemElement.className = 'shop-item';
-                itemElement.dataset.id = item.id;
-                
-                itemElement.innerHTML = `
-                    <div style="width: 100%; height: 100px; border-radius: 8px; background: ${item.gradient}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-bottom: 10px;">
-                        ${item.name}
-                    </div>
-                    <p>${item.price}💲</p>
-                    ${item.purchased ? 
-                        `<button class="activate-btn ${item.active ? 'active' : ''}" data-id="${item.id}">
-                            ${item.active ? 'Активно' : 'Активировать'}
-                        </button>` :
-                        `<button class="buy-btn ${balance >= item.price ? '' : 'disabled'}" ${balance >= item.price ? '' : 'disabled'} data-id="${item.id}">
-                            ${balance >= item.price ? 'Купить' : 'Недостаточно💲'}
-                        </button>`
-                    }
-                `;
-                
-                shopItemsContainer.appendChild(itemElement);
-            });
-        }
-
-        // Функция для обработки покупки
-        function buyItem(item, index) {
-            if (balance >= item.price) {
-                balance -= item.price;
-                points += item.price; // Добавляем очки за покупку
-                item.purchased = true;
-                showNotification(`Вы приобрели "${item.name}" за ${item.price}💲.`);
-                renderShopItems();
-                updateBalanceInGame(); // Обновляем баланс и очки в игре
-                localStorage.setItem('balance', balance);
-                localStorage.setItem('points', points);
-                saveShopData(); // Сохраняем состояние магазина
-            } else {
-                showNotification('Недостаточно средств для покупки.');
-            }
-        }
-
-        // Функция для применения темы
-        function toggleItem(item) {
-            if (!item.purchased) return;
-        
-            if (!item.active) {
-                // Деактивируем все темы
-                shopItemsData.themes.forEach(theme => theme.active = false);
-                
-                // Активируем выбранную тему
-                item.active = true;
-                
-                // Применяем тему к контейнеру игры
-                const gameContainer = document.getElementById('gameContainer');
-                if (gameContainer) {
-                    gameContainer.style.background = `${item.gradient}`;
-                }
-                
-                // Показ уведомления о применении темы
-                showNotification(`Тема "${item.name}" применена.`);
-                
-                // Сохранение активной темы в localStorage
-                localStorage.setItem('activeTheme', item.id);
-            } else {
-                // Деактивируем тему
-                item.active = false;
-                
-                // Возвращаем стандартный фон
-                const gameContainer = document.getElementById('gameContainer');
-                if (gameContainer) {
-                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)';
-                }
-                
-                // Показ уведомления о деактивации темы
-                showNotification(`Тема "${item.name}" деактивирована.`);
-                
-                // Удаление активной темы из localStorage
-                localStorage.removeItem('activeTheme');
-            }
-            
-            renderShopItems(); // Обновляем магазин, чтобы отразить изменения
-            saveShopData(); // Сохраняем состояние магазина
-        }
-
-        // Инициализация обработчиков магазина
-        function initShopHandlers() {
-            const shopItemsContainer = document.querySelector('.shop-items');
-            if (!shopItemsContainer) {
-                console.error('Контейнер магазина не найден.');
-                return;
-            }
-            
-            shopItemsContainer.addEventListener('click', (e) => {
-                const button = e.target;
-                if (!button.matches('.buy-btn, .activate-btn')) return;
-        
-                const itemContainer = button.closest('.shop-item');
-                if (!itemContainer) {
-                    console.error('Контейнер магазина не найден.');
-                    return;
-                }
-        
-                const itemId = itemContainer.dataset.id;
-                const itemIndex = shopItemsData.themes.findIndex(item => item.id === itemId);
-                const item = shopItemsData.themes[itemIndex];
-        
-                if (!item) {
-                    console.error(`Тема с ID "${itemId}" не найдена.`);
-                    return;
-                }
-        
-                if (button.classList.contains('buy-btn')) {
-                    buyItem(item, itemIndex);
-                } else if (button.classList.contains('activate-btn')) {
-                    toggleItem(item);
-                }
-            });
-        }
-
-        // Функция для сохранения состояния магазина в localStorage
-        function saveShopData() {
-            localStorage.setItem('shopThemes', JSON.stringify(shopItemsData.themes));
-        }
-
-        // Функция для рендеринга наград
-        function renderRewards(type) {
-            const rewardsContent = document.querySelector('.rewards-content');
-            if (!rewardsContent) {
-                console.error('Контейнер наград не найден.');
-                return;
-            }
-            
-            rewardsContent.innerHTML = '';
-            
-            const rewardsList = rewardsData[type];
-            if (!rewardsList) {
-                console.error(`Тип наград "${type}" не найден.`);
-                return;
-            }
-        
-            rewardsList.forEach((reward, index) => {
-                if (!reward) return;
-                
-                const rewardElement = document.createElement('div');
-                rewardElement.className = 'reward-item';
-                
-                if (type === 'daily') {
-                    // Задания на день с задержкой открытия
-                    setTimeout(() => {
-                        rewardElement.innerHTML = `
-                            <div class="reward-info">
-                                <h4>${reward.name}</h4>
-                                <p>${reward.reward}💲</p>
-                            </div>
-                            <button class="claim-btn ${reward.claimed ? 'disabled' : ''}" data-id="${reward.id}" ${reward.claimed ? 'disabled' : ''}>
-                                ${reward.claimed ? 'Получено' : 'Получить'}
-                            </button>
-                        `;
-                        rewardsContent.appendChild(rewardElement);
-                    }, 1000 * (index + 1)); // Задержка: 1 секунда на каждый день
-                } else {
-                    const progress = Math.min(100, (reward.progress / reward.target) * 100);
-                    rewardElement.innerHTML = `
-                        <div class="reward-info">
-                            <h4>${reward.name}</h4>
-                            <p>${reward.reward}💲</p>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: ${progress}%;"></div>
-                            </div>
-                            <span class="progress-text">${reward.progress}/${reward.target}</span>
-                        </div>
-                        <button class="claim-btn" data-id="${reward.id}"
-                            ${reward.completed && !reward.claimed ? '' : 'disabled'}>
-                            ${reward.claimed ? 'Получено' : 'Получить'}
-                        </button>
-                    `;
-                    rewardsContent.appendChild(rewardElement);
-                }
-            });
-        
-            // Обработчики для кнопок получения наград
-            document.querySelectorAll('.claim-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const rewardId = e.target.dataset.id;
-                    const rewardType = document.querySelector('.reward-tab.active').dataset.type;
-                    const reward = rewardsData[rewardType].find(r => r.id === rewardId);
-                    
-                    if (reward && !reward.claimed) {
-                        if (rewardType === 'daily') {
-                            balance += reward.reward;
-                        } else if (rewardType === 'achievements') {
-                            points += reward.reward * pointsMultiplier; // Добавляем очки за достижения с учетом множителя
-                        }
-                        reward.claimed = true;
-                        showNotification(`Вы получили ${reward.reward}💲!`);
-                        renderShopItems(); // Обновляем баланс и очки
-                        renderRewards(rewardType);
-                        localStorage.setItem('balance', balance);
-                        localStorage.setItem('points', points);
-                        updateBalanceInGame(); // Обновляем отображение баланса и очков
-                        // Сохранение наград
-                        if (rewardType === 'daily') {
-                            localStorage.setItem('dailyRewards', JSON.stringify(rewardsData.daily));
-                        } else if (rewardType === 'achievements') {
-                            localStorage.setItem('achievementRewards', JSON.stringify(rewardsData.achievements));
-                        }
-                    }
-                });
-            });
-        }
-
-        // Функция для скачивания рейтинга как TXT-файл
-        function downloadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            let content = 'Топ игроков:\n';
-            leaderboard.forEach(player => {
-                content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
-            });
-        
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'leaderboard.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Функция отображения ТОП 10
-        function showTop10() {
-            fetchLeaderboard();
-        }
-
-        // Функция отображения моего рейтинга
-        function showMyRating() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            const username = localStorage.getItem('username') || 'Игрок';
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Найти текущего пользователя
-            const userIndex = leaderboard.findIndex(player => player.username === username);
-            if (userIndex === -1) {
-                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
-                return;
-            }
-            const user = leaderboard[userIndex];
-            const rank = userIndex + 1;
-        
-            const userElement = document.createElement('div');
-            userElement.className = 'leaderboard-item';
-            userElement.innerHTML = `
-                <span>${rank}. ${user.username}</span>
-                <span>${user.score}💲</span>
-            `;
-            // Выделение места пользователя
-            if (rank === 1) {
-                userElement.style.color = '#FFD700'; // Золотой
-            } else if (rank === 2) {
-                userElement.style.color = '#C0C0C0'; // Серебряный
-            } else if (rank === 3) {
-                userElement.style.color = '#CD7F32'; // Бронзовый
-            }
-            leaderboardList.appendChild(userElement);
-        }
-
-        // Функция для получения данных рейтинга
-        function fetchLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            // Получаем данные из localStorage
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            // Отображаем всех игроков, а не только одного
-            leaderboard.forEach(player => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                item.innerHTML = `
-                    <span>${player.rank}. ${player.username}</span>
-                    <span>${player.score}💲</span>
-                `;
-                // Выделение первых трех мест
-                if (player.rank === 1) {
-                    item.style.color = '#FFD700'; // Золотой
-                } else if (player.rank === 2) {
-                    item.style.color = '#C0C0C0'; // Серебряный
-                } else if (player.rank === 3) {
-                    item.style.color = '#CD7F32'; // Бронзовый
-                }
-                leaderboardList.appendChild(item);
-            });
-        }
-
-        // Функция для добавления игрока в рейтинг
-        function addToLeaderboard(username, score) {
-            // Получаем текущий список игроков из localStorage или создаем новый массив
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        
-            // Проверяем, есть ли уже игрок с этим ником
-            const existingPlayerIndex = leaderboard.findIndex(player => player.username === username);
-        
-            if (existingPlayerIndex !== -1) {
-                // Обновляем очки, если новый результат выше текущего
-                if (leaderboard[existingPlayerIndex].score < score) {
-                    leaderboard[existingPlayerIndex].score = score;
-                }
-            } else {
-                // Добавляем нового игрока
-                leaderboard.push({ username, score });
-            }
-        
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-        
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            // Сохраняем обратно в localStorage
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        }
-
-        // Обновление статистики
-        function updateStats() {
-            // Здесь можно добавить элементы для отображения статистики, если необходимо
-        }
-
-        // Функции для кейсов
-        function initCaseHandlers() {
-            // Здесь можно добавить дополнительные обработчики, если необходимо
-        }
-
-        function openCase() {
-            if (balance < 500) { // Предполагаемая стоимость кейса
-                showNotification('Недостаточно средств для открытия кейса.');
-                return;
-            }
-
-            balance -= 500;
-            points += 500; // Добавляем очки за открытие кейса
-            updateBalanceInGame();
-            showNotification('Кейс открыт!');
-
-            // Случайный выбор предмета
-            const randomIndex = Math.floor(Math.random() * casesData.items.length);
-            const wonItem = casesData.items[randomIndex];
-
-            if (wonItem) {
-                // Добавление предмета в мои призы
-                myPrizes.push({ ...wonItem, obtainedAt: Date.now() });
-                saveMyPrizes();
-                renderMyPrizes();
-                showNotification(`Вы выиграли: ${wonItem.name}!`);
-
-                // Применение эффекта
-                applyEffect(wonItem.effect);
-            } else {
-                console.error('Не удалось выбрать предмет из кейса.');
-                showNotification('Ошибка при открытии кейса.');
-            }
-        }
-
-        function renderMyPrizes() {
-            const myPrizesContainer = document.getElementById('myPrizes');
-            if (!myPrizesContainer) {
-                console.error('Элемент myPrizes не найден.');
-                return;
-            }
-
-            myPrizesContainer.innerHTML = '<h4>Мои призы:</h4>';
-
-            if (myPrizes.length === 0) {
-                myPrizesContainer.innerHTML += '<p>Нет призов.</p>';
-                return;
-            }
-
-            myPrizes.forEach((prize, index) => {
-                const prizeElement = document.createElement('div');
-                prizeElement.className = 'prize-item';
-                prizeElement.innerHTML = `
-                    <img src="https://via.placeholder.com/40?text=${encodeURIComponent(prize.name.charAt(0))}" alt="${prize.name}">
-                    <span>${prize.name}</span>
-                `;
-                myPrizesContainer.appendChild(prizeElement);
-            });
-        }
-
-        function saveMyPrizes() {
-            localStorage.setItem('myPrizes', JSON.stringify(myPrizes));
-        }
-
-        // Функция применения эффекта
-        function applyEffect(effect) {
-            if (activeEffects[effect]) {
-                showNotification(`Эффект "${effect}" уже активен.`);
-                return;
-            }
-
-            switch(effect) {
-                case 'doublePoints':
-                    activeEffects.doublePoints = Date.now() + 15000;
-                    pointsMultiplier = 2;
-                    showNotification('Эффект "Удвоение Очков" активирован на 15 секунд!');
-                    break;
-                case 'extraLife':
-                    // Реализуйте логику дополнительной жизни, если предусмотрено
-                    showNotification('Эффект "Дополнительная Жизнь" активирован на 15 секунд!');
-                    break;
-                case 'slowMotion':
-                    engineInstance.gravity.y = 0.6; // Замедление
-                    activeEffects.slowMotion = Date.now() + 15000;
-                    showNotification('Эффект "Замедление" активирован на 15 секунд!');
-                    break;
-                case 'fastDrop':
-                    engineInstance.gravity.y = 2.0; // Ускорение падения
-                    activeEffects.fastDrop = Date.now() + 15000;
-                    showNotification('Эффект "Быстрое Падение" активирован на 15 секунд!');
-                    break;
-                case 'shield':
-                    // Реализуйте логику щита, если предусмотрено
-                    showNotification('Эффект "Щит" активирован на 15 секунд!');
-                    break;
-                default:
-                    console.warn(`Неизвестный эффект: ${effect}`);
-            }
-
-            // Сохранение активных эффектов
-            saveActiveEffects();
-
-            // Таймер для деактивации эффекта
-            setTimeout(() => {
-                deactivateEffect(effect);
-            }, 15000);
-        }
-
-        // Функция деактивации эффекта
-        function deactivateEffect(effect) {
-            delete activeEffects[effect];
-            switch(effect) {
-                case 'doublePoints':
-                    pointsMultiplier = 1;
-                    showNotification('Эффект "Удвоение Очков" деактивирован.');
-                    break;
-                case 'extraLife':
-                    // Реализуйте логику деактивации дополнительной жизни, если предусмотрено
-                    showNotification('Эффект "Дополнительная Жизнь" деактивирован.');
-                    break;
-                case 'slowMotion':
-                    engineInstance.gravity.y = 1.2; // Восстановление нормального падения
-                    showNotification('Эффект "Замедление" деактивирован.');
-                    break;
-                case 'fastDrop':
-                    engineInstance.gravity.y = 1.2; // Восстановление нормального падения
-                    showNotification('Эффект "Быстрое Падение" деактивирован.');
-                    break;
-                case 'shield':
-                    // Реализуйте логику деактивации щита, если предусмотрено
-                    showNotification('Эффект "Щит" деактивирован.');
-                    break;
-                default:
-                    console.warn(`Неизвестный эффект: ${effect}`);
-            }
-
-            // Сохранение активных эффектов
-            saveActiveEffects();
-        }
-
-        // Функция деактивации всех эффектов при перезапуске
-        function deactivateAllEffects() {
-            for (const effect of Object.keys(activeEffects)) {
-                deactivateEffect(effect);
-            }
-        }
-
-        // Функция для сохранения фруктов в localStorage
-        function saveFruits() {
-            const bodies = Matter.Composite.allBodies(engineInstance.world);
-            const fruitsData = bodies
-                .filter(body => body.fruitIndex !== undefined)
-                .map(body => ({
-                    fruitIndex: body.fruitIndex,
-                    position: body.position,
-                    velocity: body.velocity
-                }));
-            localStorage.setItem('savedFruits', JSON.stringify(fruitsData));
-        }
-
-        // Функция для загрузки фруктов из localStorage
-        function loadFruits() {
-            const savedFruits = JSON.parse(localStorage.getItem('savedFruits'));
-            if (savedFruits && Array.isArray(savedFruits)) {
-                savedFruits.forEach(fruitData => {
-                    const body = createFruit(fruitData.position.x, fruitData.position.y, fruitData.fruitIndex);
-                    if (body) {
-                        body.velocity.x = fruitData.velocity.x;
-                        body.velocity.y = fruitData.velocity.y;
-                        World.add(engineInstance.world, body);
-                        if (fruitData.fruitIndex < 5) { // Ограничение до 5 фруктов
-                            unlockedFruits.add(fruitData.fruitIndex);
-                        }
-                    }
-                });
-                updateCollection();
-            }
-        }
-
-        // Сохранение открытых фруктов
-        function saveUnlockedFruits() {
-            localStorage.setItem('unlockedFruits', JSON.stringify(Array.from(unlockedFruits)));
-        }
-
-        // Функция сохранения активных эффектов
-        function saveActiveEffects() {
-            const savedActiveEffects = {};
-            for (const [effect, expiry] of Object.entries(activeEffects)) {
-                if (Date.now() < expiry) {
-                    savedActiveEffects[effect] = expiry;
-                }
-            }
-            localStorage.setItem('activeEffects', JSON.stringify(savedActiveEffects));
-        }
-
-        // Инициализация фруктов
-        loadUnlockedFruits();
-        loadFruits();
-
-        // Функция навигации по коллекции фруктов
-        function scrollCollection(direction) {
-            const collectionList = document.querySelector('.collectionList');
-            if (!collectionList) {
-                console.error('Элемент collectionList не найден.');
-                return;
-            }
-            const totalItems = collectionList.children.length;
-            const itemWidth = 40; // Ширина элемента + отступ
-            const containerWidth = document.querySelector('#collectionContainer').clientWidth;
-            const visibleItems = Math.floor(containerWidth / itemWidth);
-            
-            if (direction === 'left') {
-                collectionOffset = Math.min(collectionOffset + itemWidth, 0);
-            } else {
-                collectionOffset = Math.max(collectionOffset - itemWidth, -(totalItems * itemWidth - visibleItems * itemWidth));
-            }
-            
-            collectionList.style.transform = `translateX(${collectionOffset}px)`;
-        }
-
-        // Обработчики стрелок навигации коллекции
-        document.querySelector('.left-nav').addEventListener('click', () => scrollCollection('left'));
-        document.querySelector('.right-nav').addEventListener('click', () => scrollCollection('right'));
-
-        // Функция показа рейтинга
-        function showLeaderboard() {
-            leaderboardOpen = true;
-            const menuOverlay = document.getElementById('menuOverlay');
-            const leaderboardTab = document.querySelector('[data-tab="leaderboard"]');
-            if (menuOverlay && leaderboardTab) {
-                menuOverlay.style.display = 'flex';
-                leaderboardTab.click();
-                fetchLeaderboard();
-            } else {
-                console.error('Элемент menuOverlay или вкладка "leaderboard" не найдены.');
-            }
-        }
-
-        // Функция для скачивания рейтинга как TXT-файл
-        function downloadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            let content = 'Топ игроков:\n';
-            leaderboard.forEach(player => {
-                content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
-            });
-        
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'leaderboard.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Функция отображения ТОП 10
-        function showTop10() {
-            fetchLeaderboard();
-        }
-
-        // Функция отображения моего рейтинга
-        function showMyRating() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            const username = localStorage.getItem('username') || 'Игрок';
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Найти текущего пользователя
-            const userIndex = leaderboard.findIndex(player => player.username === username);
-            if (userIndex === -1) {
-                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
-                return;
-            }
-            const user = leaderboard[userIndex];
-            const rank = userIndex + 1;
-        
-            const userElement = document.createElement('div');
-            userElement.className = 'leaderboard-item';
-            userElement.innerHTML = `
-                <span>${rank}. ${user.username}</span>
-                <span>${user.score}💲</span>
-            `;
-            // Выделение места пользователя
-            if (rank === 1) {
-                userElement.style.color = '#FFD700'; // Золотой
-            } else if (rank === 2) {
-                userElement.style.color = '#C0C0C0'; // Серебряный
-            } else if (rank === 3) {
-                userElement.style.color = '#CD7F32'; // Бронзовый
-            }
-            leaderboardList.appendChild(userElement);
-        }
-
-        // Функция получения данных рейтинга
-        function fetchLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            // Получаем данные из localStorage
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            // Отображаем всех игроков, а не только одного
-            leaderboard.forEach(player => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                item.innerHTML = `
-                    <span>${player.rank}. ${player.username}</span>
-                    <span>${player.score}💲</span>
-                `;
-                // Выделение первых трех мест
-                if (player.rank === 1) {
-                    item.style.color = '#FFD700'; // Золотой
-                } else if (player.rank === 2) {
-                    item.style.color = '#C0C0C0'; // Серебряный
-                } else if (player.rank === 3) {
-                    item.style.color = '#CD7F32'; // Бронзовый
-                }
-                leaderboardList.appendChild(item);
-            });
-        }
-
-        // Функция для добавления игрока в рейтинг
-        function addToLeaderboard(username, score) {
-            // Получаем текущий список игроков из localStorage или создаем новый массив
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        
-            // Проверяем, есть ли уже игрок с этим ником
-            const existingPlayerIndex = leaderboard.findIndex(player => player.username === username);
-        
-            if (existingPlayerIndex !== -1) {
-                // Обновляем очки, если новый результат выше текущего
-                if (leaderboard[existingPlayerIndex].score < score) {
-                    leaderboard[existingPlayerIndex].score = score;
-                }
-            } else {
-                // Добавляем нового игрока
-                leaderboard.push({ username, score });
-            }
-        
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-        
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            // Сохраняем обратно в localStorage
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        }
-
-        // Функция для сохранения активных эффектов
-        function saveActiveEffects() {
-            const savedActiveEffects = {};
-            for (const [effect, expiry] of Object.entries(activeEffects)) {
-                if (Date.now() < expiry) {
-                    savedActiveEffects[effect] = expiry;
-                }
-            }
-            localStorage.setItem('activeEffects', JSON.stringify(savedActiveEffects));
-        }
-
-        // Функция отключения фона на конкретном товаре
-        function disableBackgroundOnItem(itemId) {
-            const item = shopItemsData.themes.find(theme => theme.id === itemId);
-            if (item && item.active) {
-                item.active = false;
-                const gameContainer = document.getElementById('gameContainer');
-                if (gameContainer) {
-                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)'; // Возвращаем прозрачный фон
-                }
-                showNotification(`Фон для "${item.name}" отключен.`);
-                localStorage.removeItem('activeTheme');
-                renderShopItems();
-                saveShopData();
-            }
-        }
-
-        // Инициализация аудио и обработка кнопок настроек
-        document.addEventListener('DOMContentLoaded', () => {
-            // Инициализация аудио
-            function initAudio() {
-                if (bgMusic) {
-                    bgMusic.volume = 0.3;
-                }
-                if (combineSound) {
-                    combineSound.volume = 0.5;
-                }
-            }
-
-            initAudio();
-
-            // Переключение музыки
-            function toggleMusic() {
-                if (isMusicPlaying) {
-                    bgMusic.pause();
-                    isMusicPlaying = false;
-                    showNotification('Музыка выключена');
-                } else {
-                    const playPromise = bgMusic.play();
-                    if (playPromise !== undefined) {
-                        playPromise
-                            .then(() => {
-                                isMusicPlaying = true;
-                                showNotification('Музыка включена');
-                            })
-                            .catch(error => {
-                                console.log("Ошибка воспроизведения аудио:", error);
-                                showNotification('Не удалось воспроизвести музыку.');
-                            });
-                    }
-                }
-            }
-
-            // Переключение звуков
-            function toggleSound() {
-                isSoundOn = !isSoundOn;
-                showNotification(`Звуки ${isSoundOn ? 'включены' : 'выключены'}`);
-            }
-
-            // Переключение вибрации
-            function toggleVibration() {
-                isVibrationOn = !isVibrationOn;
-                showNotification(`Вибрация ${isVibrationOn ? 'включена' : 'выключена'}`);
-            }
-
-            // Переключение вибрации (дублирование функции)
-            function toggleVibration() {
-                isVibrationOn = !isVibrationOn;
-                showNotification(`Вибрация ${isVibrationOn ? 'включена' : 'выключена'}`);
-            }
-
-            // Переключение фона
-            function toggleBackground() {
-                const gameContainer = document.getElementById('gameContainer');
-                const backgroundToggleBtn = document.getElementById('backgroundToggle');
-                const activeThemeId = localStorage.getItem('activeTheme');
-                const activeTheme = shopItemsData.themes.find(theme => theme.id === activeThemeId);
+    <div class="store-item">
+      <h4>Custom Emotes</h4>
+      <p>Add special emotes to your messages</p>
+      <button class="store-btn" data-item="emotes" data-price="60">60 JustBucks</button>
+    </div>
+    <div class="store-item">
+      <h4>Animated Avatar</h4>
+      <p>Make your avatar animated</p>
+      <button class="store-btn" data-item="animated" data-price="200">200 JustBucks</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function sanitizeString(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function isMobileDevice() {
+  const isTouchDevice = (
+    'ontouchstart' in window || 
+    navigator.maxTouchPoints > 0
+  );
+  
+  const isMobileScreen = window.innerWidth <= 768;
+  
+  const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  return isMobileScreen && (isTouchDevice || isMobileUserAgent);
+}
+
+const JUSTAI_AVATAR_URL = 'https://i.imgur.com/4M7IWwP.png'; // Replace with a valid image URL for JustAI's avatar
+function showJustAiTyping() {
+  const messagesContainer = document.getElementById('messages');
+  const typingIndicator = document.createElement('div');
+  typingIndicator.className = 'message justai typing';
+  typingIndicator.dataset.temp = 'justai-typing';
+
+  typingIndicator.innerHTML = `
+    <img class="avatar" src="${JUSTAI_AVATAR_URL}" alt="JustAI avatar">
+    <div class="message-content">
+      <div class="message-header">
+        <span class="username">JustAI</span>
+        <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+      </div>
+      <div class="message-text"><em>JustAI is typing...</em></div>
+    </div>
+  `;
+
+  messagesContainer.appendChild(typingIndicator);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function removeJustAiTyping() {
+  const typingIndicator = document.querySelector('.message.justai.typing[data-temp="justai-typing"]');
+  if (typingIndicator) {
+    typingIndicator.remove();
+  }
+}
+
+async function getJustAiResponse(question) {
+  try {
+    const response = await fetch('/api/chatgpt', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.answer;
+    } else {
+      console.error('Error fetching JustAI response:', response.statusText);
+      return "Sorry, I'm having trouble responding right now.";
+    }
+  } catch (error) {
+    console.error('Error getting JustAI response:', error);
+    return "Sorry, I'm having trouble responding right now.";
+  }
+}
+
+const room = new WebsimSocket();
+let currentServer = 'main';
+let currentChannel = 'general';
+let replyingTo = null;
+
+async function loadServers() {
+  const servers = await room.store.get('servers') || { 'main': 'JustCord' };
+
+  updateServerList(servers);
+}
+
+function updateServerList(servers) {
+  const serversContainer = document.getElementById('servers');
+  const addServerBtn = document.getElementById('addServer');
+  
+  Array.from(serversContainer.children).forEach(child => {
+    if (!child.classList.contains('add')) {
+      child.remove();
+    }
+  });
+
+  // Add main JC server first
+  const mainServer = document.createElement('div');
+  mainServer.className = 'server-icon';
+  mainServer.textContent = 'JC';
+  mainServer.dataset.server = 'main';
+  serversContainer.insertBefore(mainServer, addServerBtn);
+  attachServerClickHandler(mainServer);
+
+  // Add other servers
+  Object.entries(servers).forEach(([serverId, serverData]) => {
+    if (serverId !== 'main') {
+      const serverIcon = document.createElement('div');
+      serverIcon.className = 'server-icon';
+      
+      if (typeof serverData === 'object' && serverData.iconUrl) {
+        serverIcon.classList.add('custom-icon');
+        serverIcon.style.backgroundImage = `url(${serverData.iconUrl})`;
+      } else {
+        const serverName = typeof serverData === 'object' ? serverData.name : serverData;
+        serverIcon.textContent = serverName.substring(0, 2).toUpperCase();
+      }
+      
+      serverIcon.dataset.server = serverId;
+      serversContainer.insertBefore(serverIcon, addServerBtn);
+      attachServerClickHandler(serverIcon);
+    }
+  });
+
+  // Set the main server as active by default if no server is selected
+  if (!currentServer || currentServer === 'main') {
+    const mainServerIcon = serversContainer.querySelector('[data-server="main"]');
+    if (mainServerIcon) {
+      mainServerIcon.classList.add('active');
+    }
+  }
+}
+
+async function createMessageTable() {
+  const query = `CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY,
+    username TEXT,
+    avatar TEXT,
+    message TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    server TEXT,
+    channel TEXT,
+    reply_to INTEGER REFERENCES messages(id)
+  )`;
+  await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+}
+
+function attachServerClickHandler(serverElement) {
+  serverElement.addEventListener('click', () => {
+      document.querySelectorAll('.server-icon').forEach(s => s.classList.remove('active')); 
+
+    serverElement.classList.add('active');
     
-                if (activeTheme && activeTheme.active) {
-                    // Отключаем активную тему
-                    activeTheme.active = false;
-                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)'; // Возвращаем прозрачный фон
-                    backgroundToggleBtn.textContent = '🖼️ Включить фон';
-                    showNotification('Фон отключён');
-                    localStorage.removeItem('activeTheme');
-                    renderShopItems();
-                    saveShopData();
-                } else {
-                    showNotification('Нет активного фона для отключения.');
-                }
-            }
+    currentServer = serverElement.dataset.server;
+    document.getElementById('messages').innerHTML = '';
+    startMessagePolling();
+  });
+}
 
-            // Обработчики кнопок настроек
-            const musicToggleBtn = document.getElementById('musicToggle');
-            const soundToggleBtn = document.getElementById('soundToggle');
-            const vibrationToggleBtn = document.getElementById('vibrationToggle');
-            const playAgainBtn = document.getElementById('playAgainBtn');
+function addMessage(username, avatar, message, messageId, replyToMessageId, replyToUsername = '', replyToMessageContent = '') {
+  const messagesContainer = document.getElementById('messages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message';
+  if (username.toLowerCase() === 'justai') {
+    messageDiv.classList.add('justai');
+  }
+  messageDiv.dataset.messageId = messageId;
 
-            if (musicToggleBtn) musicToggleBtn.addEventListener('pointerdown', toggleMusic);
-            else console.warn('Element with ID "musicToggle" not found.');
+  username = sanitizeString(username);
+  avatar = sanitizeString(avatar);
+  message = sanitizeString(message);
 
-            if (soundToggleBtn) soundToggleBtn.addEventListener('pointerdown', toggleSound);
-            else console.warn('Element with ID "soundToggle" not found.');
+  let messageContent;
+  if (message.startsWith('http') && (message.endsWith('.png') || message.endsWith('.jpg') || message.endsWith('.gif') || message.endsWith('.jpeg'))) {
+      messageContent = `<img src="${message}" alt="Shared image" style="max-width: 300px; max-height: 300px;">`; 
 
-            if (vibrationToggleBtn) vibrationToggleBtn.addEventListener('pointerdown', toggleVibration);
-            else console.warn('Element with ID "vibrationToggle" не найден.');
+  } else if (message.startsWith('http') && message.endsWith('.mp4')) {
+    messageContent = `<video controls style="max-width: 300px;"><source src="${message}" type="video/mp4"></video>`;
+  } else {
+    const urlRegex = /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/g;
+    messageContent = message.replace(urlRegex, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none;">${url}</a>`;
+    });
+  }
 
-            if (playAgainBtn) {
-                playAgainBtn.addEventListener('pointerdown', () => {
-                    restartGame();
-                });
-            } else {
-                console.warn('Элемент playAgainBtn не найден.');
-            }
+  let replyContent = '';
+  if (replyToMessageId) {
+    replyContent = `
+      <div class="replied-message">
+        <span class="replied-username">${replyToUsername}</span>
+        <div class="replied-text">${replyToMessageContent}</div>
+      </div>
+    `;
+  }
+
+  const devTag = username === 'grog' ? ' <strong>(DEV)</strong>' : '';
+  const replyButton = `
+      <button class="reply-btn" onclick="replyToMessage(${messageId}, '${encodeURIComponent(username)}', '${encodeURIComponent(message)}')">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M10 9V5l-7 7 7 7v-4h4v-6z"/>
+      </svg>
+    </button>
+  `;
+  const deleteButton = username === room.party.client.username ? 
+    `<button class="delete-btn" onclick="deleteMessage(${messageId})">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M16 9v10H8V9h8m-1.5-6H9.5L8 5H5v2h14V5h-3l-1.5-2z"/>
+      </svg>
+    </button>` : '';
+
+  const banButton = room.party.client.username === 'grog' ? 
+    `<button class="delete-btn" style="background: var(--red)" onclick="banUser('${username}')">
+      Ban User
+    </button>` : '';
+
+  messageDiv.innerHTML = `
+    <img class="avatar" src="${avatar}" alt="User avatar">
+    <div class="message-content">
+      <div class="message-header">
+        <span class="username">${username}${devTag}</span>
+        <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+      </div>
+      ${replyContent}
+      <div class="message-text">${messageContent}</div>
+      <div class="message-actions">
+        ${replyButton}
+        ${deleteButton}
+        ${banButton}
+      </div>
+    </div>
+  `;
+  
+  messagesContainer.appendChild(messageDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+async function deleteMessage(messageId) {
+  try {
+    const query = `SELECT username FROM messages WHERE id = ${messageId}`;
+    const response = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    const [message] = await response.json();
+    
+    if (message && message.username === room.party.client.username) {
+      const deleteQuery = `DELETE FROM messages WHERE id = ${messageId}`;
+      await fetch('/api/v1/sql/?' + new URLSearchParams({sql: deleteQuery}));
+      
+      const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+      if (messageElement) {
+        messageElement.remove();
+      }
+      
+      room.send({
+        type: 'messageDeleted',
+        messageId: messageId
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting message:', error);
+  }
+}
+
+async function banUser(username) {
+  if (room.party.client.username !== 'grog') {
+    console.log('Only the developer can ban users');
+    return;
+  }
+
+  try {
+    room.store.update({
+      id: 'banned_users',
+      dependencies: { username },
+      updateFunction: (bannedUsers = []) => {
+        if (!Array.isArray(bannedUsers)) {
+          bannedUsers = [];
+        }
+        if (!bannedUsers.includes(username)) {
+          bannedUsers.push(username);
+        }
+        return bannedUsers;
+      }
+    });
+
+    room.send({
+      type: 'userBanned',
+      bannedUsername: username
+    });
+
+  } catch (error) {
+    console.error('Error banning user:', error);
+  }
+}
+
+function initializeJustBucks() {
+  room.store.get('justbucks_balances').then((balances) => {
+    if (!balances) {
+      balances = {};
+    }
+    const username = room.party.client.username;
+    if (!balances[username]) {
+      balances[username] = 0;
+      room.store.update({
+        id: 'justbucks_balances',
+        dependencies: { username, balances },
+        updateFunction: (storeBalances = {}) => {
+          storeBalances[username] = balances[username];
+          return storeBalances;
+        }
+      });
+    }
+  });
+
+  setInterval(() => {
+    const username = room.party.client.username;
+    room.store.update({
+      id: 'justbucks_balances',
+      dependencies: { username },
+      updateFunction: (storeBalances = {}) => {
+        if (!storeBalances[username]) {
+          storeBalances[username] = 0;
+        }
+        storeBalances[username] += 5;
+        return storeBalances;
+      }
+    });
+  }, 60000); 
+  
+}
+
+function updateJustBucksDisplay() {
+  const username = room.party.client.username;
+  room.store.get('justbucks_balances').then((balances) => {
+    if (balances && balances[username] !== undefined) {
+      const balanceDisplay = document.getElementById('justbucksDisplay');
+      if (balanceDisplay) {
+        balanceDisplay.textContent = 'JustBucks: ' + balances[username];
+      }
+    }
+  });
+}
+
+async function init() {
+  const username = room.party.client.username;
+  const bannedUsers = await room.store.get('banned_users') || [];
+  
+  if (Array.isArray(bannedUsers) && bannedUsers.includes(username)) {
+    document.body.innerHTML = '<h1 style="color: var(--red); text-align: center; margin-top: 40px;">You have been banned from this server.</h1>';
+    return;
+  }
+
+  if (localStorage.getItem('banned') === 'true') {
+    document.body.innerHTML = '<h1>You have been banned from this server.</h1>';
+    return;
+  }
+
+  const isMobile = isMobileDevice();
+  if (isMobile) {
+    document.body.classList.add('mobile');
+    
+    const messages = document.querySelector('.messages');
+    if (messages) {
+      messages.style.paddingTop = '60px';
+    }
+    
+    const mobileNav = document.querySelector('.mobile-nav');
+    if (mobileNav) {
+      mobileNav.style.display = 'flex';
+    }
+
+    const toggleChannels = document.getElementById('toggleChannels');
+    const channels = document.getElementById('onlineUsers');
+    if (toggleChannels && channels) {
+      toggleChannels.addEventListener('click', () => {
+        channels.style.display = channels.style.display === 'none' ? 'block' : 'none';
+      });
+      channels.style.display = 'none';
+    }
+  }
+
+  await createMessageTable();
+  setupEventListeners();
+  setupServerCreation(); 
+  setupUserSettings();
+  initializeJustBucks();
+  await loadServers();
+  
+  room.onRecordChanged = (id) => {
+    if (id === 'servers') {
+      loadServers();
+    } 
+    if (id === 'justbucks_balances') {
+      updateJustBucksDisplay();
+    }
+  };
+
+  startMessagePolling();
+}
+
+function setupEventListeners() {
+  const messageInput = document.getElementById('messageInput');
+  
+  messageInput.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter' && messageInput.value.trim()) {
+      let message = messageInput.value.trim();
+      messageInput.value = '';
+
+      const replyTo = replyingTo ? replyingTo.messageId : null;
+      const replyToUsername = replyingTo ? replyingTo.username : null;
+      const replyToMessageContent = replyingTo ? replyingTo.messageContent : null;
+      cancelReply();
+
+      const sanitizedMsg = message.replace(/'/g, "''");
+      const currentServerSafe = currentServer.replace(/'/g, "''");
+
+      const query = `INSERT INTO messages (username, avatar, message, server, channel, reply_to) 
+        VALUES ('${room.party.client.username.replace(/'/g, "''")}', 
+                '${room.party.client.avatarUrl.replace(/'/g, "''")}', 
+                '${sanitizedMsg}', 
+                '${currentServerSafe}', 
+                '${currentChannel.replace(/'/g, "''")}',
+                ${replyTo || 'NULL'}) RETURNING id`;
+
+      const response = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+      const [result] = await response.json();
+      const messageId = result.id;
+
+      room.send({
+        type: 'newMessage',
+        message: sanitizedMsg,
+        messageUsername: room.party.client.username,
+        messageAvatar: room.party.client.avatarUrl,
+        server: currentServer,
+        channel: currentChannel,
+        messageId: messageId,
+        replyTo: replyTo,
+        replyToUsername: replyToUsername,
+        replyToMessageContent: replyToMessageContent
+      });
+
+      if (message.toLowerCase().includes('@justai')) {
+        showJustAiTyping();
+
+        getJustAiResponse(message)
+          .then(async (aiResponse) => {
+            removeJustAiTyping();
+
+            const aiUsername = 'JustAI';
+            const aiAvatar = JUSTAI_AVATAR_URL;
+            const sanitizedAiResponse = aiResponse.replace(/'/g, "''");
+
+            const aiMessageQuery = `INSERT INTO messages (username, avatar, message, server, channel) 
+              VALUES ('${aiUsername.replace(/'/g, "''")}', 
+                      '${aiAvatar.replace(/'/g, "''")}', 
+                      '${sanitizedAiResponse}', 
+                      '${currentServer.replace(/'/g, "''")}', 
+                      '${currentChannel.replace(/'/g, "''")}') RETURNING id`;
+            const aiResponseFetch = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: aiMessageQuery}));
+            const [aiResult] = await aiResponseFetch.json();
+            const aiMessageId = aiResult.id;
+
+            room.send({
+              type: 'newMessage',
+              message: aiResponse,
+              messageUsername: aiUsername,
+              messageAvatar: aiAvatar,
+              server: currentServer,
+              channel: currentChannel,
+              messageId: aiMessageId,
+              replyTo: null,
+              replyToUsername: null,
+              replyToMessageContent: null
+            });
+          })
+          .catch((error) => {
+            removeJustAiTyping();
+            console.error('Error handling JustAI response:', error);
+          });
+      }
+    }
+  });
+  
+  const uploadBtn = document.getElementById('uploadBtn');
+  const fileInput = document.getElementById('fileInput');
+
+  uploadBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const url = await websim.upload(file);
+        
+        const query = `INSERT INTO messages (username, avatar, message, server, channel) 
+          VALUES ('${room.party.client.username.replace(/'/g, "''")}', 
+                  '${room.party.client.avatarUrl.replace(/'/g, "''")}', 
+                  '${url}', 
+                  '${currentServer.replace(/'/g, "''")}', 
+                  '${currentChannel.replace(/'/g, "''")}') RETURNING id`;
+                  
+        const response = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+        const [result] = await response.json();
+        const messageId = result.id;
+        
+        room.send({
+          type: 'newMessage',
+          message: url,
+          messageUsername: room.party.client.username,
+          messageAvatar: room.party.client.avatarUrl,
+          server: currentServer,
+          channel: currentChannel,
+          messageId: messageId,
+          replyTo: null,
+          replyToUsername: null, 
+          replyToMessageContent: null
         });
 
-        // Добавление обработчика загрузки страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            // Проверяем, сохранён ли никнейм
-            const savedUsername = localStorage.getItem('username');
-            if (savedUsername) {
-                startGame(savedUsername);
-            } else {
-                // Показать заставку
-                const splash = document.getElementById('splashScreen');
-                if (splash) splash.style.display = 'flex';
-                else console.error('Элемент заставки не найден.');
-            }
+        fileInput.value = ''; 
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
+    }
+  });
+  
+  room.onmessage = (event) => {
+    const data = event.data;
+    if (data.type === 'newMessage') {
+      if (data.server === currentServer) {
+        addMessage(
+          data.messageUsername, 
+          data.messageAvatar, 
+          data.message, 
+          data.messageId, 
+          data.replyTo, 
+          data.replyToUsername, 
+          data.replyToMessageContent
+        );
+      }
+    } else if (data.type === 'messageDeleted') {
+      const messageElement = document.querySelector(`[data-message-id="${data.messageId}"]`);
+      if (messageElement) {
+        messageElement.remove();
+      }
+    } else if (data.type === 'userBanned') {
+      if (data.bannedUsername === room.party.client.username) {
+        localStorage.setItem('banned', 'true');
+        document.body.innerHTML = '<h1 style="color: var(--red); text-align: center; margin-top: 40px;">You have been banned from this server.</h1>';
+      }
+    }
+  };
+  
+  room.onPeersChanged = (peers) => {
+    updateOnlineUsers(peers);
+  };
+}
 
-            // Обработчик кнопки "Начать игру"
-            const startGameBtn = document.getElementById('startGameBtn');
-            if (startGameBtn) {
-                startGameBtn.addEventListener('pointerdown', () => {
-                    startGame();
-                });
-            } else {
-                console.warn('Элемент startGameBtn не найден.');
-            }
-
-            // Обработчик кнопки "Играть снова"
-            const restartGameBtn = document.getElementById('restartGameBtn');
-            if (restartGameBtn) {
-                restartGameBtn.addEventListener('pointerdown', () => {
-                    restartGame();
-                });
-            } else {
-                console.warn('Элемент restartGameBtn не найден.');
-            }
-        });
-
-        // Функции для кейсов
-        function initCaseHandlers() {
-            // Здесь можно добавить дополнительные обработчики, если необходимо
+function setupServerCreation() {
+  const addServerBtn = document.getElementById('addServer');
+  const modal = document.getElementById('serverModal');
+  const overlay = document.getElementById('modalOverlay');
+  const cancelBtn = document.getElementById('cancelServer');
+  const createBtn = document.getElementById('createServer');
+  const serverNameInput = document.getElementById('serverName');
+  const serverIconInput = document.getElementById('serverIconInput');
+  const serverIconPreview = document.getElementById('serverIconPreview');
+  
+  let uploadedIconUrl = null;
+  
+  addServerBtn.addEventListener('click', () => {
+    modal.style.display = 'block';
+    overlay.style.display = 'block';
+    uploadedIconUrl = null;
+    serverIconPreview.style.backgroundImage = '';
+    serverIconPreview.textContent = 'Click to upload icon';
+  });
+  
+  serverIconPreview.addEventListener('click', () => {
+    serverIconInput.click();
+  });
+  
+  serverIconInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        uploadedIconUrl = await websim.upload(file);
+        serverIconPreview.style.backgroundImage = `url(${uploadedIconUrl})`;
+        serverIconPreview.textContent = '';
+        serverIconPreview.style.backgroundSize = 'cover';
+      } catch (error) {
+        console.error('Error uploading server icon:', error);
+      }
+    }
+  });
+  
+  cancelBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    overlay.style.display = 'none';
+    serverNameInput.value = '';
+    uploadedIconUrl = null;
+  });
+  
+  createBtn.addEventListener('click', async () => {
+    const serverName = serverNameInput.value.trim();
+    if (serverName) {
+      const serverId = serverName.toLowerCase().replace(/\s+/g, '-');
+      
+      const serversContainer = document.getElementById('servers');
+      const serverIcon = document.createElement('div');
+      serverIcon.className = 'server-icon';
+      
+      if (uploadedIconUrl) {
+        serverIcon.classList.add('custom-icon');
+        serverIcon.style.backgroundImage = `url(${uploadedIconUrl})`;
+      } else {
+        serverIcon.textContent = serverName.substring(0, 2).toUpperCase();
+      }
+      
+      serverIcon.dataset.server = serverId;
+      
+      serversContainer.insertBefore(serverIcon, addServerBtn);
+      attachServerClickHandler(serverIcon);
+      
+      room.store.update({
+        id: 'servers',
+        dependencies: { serverId, serverName, uploadedIconUrl },
+        updateFunction: (servers = {}) => {
+          servers[serverId] = {
+            name: serverName,
+            iconUrl: uploadedIconUrl
+          };
+          return servers;
         }
+      });
+      
+      modal.style.display = 'none';
+      overlay.style.display = 'none';
+      serverNameInput.value = '';
+      uploadedIconUrl = null;
+    }
+  });
+}
 
-        function openCase() {
-            if (balance < 500) { // Предполагаемая стоимость кейса
-                showNotification('Недостаточно средств для открытия кейса.');
-                return;
-            }
+async function startMessagePolling() {
+  try {
+    if (!currentServer) {
+      console.error('Server not defined');
+      return;
+    }
 
-            balance -= 500;
-            points += 500; // Добавляем очки за открытие кейса
-            updateBalanceInGame();
-            showNotification('Кейс открыт!');
+    const safeServer = currentServer.replace(/'/g, "''");
+    
+    const query = `
+      SELECT m.*
+      FROM messages m
+      WHERE m.server = '${safeServer}' 
+      ORDER BY m.timestamp DESC 
+      LIMIT 50`;
 
-            // Случайный выбор предмета
-            const randomIndex = Math.floor(Math.random() * casesData.items.length);
-            const wonItem = casesData.items[randomIndex];
-
-            if (wonItem) {
-                // Добавление предмета в мои призы
-                myPrizes.push({ ...wonItem, obtainedAt: Date.now() });
-                saveMyPrizes();
-                renderMyPrizes();
-                showNotification(`Вы выиграли: ${wonItem.name}!`);
-
-                // Применение эффекта
-                applyEffect(wonItem.effect);
-            } else {
-                console.error('Не удалось выбрать предмет из кейса.');
-                showNotification('Ошибка при открытии кейса.');
-            }
+    const response = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    const messages = await response.json();
+    
+    const messagesContainer = document.getElementById('messages');
+    if (!messagesContainer) {
+      console.error('Messages container not found');
+      return;
+    }
+    
+    messagesContainer.innerHTML = '';
+    
+    if (Array.isArray(messages)) {
+      messages.reverse().forEach(msg => {
+        if (msg && msg.username && msg.avatar) {
+          addMessage(
+            msg.username, 
+            msg.avatar, 
+            msg.message, 
+            msg.id, 
+            null
+          );
         }
+      });
+    }
+  } catch (error) {
+    console.error('Error polling messages:', error);
+  }
+}
 
-        function renderMyPrizes() {
-            const myPrizesContainer = document.getElementById('myPrizes');
-            if (!myPrizesContainer) {
-                console.error('Элемент myPrizes не найден.');
-                return;
-            }
+function updateOnlineUsers(peers) {
+  const onlineUsersContainer = document.getElementById('onlineUsers');
+  onlineUsersContainer.innerHTML = '<h3>Online — ' + Object.keys(peers).length + '</h3>';
+  
+  Object.entries(peers).forEach(([clientId, {username, avatarUrl}]) => {
+    const userElement = document.createElement('div');
+    userElement.className = 'online-user';
+    
+    username = sanitizeString(username);
+    avatarUrl = sanitizeString(avatarUrl);
+    const devTag = username === 'grog' ? ' <strong>(DEV)</strong>' : '';
+    
+    userElement.innerHTML = `
+      <div class="status" title="Online"></div>
+      <img class="avatar" src="${avatarUrl}" alt="User avatar">
+      <span class="username">${username}${devTag}</span>
+    `;
+    
+    onlineUsersContainer.appendChild(userElement);
+  });
+}
 
-            myPrizesContainer.innerHTML = '<h4>Мои призы:</h4>';
+function setupUserSettings() {
+  const settingsBtn = document.getElementById('userSettingsBtn');
+  const settingsModal = document.getElementById('settingsModal');
+  const themeToggle = document.getElementById('themeToggle');
 
-            if (myPrizes.length === 0) {
-                myPrizesContainer.innerHTML += '<p>Нет призов.</p>';
-                return;
-            }
+  const storeBtn = document.createElement('div');
+  storeBtn.className = 'theme-toggle';
+  storeBtn.innerHTML = 'Store';
+  settingsModal.appendChild(storeBtn);
 
-            myPrizes.forEach((prize, index) => {
-                const prizeElement = document.createElement('div');
-                prizeElement.className = 'prize-item';
-                prizeElement.innerHTML = `
-                    <img src="https://via.placeholder.com/40?text=${encodeURIComponent(prize.name.charAt(0))}" alt="${prize.name}">
-                    <span>${prize.name}</span>
-                `;
-                myPrizesContainer.appendChild(prizeElement);
-            });
-        }
+  const storeModal = document.getElementById('storeModal');
 
-        function saveMyPrizes() {
-            localStorage.setItem('myPrizes', JSON.stringify(myPrizes));
-        }
+  settingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = settingsModal.style.display === 'block' ? 'none' : 'block';
+  });
 
-        // Функция применения эффекта
-        function applyEffect(effect) {
-            if (activeEffects[effect]) {
-                showNotification(`Эффект "${effect}" уже активен.`);
-                return;
-            }
+  themeToggle.addEventListener('change', () => {
+    const newTheme = themeToggle.checked ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    document.body.classList.toggle('light-theme', newTheme === 'light');
+  });
 
-            switch(effect) {
-                case 'doublePoints':
-                    activeEffects.doublePoints = Date.now() + 15000;
-                    pointsMultiplier = 2;
-                    showNotification('Эффект "Удвоение Очков" активирован на 15 секунд!');
-                    break;
-                case 'extraLife':
-                    // Реализуйте логику дополнительной жизни, если предусмотрено
-                    showNotification('Эффект "Дополнительная Жизнь" активирован на 15 секунд!');
-                    break;
-                case 'slowMotion':
-                    engineInstance.gravity.y = 0.6; // Замедление
-                    activeEffects.slowMotion = Date.now() + 15000;
-                    showNotification('Эффект "Замедление" активирован на 15 секунд!');
-                    break;
-                case 'fastDrop':
-                    engineInstance.gravity.y = 2.0; // Ускорение падения
-                    activeEffects.fastDrop = Date.now() + 15000;
-                    showNotification('Эффект "Быстрое Падение" активирован на 15 секунд!');
-                    break;
-                case 'shield':
-                    // Реализуйте логику щита, если предусмотрено
-                    showNotification('Эффект "Щит" активирован на 15 секунд!');
-                    break;
-                default:
-                    console.warn(`Неизвестный эффект: ${effect}`);
-            }
+  storeBtn.addEventListener('click', () => {
+    storeModal.style.display = 'block';
+    settingsModal.style.display = 'none';
+  });
 
-            // Сохранение активных эффектов
-            saveActiveEffects();
+  document.addEventListener('click', (e) => {
+    if (!settingsModal.contains(e.target) && !settingsBtn.contains(e.target)) {
+      settingsModal.style.display = 'none';
+    }
+    if (!storeModal.contains(e.target) && !storeBtn.contains(e.target)) {
+      storeModal.style.display = 'none';
+    }
+  });
+}
 
-            // Таймер для деактивации эффекта
-            setTimeout(() => {
-                deactivateEffect(effect);
-            }, 15000);
-        }
+function replyToMessage(messageId, encodedUsername, encodedMessageContent) {
+  const username = decodeURIComponent(encodedUsername);
+  const messageContent = decodeURIComponent(encodedMessageContent);
+  replyingTo = { messageId, username, messageContent };
+  const inputArea = document.querySelector('.input-area');
+  let replyPreview = document.getElementById('replyPreview'); 
 
-        // Функция деактивации эффекта
-        function deactivateEffect(effect) {
-            delete activeEffects[effect];
-            switch(effect) {
-                case 'doublePoints':
-                    pointsMultiplier = 1;
-                    showNotification('Эффект "Удвоение Очков" деактивирован.');
-                    break;
-                case 'extraLife':
-                    // Реализуйте логику деактивации дополнительной жизни, если предусмотрено
-                    showNotification('Эффект "Дополнительная Жизнь" деактивирован.');
-                    break;
-                case 'slowMotion':
-                    engineInstance.gravity.y = 1.2; // Восстановление нормального падения
-                    showNotification('Эффект "Замедление" деактивирован.');
-                    break;
-                case 'fastDrop':
-                    engineInstance.gravity.y = 1.2; // Восстановление нормального падения
-                    showNotification('Эффект "Быстрое Падение" деактивирован.');
-                    break;
-                case 'shield':
-                    // Реализуйте логику деактивации щита, если предусмотрено
-                    showNotification('Эффект "Щит" деактивирован.');
-                    break;
-                default:
-                    console.warn(`Неизвестный эффект: ${effect}`);
-            }
+  if (!replyPreview) {
+    replyPreview = document.createElement('div');
+    replyPreview.id = 'replyPreview';
+    replyPreview.innerHTML = `
+      <div class="reply-preview">
+        <span>Replying to <strong>${username}</strong>: ${messageContent.substring(0, 50)}</span>
+        <button onclick="cancelReply()" class="cancel-reply-btn">✖️</button>
+      </div>
+    `;
+    inputArea.insertBefore(replyPreview, inputArea.firstChild);
+  } else {
+    replyPreview.querySelector('span').innerHTML = `Replying to <strong>${username}</strong>: ${messageContent.substring(0, 50)}`;
+  }
+}
 
-            // Сохранение активных эффектов
-            saveActiveEffects();
-        }
+function cancelReply() {
+  replyingTo = null;
+  const replyPreview = document.getElementById('replyPreview');
+  if (replyPreview) {
+    replyPreview.remove();
+  }
+}
 
-        // Функция деактивации всех эффектов при перезапуске
-        function deactivateAllEffects() {
-            for (const effect of Object.keys(activeEffects)) {
-                deactivateEffect(effect);
-            }
-        }
+window.addEventListener('resize', () => {
+  const isMobile = isMobileDevice();
+  document.body.classList.toggle('mobile', isMobile);
+  
+  if (isMobile) {
+    const messages = document.querySelector('.messages');
+    if (messages) {
+      messages.style.paddingTop = '60px';
+    }
+    const mobileNav = document.querySelector('.mobile-nav');
+    if (mobileNav) {
+      mobileNav.style.display = 'flex';
+    }
+  } else {
+    const messages = document.querySelector('.messages');
+    if (messages) {
+      messages.style.paddingTop = '0';
+    }
+    const mobileNav = document.querySelector('.mobile-nav');
+    if (mobileNav) {
+      mobileNav.style.display = 'none';
+    }
+    const channels = document.getElementById('onlineUsers');
+    if (channels) {
+      channels.style.display = 'block';
+    }
+  }
+});
 
-        // Функция для сохранения фруктов в localStorage
-        function saveFruits() {
-            const bodies = Matter.Composite.allBodies(engineInstance.world);
-            const fruitsData = bodies
-                .filter(body => body.fruitIndex !== undefined)
-                .map(body => ({
-                    fruitIndex: body.fruitIndex,
-                    position: body.position,
-                    velocity: body.velocity
-                }));
-            localStorage.setItem('savedFruits', JSON.stringify(fruitsData));
-        }
+(async () => {
+  try {
+    await init();
+  } catch(err) {
+    console.error('Error during initialization:', err);
+  }
+})();
+</script>
 
-        // Функция для загрузки фруктов из localStorage
-        function loadFruits() {
-            const savedFruits = JSON.parse(localStorage.getItem('savedFruits'));
-            if (savedFruits && Array.isArray(savedFruits)) {
-                savedFruits.forEach(fruitData => {
-                    const body = createFruit(fruitData.position.x, fruitData.position.y, fruitData.fruitIndex);
-                    if (body) {
-                        body.velocity.x = fruitData.velocity.x;
-                        body.velocity.y = fruitData.velocity.y;
-                        World.add(engineInstance.world, body);
-                        if (fruitData.fruitIndex < 5) { // Ограничение до 5 фруктов
-                            unlockedFruits.add(fruitData.fruitIndex);
-                        }
-                    }
-                });
-                updateCollection();
-            }
-        }
-
-        // Функция для сохранения открытых фруктов
-        function saveUnlockedFruits() {
-            localStorage.setItem('unlockedFruits', JSON.stringify(Array.from(unlockedFruits)));
-        }
-
-        // Функция для сохранения активных эффектов
-        function saveActiveEffects() {
-            const savedActiveEffects = {};
-            for (const [effect, expiry] of Object.entries(activeEffects)) {
-                if (Date.now() < expiry) {
-                    savedActiveEffects[effect] = expiry;
-                }
-            }
-            localStorage.setItem('activeEffects', JSON.stringify(savedActiveEffects));
-        }
-
-        // Инициализация фруктов
-        function loadUnlockedFruits() {
-            const savedUnlocked = JSON.parse(localStorage.getItem('unlockedFruits'));
-            if (savedUnlocked && Array.isArray(savedUnlocked)) {
-                unlockedFruits = new Set(savedUnlocked.filter(index => index < 5)); // Ограничение до 5
-                updateCollection();
-            }
-        }
-
-        loadUnlockedFruits();
-        loadFruits();
-
-        // Функция навигации по коллекции фруктов
-        function scrollCollection(direction) {
-            const collectionList = document.querySelector('.collectionList');
-            if (!collectionList) {
-                console.error('Элемент collectionList не найден.');
-                return;
-            }
-            const totalItems = collectionList.children.length;
-            const itemWidth = 40; // Ширина элемента + отступ
-            const containerWidth = document.querySelector('#collectionContainer').clientWidth;
-            const visibleItems = Math.floor(containerWidth / itemWidth);
-            
-            if (direction === 'left') {
-                collectionOffset = Math.min(collectionOffset + itemWidth, 0);
-            } else {
-                collectionOffset = Math.max(collectionOffset - itemWidth, -(totalItems * itemWidth - visibleItems * itemWidth));
-            }
-            
-            collectionList.style.transform = `translateX(${collectionOffset}px)`;
-        }
-
-        // Обработчики стрелок навигации коллекции
-        document.querySelector('.left-nav').addEventListener('click', () => scrollCollection('left'));
-        document.querySelector('.right-nav').addEventListener('click', () => scrollCollection('right'));
-
-        // Функция показа рейтинга
-        function showLeaderboard() {
-            leaderboardOpen = true;
-            const menuOverlay = document.getElementById('menuOverlay');
-            const leaderboardTab = document.querySelector('[data-tab="leaderboard"]');
-            if (menuOverlay && leaderboardTab) {
-                menuOverlay.style.display = 'flex';
-                leaderboardTab.click();
-                fetchLeaderboard();
-            } else {
-                console.error('Элемент menuOverlay или вкладка "leaderboard" не найдены.');
-            }
-        }
-
-        // Функция получения данных рейтинга
-        function fetchLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            // Получаем данные из localStorage
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            // Отображаем всех игроков, а не только одного
-            leaderboard.forEach(player => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                item.innerHTML = `
-                    <span>${player.rank}. ${player.username}</span>
-                    <span>${player.score}💲</span>
-                `;
-                // Выделение первых трех мест
-                if (player.rank === 1) {
-                    item.style.color = '#FFD700'; // Золотой
-                } else if (player.rank === 2) {
-                    item.style.color = '#C0C0C0'; // Серебряный
-                } else if (player.rank === 3) {
-                    item.style.color = '#CD7F32'; // Бронзовый
-                }
-                leaderboardList.appendChild(item);
-            });
-        }
-
-        // Функция для добавления игрока в рейтинг
-        function addToLeaderboard(username, score) {
-            // Получаем текущий список игроков из localStorage или создаем новый массив
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        
-            // Проверяем, есть ли уже игрок с этим ником
-            const existingPlayerIndex = leaderboard.findIndex(player => player.username === username);
-        
-            if (existingPlayerIndex !== -1) {
-                // Обновляем очки, если новый результат выше текущего
-                if (leaderboard[existingPlayerIndex].score < score) {
-                    leaderboard[existingPlayerIndex].score = score;
-                }
-            } else {
-                // Добавляем нового игрока
-                leaderboard.push({ username, score });
-            }
-        
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-        
-            // Присваиваем ранги
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            // Сохраняем обратно в localStorage
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        }
-
-        // Обновление статистики
-        function updateStats() {
-            // Здесь можно добавить элементы для отображения статистики, если необходимо
-        }
-
-        // Функция для скачивания рейтинга как TXT-файл
-        function downloadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            let content = 'Топ игроков:\n';
-            leaderboard.forEach(player => {
-                content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
-            });
-        
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'leaderboard.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Функция отображения ТОП 10
-        function showTop10() {
-            fetchLeaderboard();
-        }
-
-        // Функция отображения моего рейтинга
-        function showMyRating() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            const username = localStorage.getItem('username') || 'Игрок';
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Найти текущего пользователя
-            const userIndex = leaderboard.findIndex(player => player.username === username);
-            if (userIndex === -1) {
-                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
-                return;
-            }
-            const user = leaderboard[userIndex];
-            const rank = userIndex + 1;
-        
-            const userElement = document.createElement('div');
-            userElement.className = 'leaderboard-item';
-            userElement.innerHTML = `
-                <span>${rank}. ${user.username}</span>
-                <span>${user.score}💲</span>
-            `;
-            // Выделение места пользователя
-            if (rank === 1) {
-                userElement.style.color = '#FFD700'; // Золотой
-            } else if (rank === 2) {
-                userElement.style.color = '#C0C0C0'; // Серебряный
-            } else if (rank === 3) {
-                userElement.style.color = '#CD7F32'; // Бронзовый
-            }
-            leaderboardList.appendChild(userElement);
-        }
-
-        // Функции для кейсов
-        function initCaseHandlers() {
-            // Здесь можно добавить дополнительные обработчики, если необходимо
-        }
-
-        function openCase() {
-            if (balance < 500) { // Предполагаемая стоимость кейса
-                showNotification('Недостаточно средств для открытия кейса.');
-                return;
-            }
-
-            balance -= 500;
-            points += 500; // Добавляем очки за открытие кейса
-            updateBalanceInGame();
-            showNotification('Кейс открыт!');
-
-            // Случайный выбор предмета
-            const randomIndex = Math.floor(Math.random() * casesData.items.length);
-            const wonItem = casesData.items[randomIndex];
-
-            if (wonItem) {
-                // Добавление предмета в мои призы
-                myPrizes.push({ ...wonItem, obtainedAt: Date.now() });
-                saveMyPrizes();
-                renderMyPrizes();
-                showNotification(`Вы выиграли: ${wonItem.name}!`);
-
-                // Применение эффекта
-                applyEffect(wonItem.effect);
-            } else {
-                console.error('Не удалось выбрать предмет из кейса.');
-                showNotification('Ошибка при открытии кейса.');
-            }
-        }
-
-        function renderMyPrizes() {
-            const myPrizesContainer = document.getElementById('myPrizes');
-            if (!myPrizesContainer) {
-                console.error('Элемент myPrizes не найден.');
-                return;
-            }
-
-            myPrizesContainer.innerHTML = '<h4>Мои призы:</h4>';
-
-            if (myPrizes.length === 0) {
-                myPrizesContainer.innerHTML += '<p>Нет призов.</p>';
-                return;
-            }
-
-            myPrizes.forEach((prize, index) => {
-                const prizeElement = document.createElement('div');
-                prizeElement.className = 'prize-item';
-                prizeElement.innerHTML = `
-                    <img src="https://via.placeholder.com/40?text=${encodeURIComponent(prize.name.charAt(0))}" alt="${prize.name}">
-                    <span>${prize.name}</span>
-                `;
-                myPrizesContainer.appendChild(prizeElement);
-            });
-        }
-
-        function saveMyPrizes() {
-            localStorage.setItem('myPrizes', JSON.stringify(myPrizes));
-        }
-
-        // Функция отключения фона на конкретном товаре
-        function disableBackgroundOnItem(itemId) {
-            const item = shopItemsData.themes.find(theme => theme.id === itemId);
-            if (item && item.active) {
-                item.active = false;
-                const gameContainer = document.getElementById('gameContainer');
-                if (gameContainer) {
-                    gameContainer.style.background = 'rgba(255, 255, 255, 0.1)'; // Возвращаем прозрачный фон
-                }
-                showNotification(`Фон для "${item.name}" отключен.`);
-                localStorage.removeItem('activeTheme');
-                renderShopItems();
-                saveShopData();
-            }
-        }
-
-        // Функция для скачивания рейтинга как TXT-файл
-        function downloadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((player, index) => {
-                player.rank = index + 1;
-            });
-        
-            let content = 'Топ игроков:\n';
-            leaderboard.forEach(player => {
-                content += `${player.rank}. ${player.username} - ${player.score}💲\n`;
-            });
-        
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'leaderboard.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Функция отображения ТОП 10
-        function showTop10() {
-            fetchLeaderboard();
-        }
-
-        // Функция отображения моего рейтинга
-        function showMyRating() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) {
-                console.error('Элемент leaderboardList не найден.');
-                return;
-            }
-            leaderboardList.innerHTML = '';
-        
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            const username = localStorage.getItem('username') || 'Игрок';
-            // Сортируем по убыванию очков
-            leaderboard.sort((a, b) => b.score - a.score);
-            // Найти текущего пользователя
-            const userIndex = leaderboard.findIndex(player => player.username === username);
-            if (userIndex === -1) {
-                leaderboardList.innerHTML = `<div class="leaderboard-item">Вы не в рейтинге.</div>`;
-                return;
-            }
-            const user = leaderboard[userIndex];
-            const rank = userIndex + 1;
-        
-            const userElement = document.createElement('div');
-            userElement.className = 'leaderboard-item';
-            userElement.innerHTML = `
-                <span>${rank}. ${user.username}</span>
-                <span>${user.score}💲</span>
-            `;
-            // Выделение места пользователя
-            if (rank === 1) {
-                userElement.style.color = '#FFD700'; // Золотой
-            } else if (rank === 2) {
-                userElement.style.color = '#C0C0C0'; // Серебряный
-            } else if (rank === 3) {
-                userElement.style.color = '#CD7F32'; // Бронзовый
-            }
-            leaderboardList.appendChild(userElement);
-        }
-
-        // Функции для кейсов
-        function initCaseHandlers() {
-            // Здесь можно добавить дополнительные обработчики, если необходимо
-        }
-
-        // Настройка Matter.js (дублирование, убрано)
-        // ...
-
-        // Функция для рендеринга наград
-        // ...
-
-        // Функция для запуска игры из заставки
-        function startGame(username = null) {
-            if (!username) {
-                const input = document.getElementById('usernameInput');
-                if (!input) {
-                    showNotification('Поле ввода никнейма не найдено.');
-                    return;
-                }
-                const enteredUsername = input.value.trim();
-                if (enteredUsername === '') {
-                    showNotification('Пожалуйста, введите никнейм.');
-                    return;
-                }
-                username = enteredUsername;
-                localStorage.setItem('username', username);
-            }
-            // Скрыть заставку
-            const splash = document.getElementById('splashScreen');
-            if (splash) splash.style.display = 'none';
-            else console.error('Элемент заставки не найден.');
-            // Инициализировать игру
-            initGame();
-            
-            // Включение музыки по умолчанию
-            if (bgMusic && isMusicPlaying) {
-                const playPromise = bgMusic.play();
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => {
-                            isMusicPlaying = true;
-                            showNotification('Музыка включена');
-                        })
-                        .catch(error => {
-                            console.log("Ошибка воспроизведения аудио:", error);
-                            showNotification('Не удалось воспроизвести музыку.');
-                        });
-                }
-            }
-        }
-
-        // Инициализация игры
-        function initGame() {
-            initShop();
-            renderShopItems();
-            renderRewards('daily');
-            updateNextFruit();
-            updateCollection();
-            updateBalanceInGame(); // Обновляем отображение баланса и очков
-            renderMyPrizes();
-
-            // Автоматический выбор первой вкладки
-            const firstTab = document.querySelector('.menu-tab');
-            if (firstTab) firstTab.click();
-            else console.warn('Вкладка меню не найдена.');
-        
-            // Обработчики для вкладок наград
-            const rewardTabs = document.querySelectorAll('.reward-tab');
-            if (rewardTabs.length > 0) {
-                rewardTabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        document.querySelectorAll('.reward-tab').forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        renderRewards(tab.dataset.type);
-                    });
-                });
-            } else {
-                console.warn('Вкладки наград не найдены.');
-            }
-        
-            // Инициализация обработчиков магазина
-            initShopHandlers();
-
-            // Инициализация обработчиков кейсов
-            initCaseHandlers();
-        
-            // Инициализация обработчиков кнопок меню
-            initMenuHandlers();
-        
-            // Применение сохранённой темы
-            const savedThemeId = localStorage.getItem('activeTheme');
-            if (savedThemeId) {
-                const savedTheme = shopItemsData.themes.find(theme => theme.id === savedThemeId);
-                if (savedTheme && savedTheme.purchased) {
-                    toggleItem(savedTheme);
-                }
-            }
-        }
-        
-        </script>
-</body>
-</html>
-
+</body></html>
