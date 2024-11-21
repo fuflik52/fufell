@@ -51,7 +51,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start; /* Changed from default to help with spacing */
   overflow: hidden;
+  padding-top: 20px; /* Added padding to improve spacing */
 }
 
 .stats {
@@ -60,7 +62,7 @@ body {
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   font-size: 24px;
-  margin: 15px 0;
+  margin: 15px 0 30px; /* Increased bottom margin */
   text-align: center;
   border: 2px solid var(--accent);
 }
@@ -75,17 +77,19 @@ body {
 }
 
 .coin {
-  width: 80px;
-  height: 80px;
-  background: var(--gold);
+  width: 240px; /* Increased from 80px */
+  height: 240px; /* Increased from 80px */
+  background: linear-gradient(45deg, var(--gold), #ffe44d);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  border: 2px solid rgba(255, 215, 0, 0.5);
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
-  margin: 15px 0;
+  font-size: 96px; /* Increased from 32px */
+  margin: 30px 0;
   position: relative;
   animation: pulse 2s infinite;
 }
@@ -97,6 +101,8 @@ body {
 .nav-bar {
   width: 100%;
   background: var(--secondary-bg);
+  border: 1px solid var(--accent);
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-around;
   padding: 10px 0;
@@ -116,11 +122,16 @@ body {
   cursor: pointer;
   padding: 5px 10px;
   border-radius: 5px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+  background: rgba(79, 168, 255, 0.2);
 }
 
 .nav-item.active {
-  background-color: #77ff77;
+  background-color: rgba(119, 255, 119, 0.5);
+  transform: translateY(-2px);
 }
 
 .shop-container {
@@ -175,8 +186,10 @@ body {
   background: #3d96eb;
 }
 
-.shop-item {
+.shop-item, .task-item {
   background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin: 10px;
   padding: 10px;
   border-radius: 8px;
@@ -185,7 +198,7 @@ body {
   gap: 10px;
 }
 
-.shop-item-icon {
+.shop-item-icon, .task-icon {
   width: 40px;
   height: 40px;
   background: var(--accent);
@@ -197,17 +210,17 @@ body {
   color: var(--text);
 }
 
-.shop-item-info {
+.shop-item-info, .task-info {
   flex: 1;
 }
 
-.shop-item-name {
+.shop-item-name, .task-name {
   font-weight: bold;
   margin-bottom: 3px;
   font-size: 16px;
 }
 
-.shop-item-price {
+.shop-item-price, .task-description {
   color: var(--gold);
   display: flex;
   align-items: center;
@@ -216,22 +229,22 @@ body {
   font-size: 14px;
 }
 
-.buy-button {
+.buy-button, .task-claim-button {
   background: var(--accent);
-  border: none;
   color: white;
-  padding: 6px 12px;
+  border: none;
+  padding: 8px 16px;
   border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
 }
 
-.buy-button:hover:not(:disabled) {
+.buy-button:hover:not(:disabled), 
+.task-claim-button:hover:not(:disabled) {
   background: #3d96eb;
+  transform: translateY(-1px);
 }
 
-.buy-button:disabled {
+.buy-button:disabled, .task-claim-button:disabled {
   background: #4a4a6a;
   cursor: not-allowed;
 }
@@ -299,7 +312,7 @@ body {
   background: rgba(255, 255, 255, 0.95);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   text-align: center;
   animation: fadeIn 0.3s ease-out;
   z-index: 1000;
@@ -495,6 +508,98 @@ body {
   animation: moneySubtract 0.6s ease-out;
 }
 
+.settings-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  z-index: 100;
+}
+
+.settings-icon:hover {
+  transform: rotate(90deg);
+}
+
+.theme-aqua {
+  --primary-bg: #e6f3ff;
+  --window-bg: #c9e6ff;
+  --secondary-bg: #e0e0e0;
+  --accent: #4fa8ff;
+  --text: #000000;
+}
+
+.theme-dark {
+  --primary-bg: #1a1a2e;
+  --window-bg: #16213e;
+  --secondary-bg: #1f305e;
+  --accent: #43a5ff;
+  --text: #ffffff;
+}
+
+.theme-forest {
+  --primary-bg: #2d4a3e;
+  --window-bg: #335c49;
+  --secondary-bg: #3b6b54;
+  --accent: #8fbc8f;
+  --text: #ffffff;
+}
+
+.prize-item {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.2s;
+}
+
+.prize-item:hover {
+  transform: translateY(-2px);
+}
+
+.prize-icon {
+  font-size: 32px;
+}
+
+.prize-info {
+  flex: 1;
+}
+
+.prize-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.prize-description {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.claim-prize-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.claim-prize-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.claim-prize-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 400px) {
   body {
     align-items: flex-start;
@@ -512,9 +617,9 @@ body {
   }
 
   .coin {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: 210px; /* Adjusted for mobile */
+    height: 210px;
+    font-size: 84px;
   }
 
   .shop-item {
@@ -525,6 +630,7 @@ body {
 </head>
 <body>
 <div class="game-window">
+  <div class="settings-icon" onclick="toggleTheme()">⚙️</div>
   <div class="game-container">
     <div class="stats">
       <span id="coins">0</span> 💰
@@ -807,6 +913,114 @@ let tasksCompleted = JSON.parse(localStorage.getItem('tasksCompleted')) || {
   task3: false
 };
 
+// Prize system
+const prizes = [
+  {
+    id: 'daily',
+    name: 'Ежедневная награда',
+    icon: '🎁',
+    description: 'Получите 1000 монет каждый день',
+    reward: 1000,
+    cooldown: 24 * 60 * 60 * 1000, // 24 hours
+    lastClaimed: parseInt(localStorage.getItem('prize-daily')) || 0
+  },
+  {
+    id: 'achievement',
+    name: 'Достижение: Первые шаги',
+    icon: '🏆',
+    description: 'Получите 5000 монет за первый вход в игру',
+    reward: 5000,
+    oneTime: true,
+    claimed: localStorage.getItem('prize-achievement') === 'true'
+  }
+];
+
+function showPrizes() {
+  shopContainer.style.display = 'none';
+  clickCoin.style.display = 'none';
+  tasksContainer.style.display = 'none';
+  
+  const modal = document.getElementById('underConstructionModal');
+  modal.style.display = 'block';
+  document.getElementById('modalOverlay').style.display = 'block';
+  
+  // Generate prizes HTML
+  modal.innerHTML = `
+    <h3>🎁 Доступные призы</h3>
+    <div class="prizes-container">
+      ${prizes.map(prize => {
+        const now = Date.now();
+        const timeLeft = prize.cooldown ? (prize.lastClaimed + prize.cooldown - now) : 0;
+        const canClaim = prize.oneTime ? !prize.claimed : timeLeft <= 0;
+        
+        return `
+          <div class="prize-item">
+            <div class="prize-icon">${prize.icon}</div>
+            <div class="prize-info">
+              <div class="prize-name">${prize.name}</div>
+              <div class="prize-description">${prize.description}</div>
+              ${timeLeft > 0 ? `<div>Доступно через: ${Math.ceil(timeLeft / 1000 / 60)} мин</div>` : ''}
+            </div>
+            <button 
+              class="claim-prize-btn" 
+              onclick="claimPrize('${prize.id}')"
+              ${!canClaim ? 'disabled' : ''}
+            >
+              Получить ${prize.reward}💰
+            </button>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <button onclick="closeModal()">Закрыть</button>
+  `;
+}
+
+function claimPrize(prizeId) {
+  const prize = prizes.find(p => p.id === prizeId);
+  if (!prize) return;
+  
+  const now = Date.now();
+  if (prize.oneTime && prize.claimed) return;
+  if (prize.cooldown && (now - prize.lastClaimed) < prize.cooldown) return;
+  
+  coins += prize.reward;
+  
+  if (prize.oneTime) {
+    prize.claimed = true;
+    localStorage.setItem(`prize-${prizeId}`, 'true');
+  } else {
+    prize.lastClaimed = now;
+    localStorage.setItem(`prize-${prizeId}`, now);
+  }
+  
+  updateDisplays();
+  showPrizes(); // Refresh the prizes view
+}
+
+// Add theme switcher
+const themes = ['aqua', 'dark', 'forest'];
+let currentTheme = localStorage.getItem('theme') || 'aqua';
+
+// Add settings icon to game window
+document.querySelector('.game-window').insertAdjacentHTML('afterbegin', `
+  <div class="settings-icon" onclick="toggleTheme()">⚙️</div>
+`);
+
+function toggleTheme() {
+  const currentIndex = themes.indexOf(currentTheme);
+  currentTheme = themes[(currentIndex + 1) % themes.length];
+  applyTheme(currentTheme);
+  localStorage.setItem('theme', currentTheme);
+}
+
+function applyTheme(theme) {
+  document.body.className = `theme-${theme}`;
+}
+
+// Apply saved theme on load
+applyTheme(currentTheme);
+
 const calculateOfflineEarnings = () => {
   const currentTime = Date.now();
   const timeDiff = (currentTime - lastUpdate) / 1000;
@@ -956,44 +1170,6 @@ function showTasks() {
   tasksContainer.style.display = 'block';
   setActiveNav(document.querySelector('.nav-item:nth-child(3)'));
   updateTasks();
-}
-
-function showRating() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'none';
-  document.getElementById('modalOverlay').style.display = 'block';
-  const modal = document.getElementById('underConstructionModal');
-  modal.style.display = 'block';
-  
-  // Update modal content
-  modal.innerHTML = `
-    <h3>🏆 Топ 10 игроков</h3>
-    <div class="leaderboard-container">
-      ${leaderboardData.map((user, index) => `
-        <div class="leaderboard-item">
-          <span class="rank">${index + 1}</span>
-          <span class="username">${user.username}</span>
-          <span class="score">${formatNumber(Math.floor(user.score))} 💰</span>
-        </div>
-      `).join('')}
-    </div>
-    <button onclick="closeModal()">Закрыть</button>
-  `;
-
-  // Update nav item active state directly without recursive call
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  document.querySelector('.nav-item:nth-child(4)').classList.add('active');
-}
-
-function showPrizes() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'none';
-  setActiveNav(document.querySelector('.nav-item:nth-child(5)'));
-  showModal();
 }
 
 document.getElementById('buy-runner').addEventListener('click', () => buyBooster('runner'));
