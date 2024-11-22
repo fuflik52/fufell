@@ -589,7 +589,42 @@ body {
   cursor: not-allowed;
 }
 
-/* Update news modal styling to fit inside game window */
+/* Update the investment-section styling */
+.investment-section {
+  max-height: calc(100vh - 200px); /* Reduce max height to ensure content is visible */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+.investment-section::-webkit-scrollbar {
+  display: none;
+}
+
+/* Update the city-container styling */
+.city-container {
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+.city-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Update button styles to ensure proper spacing */
+.city-button {
+  margin: 10px auto;
+  width: 80%;
+  max-width: 300px;
+}
+
 .news-modal {
   position: absolute;
   top: 0;
@@ -811,7 +846,7 @@ body {
 }
 
 .investment-section {
-  height: calc(100vh - 200px);
+  max-height: calc(100vh - 200px); /* Reduce max height to ensure content is visible */
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -820,22 +855,27 @@ body {
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  align-items: center;
 }
 
-.investment-section::-webkit-scrollbar { /* WebKit */
-  width: 0;
-  height: 0;
+.investment-section::-webkit-scrollbar {
+  display: none;
 }
 
 .city-container {
+  height: calc(100vh - 120px);
+  overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 
 .city-container::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  display: none;
+}
+
+.city-button {
+  margin: 10px auto;
+  width: 80%;
+  max-width: 300px;
 }
 
 .notification {
@@ -1199,6 +1239,7 @@ body {
       <div class="investment-section" id="investmentSection" style="display: none;">
         <h3 style="text-align: center;">Инвестиции</h3>
         <p style="text-align: center;">Текущий вклад: <span id="currentInvestment">0</span> 💰</p>
+        <p style="text-align: center;">Накопленная прибыль: <span id="currentEarnings">0</span> 💰</p>
         <p style="text-align: center;">Доход: 1% в час</p>
         <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
           <button class="city-button" onclick="makeInvestment(10000)">10,000 💰</button>
@@ -1535,21 +1576,31 @@ function claimPrize(prizeType) {
 function invest() {
   const investmentAmounts = [10000, 20000, 50000, 100000];
   const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
+  const lastInvestmentTime = parseInt(localStorage.getItem('lastInvestmentTime'));
+  
+  let earnings = 0;
+  if (lastInvestmentTime) {
+    const timeElapsed = (Date.now() - lastInvestmentTime) / (1000 * 60 * 60);
+    earnings = currentInvestment * 0.01 * timeElapsed;
+  }
 
   document.getElementById('investmentSection').innerHTML = `
     <h3 style="text-align: center; margin: 20px 0;">Инвестиции</h3>
     <p style="text-align: center;">Текущий вклад: <span id="currentInvestment">${currentInvestment}</span> 💰</p>
+    <p style="text-align: center;">Накопленная прибыль: <span id="currentEarnings">${Math.floor(earnings)}</span> 💰</p>
     <p style="text-align: center;">Доход: 1% в час</p>
+    
+    ${currentInvestment > 0 ? `
+      <button class="city-button" style="background: linear-gradient(45deg, #ff4444, #ff6666); margin: 10px auto 20px auto; display: block;" onclick="withdrawInvestment()">
+        Снять вклад (${Math.floor(currentInvestment + earnings)} 💰)
+      </button>
+    ` : ''}
+    
     <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
       ${investmentAmounts.map(amount => 
         `<button class="city-button" onclick="makeInvestment(${amount})">${amount.toLocaleString()} 💰</button>`
       ).join('')}
     </div>
-    ${currentInvestment > 0 ? `
-      <button class="city-button" style="background: linear-gradient(45deg, #ff4444, #ff6666);" onclick="withdrawInvestment()">
-        Снять вклад
-      </button>
-    ` : ''}
   `;
 }
 
@@ -1590,26 +1641,74 @@ function withdrawInvestment() {
 }
 
 // Initialize click handlers and game state
-document.getElementById('clickCoin').addEventListener('click', () => {
-  coins += coinsPerClick;
-  clickCount++;
-  updateDisplays();
+document.getElementById('clickCoin').addEventListener('touchstart', (e) => {
+  e.preventDefault(); // Prevent default touch behavior
   
-  // Vibrate on mobile devices
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
+  // Handle all touch points
+  for(let i = 0; i < e.touches.length; i++) {
+    coins += coinsPerClick;
+    clickCount++;
+    
+    // Vibrate for each touch if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    
+    // Create floating number for each touch point
+    const touch = e.touches[i];
+    const coinElement = document.querySelector('.coin');
+    const rect = coinElement.getBoundingClientRect();
+    
+    // Calculate position relative to the coin element
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    const floatingNumber = document.createElement('div');
+    floatingNumber.className = 'floating-number';
+    floatingNumber.textContent = `+${coinsPerClick}`;
+    floatingNumber.style.position = 'absolute';
+    floatingNumber.style.left = `${x}px`;
+    floatingNumber.style.top = `${y}px`;
+    coinElement.appendChild(floatingNumber);
+    
+    setTimeout(() => {
+      floatingNumber.remove();
+    }, 1000);
   }
   
-  // Show floating number
-  const floatingNumber = document.createElement('div');
-  floatingNumber.className = 'floating-number';
-  floatingNumber.textContent = `+${coinsPerClick}`;
-  floatingNumber.style.left = `${Math.random() * 200 + 20}px`;
-  document.querySelector('.coin').appendChild(floatingNumber);
-  
-  setTimeout(() => {
-    floatingNumber.remove();
-  }, 1000);
+  updateDisplays();
+}, { passive: false });
+
+// Keep the regular click handler for desktop
+document.getElementById('clickCoin').addEventListener('click', (e) => {
+  if (e.pointerType !== 'touch') { // Only handle non-touch clicks
+    coins += coinsPerClick;
+    clickCount++;
+    updateDisplays();
+    
+    // Try to vibrate
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    
+    // Show floating number
+    const floatingNumber = document.createElement('div');
+    floatingNumber.className = 'floating-number';
+    floatingNumber.textContent = `+${coinsPerClick}`;
+    
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    floatingNumber.style.position = 'absolute';
+    floatingNumber.style.left = `${x}px`;
+    floatingNumber.style.top = `${y}px`;
+    e.target.appendChild(floatingNumber);
+    
+    setTimeout(() => {
+      floatingNumber.remove();
+    }, 1000);
+  }
 });
 
 // Make nav-bar scrollable horizontally on mobile and vertically on desktop
@@ -1700,7 +1799,7 @@ window.addEventListener('load', () => {
     showNews();
   }
   showMain(); // This will be visible after news is closed
-}); // Add missing closing parenthesis here
+});
 
 // Function to toggle premium boosters
 function togglePremiumBoosters() {
