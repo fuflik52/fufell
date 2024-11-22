@@ -906,8 +906,6 @@ body {
   }
 }
 
-/* Add other existing styles... */
-
 .city-button {
   background: linear-gradient(45deg, var(--accent), #3d96eb);
   border: none;
@@ -937,7 +935,6 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
-/* Style for "Start Game" button in news modal */
 .news-modal button {
   background: linear-gradient(45deg, var(--accent), #3d96eb);
   border: none;
@@ -965,6 +962,115 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
+.cheat-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid #43a5ff;
+  border-radius: 15px;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  z-index: 2000;
+  color: white;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.cheat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(67, 165, 255, 0.3);
+}
+
+.cheat-header h3 {
+  margin: 0;
+  font-size: 24px;
+  background: linear-gradient(45deg, #43a5ff, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.close-cheat {
+  cursor: pointer;
+  font-size: 20px;
+  opacity: 0.8;
+  transition: 0.3s;
+}
+
+.close-cheat:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.cheat-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.cheat-section h4 {
+  margin: 0 0 15px 0;
+  color: #43a5ff;
+}
+
+.cheat-control {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cheat-control input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  outline: none;
+}
+
+.cheat-control input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.cheat-control button,
+.quick-actions button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #43a5ff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cheat-control button:hover,
+.quick-actions button:hover {
+  background: #3d96eb;
+  transform: translateY(-2px);
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.quick-actions button:last-child {
+  background: #ff4444;
+  grid-column: span 2;
+}
+
+.quick-actions button:last-child:hover {
+  background: #ff3333;
+}
 </style>
 </head>
 <body>
@@ -1252,8 +1358,42 @@ body {
         </button>
       </div>
       
-      <div class="buildings-grid" id="buildingsGrid" style="display: none">
+      <div class="buildings-grid" id="buildingsGrid" style="display: none;">
         <!-- Buildings will be added dynamically -->
+      </div>
+
+      <div class="buildings-section" id="buildingsSection" style="display: none;">
+        <h3 style="text-align: center; margin: 20px 0;">Городские постройки</h3>
+        
+        <div class="building-item" style="background: var(--section-bg); margin: 10px; padding: 15px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 24px;">🏪</div>
+          <h4 style="margin: 10px 0;">Пекарня</h4>
+          <p>Доход: 100 монет/час</p>
+          <p>Владеете: <span id="bakeryCount">0</span></p>
+          <button class="city-button" onclick="buyBuilding('bakery', 1000, 100)" style="margin: 10px auto;">
+            Купить за 1000 💰
+          </button>
+        </div>
+
+        <div class="building-item" style="background: var(--section-bg); margin: 10px; padding: 15px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 24px;">🏬</div>
+          <h4 style="margin: 10px 0;">Рынок</h4>
+          <p>Доход: 500 монет/час</p>
+          <p>Владеете: <span id="marketCount">0</span></p>
+          <button class="city-button" onclick="buyBuilding('market', 5000, 500)" style="margin: 10px auto;">
+            Купить за 5000 💰
+          </button>
+        </div>
+
+        <div class="building-item" style="background: var(--section-bg); margin: 10px; padding: 15px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 24px;">🏭</div>
+          <h4 style="margin: 10px 0;">Завод</h4>
+          <p>Доход: 2000 монет/час</p>
+          <p>Владеете: <span id="factoryCount">0</span></p>
+          <button class="city-button" onclick="buyBuilding('factory', 20000, 2000)" style="margin: 10px auto;">
+            Купить за 20000 💰
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1287,6 +1427,37 @@ body {
 </div>
 
 <script>
+// Show notification function - Should be defined early in code
+function showNotification(message, type = 'info') {
+  // Remove any existing notifications
+  const existingNotification = document.querySelector('.notification');
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  // Create new notification
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  
+  // Add color based on type
+  if (type === 'success') {
+    notification.style.backgroundColor = 'rgba(40, 167, 69, 0.9)';
+  } else if (type === 'error') {
+    notification.style.backgroundColor = 'rgba(220, 53, 69, 0.9)';
+  } else {
+    notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  }
+  
+  // Add to document
+  document.body.appendChild(notification);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
 // Initialize game variables
 let coins = parseFloat(localStorage.getItem('coins')) || 0;
 let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
@@ -1304,36 +1475,14 @@ let boosters = {
   diamond: parseInt(localStorage.getItem('diamond')) || 0
 };
 
-// Theme toggle function
-function toggleTheme() {
-  const themes = ['theme-aqua', 'theme-dark', 'theme-forest'];
-  const body = document.body;
-  let currentTheme = '';
-  
-  // Find current theme
-  for (let theme of themes) {
-    if (body.classList.contains(theme)) {
-      currentTheme = theme;
-      break;
-    }
-  }
-  
-  // Remove current theme
-  if (currentTheme) {
-    body.classList.remove(currentTheme);
-  }
-  
-  // Get next theme
-  const currentIndex = themes.indexOf(currentTheme);
-  const nextIndex = (currentIndex + 1) % themes.length;
-  const newTheme = themes[nextIndex];
-  
-  // Apply new theme
-  body.classList.add(newTheme);
-  localStorage.setItem('theme', newTheme);
-}
+// Initialize building counts
+let buildings = {
+  bakery: parseInt(localStorage.getItem('building_bakery')) || 0,
+  market: parseInt(localStorage.getItem('building_market')) || 0,
+  factory: parseInt(localStorage.getItem('building_factory')) || 0
+};
 
-// Calculate hourly income based on boosters
+// Calculate hourly income based on boosters and buildings
 function calculateHourlyIncome() {
   hourlyIncome = 
     boosters.runner * 2750 +
@@ -1342,7 +1491,11 @@ function calculateHourlyIncome() {
     boosters.factory * 10000 +
     boosters.circus * 25000 +
     boosters.golden * 50000 +
-    boosters.diamond * 100000;
+    boosters.diamond * 100000 +
+    // Add building income
+    buildings.bakery * 100 +
+    buildings.market * 500 +
+    buildings.factory * 2000;
     
   document.getElementById('hourlyIncome').textContent = hourlyIncome;
 }
@@ -1407,6 +1560,13 @@ function updateDisplays() {
   document.getElementById('coins').textContent = Math.floor(coins);
   localStorage.setItem('coins', Math.floor(coins));
   updateTasks();
+  updateBuildingCounts();
+}
+
+function updateBuildingCounts() {
+  document.getElementById('bakeryCount').textContent = buildings.bakery;
+  document.getElementById('marketCount').textContent = buildings.market;
+  document.getElementById('factoryCount').textContent = buildings.factory;
 }
 
 // Navigation functions
@@ -1576,7 +1736,7 @@ function claimPrize(prizeType) {
 function invest() {
   const investmentAmounts = [10000, 20000, 50000, 100000];
   const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
-  const lastInvestmentTime = parseInt(localStorage.getItem('lastInvestmentTime'));
+  const lastInvestmentTime = parseInt(localStorage.getItem('lastInvestmentTime')) || Date.now(); // Add default value
   
   let earnings = 0;
   if (lastInvestmentTime) {
@@ -1586,7 +1746,7 @@ function invest() {
 
   document.getElementById('investmentSection').innerHTML = `
     <h3 style="text-align: center; margin: 20px 0;">Инвестиции</h3>
-    <p style="text-align: center;">Текущий вклад: <span id="currentInvestment">${currentInvestment}</span> 💰</p>
+    <p style="text-align: center;">Текущий вклад: <span id="currentInvestment">${Math.floor(currentInvestment)}</span> 💰</p>
     <p style="text-align: center;">Накопленная прибыль: <span id="currentEarnings">${Math.floor(earnings)}</span> 💰</p>
     <p style="text-align: center;">Доход: 1% в час</p>
     
@@ -1785,7 +1945,7 @@ window.addEventListener('load', () => {
   const savedTheme = localStorage.getItem('theme') || 'theme-aqua';
   document.body.classList.add(savedTheme);
   
-  const lastInvestmentTime = parseInt(localStorage.getItem('lastInvestmentTime'));
+  const lastInvestmentTime = parseInt(localStorage.getItem('lastInvestmentTime')) || Date.now(); // Add default value
   const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
     
   if (lastInvestmentTime && currentInvestment) {
@@ -1880,41 +2040,35 @@ document.getElementById('task7-claim').onclick = () => claimTask(7, 25000, 10000
 document.getElementById('task8-claim').onclick = () => claimTask(8, 30000, 50000, coins);
 document.getElementById('task9-claim').onclick = () => claimTask(9, 40000, 100000, coins);
 
-function showNotification(message, type = 'success') {
-  const notification = document.createElement('div');
-  notification.className = 'notification';
-  notification.textContent = message;
-  
-  // Set color based on type
-  if (type === 'success') {
-    notification.style.background = 'rgba(76, 175, 80, 0.9)';
-  } else if (type === 'error') {
-    notification.style.background = 'rgba(244, 67, 54, 0.9)';
-  }
-  
-  document.body.appendChild(notification);
-  
-  // Remove notification after 2 seconds
-  setTimeout(() => {
-    notification.style.opacity = '0';
-    setTimeout(() => {
-      notification.remove();
-    }, 300);
-  }, 2000);
-}
-
-// New Investment and Buildings functions
 function showInvestments() {
   document.getElementById('investmentSection').style.display = 'block';
-  document.getElementById('buildingsGrid').style.display = 'none';
-  invest(); // This will update the investment section content
+  document.getElementById('buildingsSection').style.display = 'none';
+  invest(); // Update investment display
 }
 
 function showBuildings() {
   document.getElementById('investmentSection').style.display = 'none';
-  document.getElementById('buildingsGrid').style.display = 'block';
-  // Buildings functionality can be added here later
+  document.getElementById('buildingsSection').style.display = 'block';
+  document.getElementById('buildingsGrid').style.display = 'none';
+  
+  // Update building counts display
+  document.getElementById('bakeryCount').textContent = buildings.bakery;
+  document.getElementById('marketCount').textContent = buildings.market;
+  document.getElementById('factoryCount').textContent = buildings.factory;
 }
 
+// Add building purchase function
+function buyBuilding(type, cost, income) {
+  if (coins >= cost) {
+    coins -= cost;
+    buildings[type]++;
+    localStorage.setItem(`building_${type}`, buildings[type]);
+    calculateHourlyIncome();
+    updateDisplays();
+    showNotification(`${type} успешно куплен!`, 'success');
+  } else {
+    showNotification(`Недостаточно монет! Нужно еще ${Math.floor(cost - coins)} монет.`, 'error');
+  }
+}
 </script>
 </body></html>
