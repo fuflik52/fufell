@@ -35,12 +35,14 @@ body {
 }
 
 .game-window {
+  height: 100vh; /* Full viewport height */
+  margin: 0; /* Remove margins */
+  overflow: hidden;
   background: var(--window-bg);
   border: 2px solid var(--border-color);
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   width: 400px;
-  height: 600px;
   padding: 20px;
   box-sizing: border-box;
   display: flex;
@@ -82,9 +84,7 @@ body {
 .coin {
   width: 240px;
   height: 240px;
-  background: linear-gradient(45deg, var(--gold), #ffe44d);
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-  border: 2px solid rgba(255, 215, 0, 0.5);
+  background: linear-gradient(135deg, var(--accent), #77b5ff);
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.1s;
@@ -92,9 +92,8 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 96px;
-  margin: 30px 0;
+  margin: 30px auto 50px;
   position: relative;
-  animation: pulse 2s infinite;
 }
 
 .coin:active {
@@ -102,21 +101,18 @@ body {
 }
 
 .nav-bar {
-  width: calc(100% - 40px);
-  margin: 0 20px;
-  background: var(--secondary-bg);
-  border: 1px solid var(--accent);
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-radius: 10px;
-  position: absolute;
-  bottom: 20px;
-  left: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; 
+  white-space: nowrap;
+  display: flex; /* Add display flex */
+  justify-content: flex-start;
+  padding: 10px 20px;
+  width: calc(100% - 40px); /* Control width accounting for padding */
 }
 
 .nav-item {
+  flex: 0 0 auto; /* Don't allow shrinking */
+  margin: 0 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,7 +136,7 @@ body {
 
 .shop-container {
   width: 100%;
-  height: calc(100% - 100px);
+  height: calc(100vh - 120px); /* Leave space for nav bar */
   display: none;
   padding: 10px 0;
   overflow-y: auto;
@@ -148,7 +144,7 @@ body {
 
 .tasks-container {
   width: 100%;
-  height: calc(100% - 100px);
+  height: calc(100vh - 120px); /* Leave space for nav bar */
   display: none;
   padding: 10px 0;
   overflow-y: auto;
@@ -303,18 +299,22 @@ body {
 }
 
 .modal-window button {
-  background: var(--accent);
+  background: linear-gradient(45deg, #4fa8ff, #3d96eb);
   border: none;
   color: white;
-  padding: 8px 16px;
-  border-radius: 5px;
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
   cursor: pointer;
-  margin-top: 15px;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .modal-window button:hover {
-  background: #3d96eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
 .task-item {
@@ -665,31 +665,11 @@ body {
   border-radius: 10px;
   border-left: 4px solid white;
   transition: all 0.3s ease;
-  color: white;
 }
 
 .update-item:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateX(10px);
-}
-
-.news-modal button {
-  background: white;
-  color: #2ecc71;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
-  cursor: pointer;
-  margin: 20px auto;
-  font-size: 18px;
-  font-weight: bold;
-  display: block;
-  transition: all 0.3s ease;
-}
-
-.news-modal button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
 }
 
 .dont-show-again {
@@ -830,94 +810,121 @@ body {
   margin: 5px 0;
 }
 
-.city-button {
-  font-size: 14px; /* Reduce font size */
-  padding: 8px 16px; /* Reduce padding */
-  margin: 3px; /* Reduce margin */
-  width: 70%; /* Reduce width */
-  max-width: 250px; /* Reduce max-width */
-}
-
 .investment-section {
-  max-height: calc(100% - 150px);
+  height: calc(100vh - 200px);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
   overflow-y: auto;
-  padding: 10px;
-  margin: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent) var(--window-bg);
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  align-items: center;
 }
 
-.investment-section::-webkit-scrollbar {
-  width: 8px;
+.investment-section::-webkit-scrollbar { /* WebKit */
+  width: 0;
+  height: 0;
 }
 
-.investment-section::-webkit-scrollbar-track {
-  background: var(--window-bg);
-  border-radius: 4px;
-}
-
-.investment-section::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 4px;
-}
-
-/* Update city container and button styles */
 .city-container {
-  padding: 10px;
-  max-height: calc(100% - 100px);
-  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
+
+.city-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 25px;
+  font-size: 16px;
+  z-index: 2000;
+  animation: slideDown 0.3s ease-out;
+  max-width: 80%;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Add other existing styles... */
 
 .city-button {
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(45deg, var(--accent), #3d96eb);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  margin: 5px;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 10px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  width: 80%;
+  display: block;
+  margin: 15px auto;
   text-align: center;
-  width: auto;
-  min-width: 120px;
 }
 
 .city-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  background: linear-gradient(45deg, #3d96eb, #2d86db);
 }
 
-/* Style text content in city sections */
-.investment-section h3 {
-  font-size: 18px;
-  color: var(--accent);
-  margin-bottom: 10px;
+.city-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
-.investment-section p {
-  font-size: 14px;
-  margin: 5px 0;
-  color: var(--text);
-}
-
-.investment-info {
-  background: var(--section-bg);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid var(--border-color);
-}
-
-.investment-amount {
+/* Style for "Start Game" button in news modal */
+.news-modal button {
+  background: linear-gradient(45deg, var(--accent), #3d96eb);
+  border: none;
+  color: white;
+  padding: 15px 40px;
+  border-radius: 25px;
+  font-size: 20px;
   font-weight: bold;
-  color: var(--accent);
+  margin: 20px auto;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: block;
+  width: fit-content;
 }
 
-.investment-rate {
-  color: #4CAF50;
-  font-size: 13px;
+.news-modal button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  background: linear-gradient(45deg, #3d96eb, #2d86db);
 }
+
+.news-modal button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
 </style>
 </head>
 <body>
@@ -929,7 +936,7 @@ body {
       <div class="income-display">Доход в час: <span id="hourlyIncome">0</span></div>
     </div>
 
-    <div class="coin" id="clickCoin">💰</div>
+    <div class="coin" id="clickCoin">🎯</div>
 
     <div class="shop-container" id="shopContainer">
       <button class="booster-type-btn premium-btn" onclick="togglePremiumBoosters()">Премиум бустеры</button>
@@ -1184,16 +1191,24 @@ body {
     </div>
 
     <div class="city-container">
-      <div class="city-buttons" style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px;">
+      <div class="city-buttons" style="display: flex; flex-direction: row !important; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 10px;">
         <button class="city-button" onclick="showInvestments()">Инвестиции</button>
         <button class="city-button" onclick="showBuildings()">Постройки</button>
       </div>
       
       <div class="investment-section" id="investmentSection" style="display: none;">
-        <h3>Инвестиции</h3>
-        <p>Текущий вклад: <span id="currentInvestment">0</span> 💰</p>
-        <p>Доход: 1% в час</p>
-        <button class="city-button" onclick="invest()">Вложить</button>
+        <h3 style="text-align: center;">Инвестиции</h3>
+        <p style="text-align: center;">Текущий вклад: <span id="currentInvestment">0</span> 💰</p>
+        <p style="text-align: center;">Доход: 1% в час</p>
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+          <button class="city-button" onclick="makeInvestment(10000)">10,000 💰</button>
+          <button class="city-button" onclick="makeInvestment(20000)">20,000 💰</button>
+          <button class="city-button" onclick="makeInvestment(50000)">50,000 💰</button>
+          <button class="city-button" onclick="makeInvestment(100000)">100,000 💰</button>
+        </div>
+        <button class="city-button" style="background: linear-gradient(45deg, #ff4444, #ff6666);" onclick="withdrawInvestment()">
+          Снять вклад
+        </button>
       </div>
       
       <div class="buildings-grid" id="buildingsGrid" style="display: none">
@@ -1231,667 +1246,576 @@ body {
 </div>
 
 <script>
-const boosters = {
-  runner: {
-    price: 2750,
-    income: 2750,
-    owned: parseInt(localStorage.getItem('booster-runner')) || 0
-  },
-  bigbaby: {
-    price: 1000,
-    income: 500, 
-    owned: parseInt(localStorage.getItem('booster-bigbaby')) || 0
-  },
-  miner: {
-    price: 5000,
-    income: 5000,
-    owned: parseInt(localStorage.getItem('booster-miner')) || 0
-  },
-  factory: {
-    price: 10000,
-    income: 10000,
-    owned: parseInt(localStorage.getItem('booster-factory')) || 0
-  },
-  circus: {
-    price: 25000,
-    income: 25000,
-    owned: parseInt(localStorage.getItem('booster-circus')) || 0
-  },
-  golden: {
-    price: 50000,
-    income: 50000,
-    owned: parseInt(localStorage.getItem('booster-golden')) || 0
-  },
-  diamond: {
-    price: 100000,
-    income: 100000,
-    owned: parseInt(localStorage.getItem('booster-diamond')) || 0
-  }
+// Initialize game variables
+let coins = parseFloat(localStorage.getItem('coins')) || 0;
+let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
+let coinsPerClick = 1;
+let hourlyIncome = 0;
+
+// Initialize booster counts
+let boosters = {
+  runner: parseInt(localStorage.getItem('runner')) || 0,
+  bigbaby: parseInt(localStorage.getItem('bigbaby')) || 0,
+  miner: parseInt(localStorage.getItem('miner')) || 0,
+  factory: parseInt(localStorage.getItem('factory')) || 0,
+  circus: parseInt(localStorage.getItem('circus')) || 0,
+  golden: parseInt(localStorage.getItem('golden')) || 0,
+  diamond: parseInt(localStorage.getItem('diamond')) || 0
 };
 
-function updateBuyButtons() {
-  // Update button states based on coins available
-  for (let id in boosters) {
-    const button = document.getElementById(`buy-${id}`);
-    if (button) {
-      button.disabled = coins < boosters[id].price;
+// Theme toggle function
+function toggleTheme() {
+  const themes = ['theme-aqua', 'theme-dark', 'theme-forest'];
+  const body = document.body;
+  let currentTheme = '';
+  
+  // Find current theme
+  for (let theme of themes) {
+    if (body.classList.contains(theme)) {
+      currentTheme = theme;
+      break;
     }
   }
   
-  // Update price displays
-  Object.keys(boosters).forEach(id => {
-    const priceElement = document.getElementById(`price-${id}`);
-    if (priceElement) {
-      priceElement.textContent = formatNumber(boosters[id].price);
+  // Remove current theme
+  if (currentTheme) {
+    body.classList.remove(currentTheme);
+  }
+  
+  // Get next theme
+  const currentIndex = themes.indexOf(currentTheme);
+  const nextIndex = (currentIndex + 1) % themes.length;
+  const newTheme = themes[nextIndex];
+  
+  // Apply new theme
+  body.classList.add(newTheme);
+  localStorage.setItem('theme', newTheme);
+}
+
+// Calculate hourly income based on boosters
+function calculateHourlyIncome() {
+  hourlyIncome = 
+    boosters.runner * 2750 +
+    boosters.bigbaby * 500 +
+    boosters.miner * 5000 +
+    boosters.factory * 10000 +
+    boosters.circus * 25000 +
+    boosters.golden * 50000 +
+    boosters.diamond * 100000;
+    
+  document.getElementById('hourlyIncome').textContent = hourlyIncome;
+}
+
+// Start automatic income generation
+setInterval(() => {
+  coins += hourlyIncome / 3600; // Convert hourly income to per-second
+  updateDisplays();
+}, 1000);
+
+// Calculate initial hourly income
+calculateHourlyIncome();
+
+function updateTasks() {
+  // Update task 1 - Click count
+  const task1Progress = Math.min((clickCount / 100) * 100, 100);
+  document.getElementById('task1-progress').style.width = `${task1Progress}%`;
+  document.getElementById('task1-counter').textContent = `${clickCount}/100`;
+  document.getElementById('task1-claim').disabled = clickCount < 100;
+
+  // Update task 2 - Coin accumulation
+  const task2Progress = Math.min((coins / 10000) * 100, 100);
+  document.getElementById('task2-progress').style.width = `${task2Progress}%`;
+  document.getElementById('task2-counter').textContent = `${Math.floor(coins)}/10000`;
+  document.getElementById('task2-claim').disabled = coins < 10000;
+
+  // Update task 4 - Elite clicker
+  const task4Progress = Math.min((clickCount / 1000) * 100, 100);
+  document.getElementById('task4-progress').style.width = `${task4Progress}%`;
+  document.getElementById('task4-counter').textContent = `${clickCount}/1000`;
+  document.getElementById('task4-claim').disabled = clickCount < 1000;
+
+  // Update task 5 - Super Elite clicker
+  const task5Progress = Math.min((clickCount / 5000) * 100, 100);
+  document.getElementById('task5-progress').style.width = `${task5Progress}%`;
+  document.getElementById('task5-counter').textContent = `${clickCount}/5000`;
+  document.getElementById('task5-claim').disabled = clickCount < 5000;
+
+  // Update task 7 - Master clicker
+  const task7Progress = Math.min((clickCount / 10000) * 100, 100);
+  document.getElementById('task7-progress').style.width = `${task7Progress}%`;
+  document.getElementById('task7-counter').textContent = `${clickCount}/10000`;
+  document.getElementById('task7-claim').disabled = clickCount < 10000;
+
+  // Update task 8 - Key to success
+  const task8Progress = Math.min((coins / 50000) * 100, 100);
+  document.getElementById('task8-progress').style.width = `${task8Progress}%`;
+  document.getElementById('task8-counter').textContent = `${Math.floor(coins)}/50000`;
+  document.getElementById('task8-claim').disabled = coins < 50000;
+
+  // Update task 9 - 100k coins
+  const task9Progress = Math.min((coins / 100000) * 100, 100);
+  document.getElementById('task9-progress').style.width = `${task9Progress}%`;
+  document.getElementById('task9-counter').textContent = `${Math.floor(coins)}/100000`;
+  document.getElementById('task9-claim').disabled = coins < 100000;
+
+  // Save progress
+  localStorage.setItem('clickCount', clickCount);
+}
+
+function updateDisplays() {
+  document.getElementById('coins').textContent = Math.floor(coins);
+  localStorage.setItem('coins', Math.floor(coins));
+  updateTasks();
+}
+
+// Navigation functions
+function cleanupPreviousSections() {
+  // Remove any dynamically created containers
+  const containers = [
+    '.rating-container',
+    '.prizes-container'
+  ];
+  
+  containers.forEach(selector => {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.remove();
     }
   });
 }
 
-function showShop() {
-  shopContainer.style.display = 'block';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'none';
+function showMain() {
+  cleanupPreviousSections();
+  document.querySelector('.stats').style.display = 'block';
+  document.querySelector('.coin').style.display = 'block';
+  document.querySelector('.shop-container').style.display = 'none';
+  document.querySelector('.tasks-container').style.display = 'none';
   document.querySelector('.city-container').style.display = 'none';
-  setActiveNav(document.querySelector('.nav-item:nth-child(2)'));
-  updateBuyButtons();
+  
+  // Update active state
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  document.querySelector('.nav-item:nth-child(1)').classList.add('active');
 }
 
-// Add these functions for booster type toggles
-function togglePremiumBoosters() {
-  document.getElementById('regularBoosters').style.display = 'none';
-  document.getElementById('premiumBoosters').style.display = 'block';
-  document.getElementById('eliteBoosters').style.display = 'none';
+function showShop() {
+  cleanupPreviousSections();
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelector('.coin').style.display = 'none';
+  document.querySelector('.shop-container').style.display = 'block';
+  document.querySelector('.tasks-container').style.display = 'none';
+  document.querySelector('.city-container').style.display = 'none';
+  
+  // Update active state
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  document.querySelector('.nav-item:nth-child(2)').classList.add('active');
 }
 
-function toggleEliteBoosters() {
-  document.getElementById('regularBoosters').style.display = 'none';
-  document.getElementById('premiumBoosters').style.display = 'none';
-  document.getElementById('eliteBoosters').style.display = 'block';
+function showTasks() {
+  cleanupPreviousSections();
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelector('.coin').style.display = 'none';
+  document.querySelector('.shop-container').style.display = 'none';
+  document.querySelector('.tasks-container').style.display = 'block';
+  document.querySelector('.city-container').style.display = 'none';
+  
+  // Update active state
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  document.querySelector('.nav-item:nth-child(3)').classList.add('active');
 }
 
-function formatNumber(num) {
-  if (num >= 1000000) {
-    return (num/1000000).toFixed(1) + 'M';
-  } else if (num >= 1000) {
-    return (num/1000).toFixed(1) + 'K';
-  } else {
-    return Math.floor(num).toString();
+function showRating() {
+  cleanupPreviousSections();
+  // Hide all other sections first
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelector('.coin').style.display = 'none';
+  document.querySelector('.shop-container').style.display = 'none';
+  document.querySelector('.tasks-container').style.display = 'none';
+  document.querySelector('.city-container').style.display = 'none';
+  
+  // Create new rating container
+  const ratingContainer = document.createElement('div');
+  ratingContainer.className = 'rating-container';
+  document.querySelector('.game-container').appendChild(ratingContainer);
+
+  // Get record balance from localStorage
+  const recordBalance = localStorage.getItem('recordBalance') || coins;
+  if (coins > recordBalance) {
+    localStorage.setItem('recordBalance', coins);
   }
-}
 
-let coins = localStorage.getItem('coins') !== null ? 
-  parseFloat(localStorage.getItem('coins')) : 
-  5000; // Start with 5000 if no previous balance
-let coinsPerClick = 1;
-let hourlyIncome = parseFloat(localStorage.getItem('hourlyIncome')) || 0;
-let lastUpdate = parseInt(localStorage.getItem('lastUpdate')) || Date.now();
-
-// Leaderboard data structure
-const leaderboardData = JSON.parse(localStorage.getItem('leaderboardData')) || [];
-
-function updateLeaderboard(score) {
-  const username = 'Player'; // For simplicity, using static username
-  const existingUserIndex = leaderboardData.findIndex(user => user.username === username);
-  
-  if (existingUserIndex !== -1) {
-    leaderboardData[existingUserIndex].score = score;
-  } else {
-    leaderboardData.push({ username, score });
-  }
-  
-  // Sort leaderboard by score descending
-  leaderboardData.sort((a, b) => b.score - a.score);
-  
-  // Keep only top 10
-  while (leaderboardData.length > 10) {
-    leaderboardData.pop();
-  }
-  
-  // Save to localStorage
-  localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
-}
-
-// Update window load event to show news first
-window.addEventListener('load', () => {
-  if (localStorage.getItem('hideNews') !== 'true') {
-    showNews();
-  }
-  showMain(); // This will be visible after news is closed
-});
-
-// Update the gameNews object
-const gameNews = {
-  currentVersion: '1.2',
-  updates: [
-    {
-      version: '1.1',
-      changes: [
-        'Добавлена система городского развития',
-        'Добавлены инвестиции',
-        'Добавлена система призов',
-        'Добавлена смена тем оформления',
-        'Улучшен интерфейс игры',
-        'Добавлены Премиум и Элитные бустеры',
-        'Добавлена система новых заданий',
-        'Улучшена система достижений',
-        'Добавлена настройка прозрачности интерфейса', 
-        'Улучшен дизайн новостей и обновлений',
-        'Добавлены Elite задания с особыми наградами',
-        'Обновлен дизайн магазина бустеров',
-        'Добавлены специальные награды за достижения',
-        'Улучшена система городского развития',
-        'Оптимизирован интерфейс пользователя'
-      ]
-    }
-  ]
-};
-
-function showNews() {
-  const newsModal = document.createElement('div');
-  newsModal.className = 'news-modal';
-  newsModal.style.opacity = '0';
-  
-  let newsContent = `
-    <h2 class="news-title">🎮 Обновление игры!</h2>
-    
-    <div class="version-block">
-      <div class="version-title">Версия ${gameNews.currentVersion}</div>
-      <div class="update-list">
-        ${gameNews.updates[0].changes.map(change => `
-          <div class="update-item">
-            <span style="margin-right: 10px;">✨</span>
-            ${change}
-          </div>
-        `).join('')}
-      </div>
+  // Show rating content with personal stats only
+  ratingContainer.innerHTML = `
+    <h2 style="text-align: center; margin: 20px 0;">Моя статистика</h2>
+    <div class="stats-container" style="background: var(--section-bg); padding: 15px; border-radius: 10px; margin: 10px;">
+      <p style="margin: 10px 0;">Текущий баланс: ${Math.floor(coins)} 💰</p>
+      <p style="margin: 10px 0;">Рекорд баланса: ${Math.floor(localStorage.getItem('recordBalance') || coins)} 💰</p>
+      <p style="margin: 10px 0;">Всего кликов: ${clickCount} 🖱️</p>
+      <p style="margin: 10px 0;">Доход в час: ${hourlyIncome} 💰</p>
     </div>
-    
-    <div class="dont-show-again">
-      <input type="checkbox" id="hideNewsCheckbox">
-      <label for="hideNewsCheckbox">Больше не показывать это окно</label>
-    </div>
-    
-    <button onclick="closeNews()">Начать игру</button>
   `;
-  
-  newsModal.innerHTML = newsContent;
-  document.querySelector('.game-window').appendChild(newsModal);
-  
-  // Fade in animation
-  setTimeout(() => {
-    newsModal.style.transition = 'opacity 0.5s ease';
-    newsModal.style.opacity = '1';
-  }, 100);
+
+  // Update active state
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  document.querySelector('.nav-item:nth-child(4)').classList.add('active');
 }
 
-// Update closeNews function
-function closeNews() {
-  const hideNews = document.getElementById('hideNewsCheckbox').checked;
-  if (hideNews) {
-    localStorage.setItem('hideNews', 'true');
-  }
+function showCity() {
+  cleanupPreviousSections();
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelector('.coin').style.display = 'none';
+  document.querySelector('.shop-container').style.display = 'none';
+  document.querySelector('.tasks-container').style.display = 'none';
+  document.querySelector('.city-container').style.display = 'block';
   
-  const newsModal = document.querySelector('.news-modal');
-  if (newsModal) {
-    newsModal.style.opacity = '0';
-    setTimeout(() => {
-      newsModal.remove();
-    }, 500);
-  }
+  // Update active state
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  document.querySelector('.nav-item:nth-child(5)').classList.add('active');
 }
 
-function updateDisplays() {
-  const oldCoins = parseFloat(coinsDisplay.textContent.replace(/,/g, ''));
-  const newCoins = Math.floor(coins);
-  
-  // Remove any existing animation classes
-  coinsDisplay.classList.remove('money-add', 'money-subtract');
-  
-  // Force browser reflow to ensure animation plays again
-  void coinsDisplay.offsetWidth;
-  
-  // Add appropriate animation class based on whether money increased or decreased
-  if (newCoins > oldCoins) {
-    coinsDisplay.classList.add('money-add');
-  } else if (newCoins < oldCoins) {
-    coinsDisplay.classList.add('money-subtract');
+// Function to handle showing the prizes section
+function showPrizes() {
+  cleanupPreviousSections();
+  document.querySelector('.stats').style.display = 'none';
+  document.querySelector('.coin').style.display = 'none';
+  document.querySelector('.shop-container').style.display = 'none';
+  document.querySelector('.tasks-container').style.display = 'none';
+  document.querySelector('.city-container').style.display = 'none';
+
+  // Create prizes container if it doesn't exist
+  let prizesContainer = document.querySelector('.prizes-container');
+  if (!prizesContainer) {
+    prizesContainer = document.createElement('div');
+    prizesContainer.className = 'prizes-container';
+    document.querySelector('.game-container').appendChild(prizesContainer);
   }
-  
-  coinsDisplay.textContent = formatNumber(newCoins);
-  hourlyIncomeDisplay.textContent = formatNumber(hourlyIncome);
-  updateBuyButtons(); // Update buy buttons here
-  
-  // Update leaderboard with current coins
-  updateLeaderboard(coins);
-  
-  localStorage.setItem('coins', coins);
-  localStorage.setItem('hourlyIncome', hourlyIncome);
+
+  // Show prizes content
+  prizesContainer.style.display = 'block';
+  prizesContainer.innerHTML = `
+    <h2 style="text-align: center; margin: 20px 0;">Доступные призы</h2>
+    <div class="prize-item">
+      <div class="prize-icon">🎮</div>
+      <div class="prize-info">
+        <div class="prize-name">Игровая консоль</div>
+        <div class="prize-description">Необходимо: 1,000,000 монет</div>
+      </div>
+      <button class="claim-prize-btn" onclick="claimPrize('console')" ${coins >= 1000000 ? '' : 'disabled'}>Получить</button>
+    </div>
+    <div class="prize-item">
+      <div class="prize-icon">📱</div>
+      <div class="prize-info">
+        <div class="prize-name">Смартфон</div>
+        <div class="prize-description">Необходимо: 500,000 монет</div>
+      </div>
+      <button class="claim-prize-btn" onclick="claimPrize('phone')" ${coins >= 500000 ? '' : 'disabled'}>Получить</button>
+    </div>
+  `;
+
+  // Update active state
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  document.querySelector('.nav-item:nth-child(6)').classList.add('active');
 }
 
-const coinsDisplay = document.getElementById('coins');
-const hourlyIncomeDisplay = document.getElementById('hourlyIncome');
-const clickCoin = document.getElementById('clickCoin');
-const shopContainer = document.getElementById('shopContainer');
-const tasksContainer = document.getElementById('tasksContainer');
+// Add prize claim function
+function claimPrize(prizeType) {
+  const prizes = {
+    console: { cost: 1000000, name: 'Игровая консоль' },
+    phone: { cost: 500000, name: 'Смартфон' }
+  };
 
-let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
-let totalBoostersBought = parseInt(localStorage.getItem('totalBoostersBought')) || 0;
-let tasksCompleted = JSON.parse(localStorage.getItem('tasksCompleted')) || {
-  task1: false,
-  task2: false,
-  task3: false,
-  task4: false,
-  task5: false,
-  task6: false,
-  task7: false,
-  task8: false,
-  task9: false,
-  task10: false
-};
-
-function buyBooster(boosterId) {
-  const booster = boosters[boosterId];
-  if (coins >= booster.price) {
-    // Add subtract animation
-    coinsDisplay.classList.remove('money-subtract');
-    void coinsDisplay.offsetWidth;
-    coinsDisplay.classList.add('money-subtract');
-    
-    setTimeout(() => {
-      coins -= booster.price;
-      booster.owned++;
-      hourlyIncome += booster.income;
-      totalBoostersBought++;
-      localStorage.setItem('totalBoostersBought', totalBoostersBought);
-      localStorage.setItem(`booster-${boosterId}`, booster.owned);
-      updateDisplays();
-      updateTasks();
-    }, 100);
-  }
-}
-
-function claimTask(taskId, reward) {
-  if (tasksCompleted[taskId]) return;
-  
-  // Add addition animation
-  coinsDisplay.classList.remove('money-add');
-  void coinsDisplay.offsetWidth;
-  coinsDisplay.classList.add('money-add');
-  
-  setTimeout(() => {
-    coins += reward;
-    tasksCompleted[taskId] = true;
-    localStorage.setItem('tasksCompleted', JSON.stringify(tasksCompleted));
+  const prize = prizes[prizeType];
+  if (coins >= prize.cost) {
+    coins -= prize.cost;
     updateDisplays();
-    updateTasks();
-    document.getElementById(`${taskId}-claim`).disabled = true;
-  }, 100);
+    showNotification(`Поздравляем! Вы получили приз: ${prize.name}`, 'success');
+  }
 }
 
-setInterval(() => {
-  coins += hourlyIncome / 3600;
-  updateDisplays();
-}, 1000);
+// Investment functions
+function invest() {
+  const investmentAmounts = [10000, 20000, 50000, 100000];
+  const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
 
-clickCoin.addEventListener('click', (event) => {
+  document.getElementById('investmentSection').innerHTML = `
+    <h3 style="text-align: center; margin: 20px 0;">Инвестиции</h3>
+    <p style="text-align: center;">Текущий вклад: <span id="currentInvestment">${currentInvestment}</span> 💰</p>
+    <p style="text-align: center;">Доход: 1% в час</p>
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+      ${investmentAmounts.map(amount => 
+        `<button class="city-button" onclick="makeInvestment(${amount})">${amount.toLocaleString()} 💰</button>`
+      ).join('')}
+    </div>
+    ${currentInvestment > 0 ? `
+      <button class="city-button" style="background: linear-gradient(45deg, #ff4444, #ff6666);" onclick="withdrawInvestment()">
+        Снять вклад
+      </button>
+    ` : ''}
+  `;
+}
+
+function makeInvestment(amount) {
+  if (coins >= amount) {
+    coins -= amount;
+    const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
+    const newInvestment = currentInvestment + amount;
+    localStorage.setItem('currentInvestment', newInvestment);
+    localStorage.setItem('lastInvestmentTime', Date.now());
+    document.getElementById('currentInvestment').textContent = newInvestment;
+    updateDisplays();
+    
+    // Vibrate if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  } else {
+    showNotification('Недостаточно монет!', 'error');
+  }
+}
+
+function withdrawInvestment() {
+  const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
+  if (currentInvestment > 0) {
+    const timeElapsed = (Date.now() - parseInt(localStorage.getItem('lastInvestmentTime'))) / (1000 * 60 * 60);
+    const earnings = currentInvestment * 0.01 * timeElapsed;
+    const totalReturn = currentInvestment + earnings;
+    
+    coins += totalReturn;
+    localStorage.setItem('currentInvestment', '0');
+    localStorage.removeItem('lastInvestmentTime');
+    updateDisplays();
+    invest(); // Refresh investment display
+    
+    showNotification(`Вы получили ${Math.floor(totalReturn)} монет (вклад + прибыль)!`, 'success');
+  }
+}
+
+// Initialize click handlers and game state
+document.getElementById('clickCoin').addEventListener('click', () => {
   coins += coinsPerClick;
   clickCount++;
-  localStorage.setItem('clickCount', clickCount);
   updateDisplays();
-  updateTasks();
-
+  
+  // Vibrate on mobile devices
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+  
+  // Show floating number
   const floatingNumber = document.createElement('div');
+  floatingNumber.className = 'floating-number';
   floatingNumber.textContent = `+${coinsPerClick}`;
-  floatingNumber.classList.add('floating-number');
-
-  const rect = clickCoin.getBoundingClientRect();
-  const windowRect = document.querySelector('.game-window').getBoundingClientRect();
-  floatingNumber.style.left = `${rect.left + rect.width / 2 - windowRect.left}px`;
-  floatingNumber.style.top = `${rect.top - windowRect.top}px`;
-
-  document.querySelector('.game-window').appendChild(floatingNumber);
-
+  floatingNumber.style.left = `${Math.random() * 200 + 20}px`;
+  document.querySelector('.coin').appendChild(floatingNumber);
+  
   setTimeout(() => {
     floatingNumber.remove();
   }, 1000);
 });
 
-clickCoin.addEventListener('touchstart', handleTouch);
-clickCoin.addEventListener('touchmove', handleTouch);
-clickCoin.addEventListener('touchend', handleTouch);
+// Make nav-bar scrollable horizontally on mobile and vertically on desktop
+const navBar = document.querySelector('.nav-bar');
+navBar.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  navBar.scrollLeft += e.deltaY;
+});
 
-function handleTouch(event) {
-  event.preventDefault();
-  Array.from(event.touches).forEach(touch => {
-    coins += coinsPerClick;
-    clickCount++;
+// Enable touch scrolling for mobile
+let touchStartX = 0;
+navBar.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+});
+
+navBar.addEventListener('touchmove', (e) => {
+  const touchDiff = touchStartX - e.touches[0].clientX;
+  navBar.scrollLeft += touchDiff;
+  touchStartX = e.touches[0].clientX;
+});
+
+function showNews() {
+  const newsModal = document.createElement('div');
+  newsModal.className = 'news-modal';
+  newsModal.innerHTML = `
+    <div class="news-title">🎮 Обновление игры! 🎮</div>
     
-    // Create floating number for each touch
-    const floatingNumber = document.createElement('div');
-    floatingNumber.textContent = `+${coinsPerClick}`;
-    floatingNumber.classList.add('floating-number');
-    
-    const rect = clickCoin.getBoundingClientRect();
-    const windowRect = document.querySelector('.game-window').getBoundingClientRect();
-    floatingNumber.style.left = `${touch.clientX - windowRect.left}px`;
-    floatingNumber.style.top = `${touch.clientY - windowRect.top}px`;
-    
-    document.querySelector('.game-window').appendChild(floatingNumber);
-    setTimeout(() => floatingNumber.remove(), 1000);
-  });
-  
-  updateDisplays();
-  updateTasks();
-  
-  // Add coin rotation animation
-  clickCoin.style.animation = 'none';
-  void clickCoin.offsetWidth;
-  clickCoin.style.animation = 'coinRotate 0.5s ease-out';
-}
-
-function setActiveNav(element) {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  element.classList.add('active');
-}
-
-function showMain() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'flex';
-  tasksContainer.style.display = 'none';
-  document.querySelector('.city-container').style.display = 'none'; // Hide city container
-  setActiveNav(document.querySelector('.nav-item:nth-child(1)'));
-}
-
-function showModal() {
-  document.getElementById('underConstructionModal').style.display = 'block';
-  document.getElementById('modalOverlay').style.display = 'block';
-}
-
-function closeModal() {
-  document.getElementById('underConstructionModal').style.display = 'none';
-  document.getElementById('modalOverlay').style.display = 'none';
-  showMain(); // Show main screen after closing modal
-}
-
-function showTasks() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'block';
-  document.querySelector('.city-container').style.display = 'none'; // Hide city container
-  setActiveNav(document.querySelector('.nav-item:nth-child(3)'));
-  updateTasks();
-}
-
-function showRating() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'none';
-  document.querySelector('.city-container').style.display = 'none';
-  
-  // Show rating in the modal
-  const modal = document.getElementById('underConstructionModal');
-  modal.innerHTML = `
-    <h3>🏆 Рейтинг игроков</h3>
-    <div class="leaderboard-container">
-      ${leaderboardData.map((user, index) => `
-        <div class="leaderboard-item">
-          <span class="rank">#${index + 1}</span>
-          <span class="username">${user.username}</span>
-          <span class="score">${formatNumber(user.score)} 💰</span>
-        </div>
-      `).join('')}
+    <div class="version-block">
+      <div class="version-title">Версия 1.2</div>
+      <div class="update-item">• Добавлены новые элитные бустеры!</div>
+      <div class="update-item">• Добавлена система инвестиций</div>
+      <div class="update-item">• Улучшен интерфейс игры</div>
+      <div class="update-item">• Добавлены новые задания</div>
     </div>
-    <button onclick="closeModal()">Закрыть</button>
+
+    <div class="version-block">
+      <div class="version-title">Что нового?</div>
+      <div class="update-item">• Теперь можно инвестировать монеты</div>
+      <div class="update-item">• Добавлена вибрация при клике</div>
+      <div class="update-item">• Улучшена производительность</div>
+      <div class="update-item">• Исправлены ошибки</div>
+    </div>
+
+    <div class="dont-show-again">
+      <input type="checkbox" id="dontShowAgain">
+      <label for="dontShowAgain">Больше не показывать</label>
+    </div>
+
+    <button onclick="closeNews()">Начать игру</button>
   `;
   
-  modal.style.display = 'block';
-  document.getElementById('modalOverlay').style.display = 'block';
-  setActiveNav(document.querySelector('.nav-item:nth-child(4)'));
+  document.querySelector('.game-window').appendChild(newsModal);
+
+  // Add event listener for checkbox
+  document.getElementById('dontShowAgain').addEventListener('change', (e) => {
+    if (e.target.checked) {
+      localStorage.setItem('hideNews', 'true');
+    } else {
+      localStorage.removeItem('hideNews');
+    }
+  });
 }
 
-function showCity() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'none';
-  document.querySelector('.city-container').style.display = 'block';
-  setActiveNav(document.querySelector('.nav-item:nth-child(5)'));
+function closeNews() {
+  const newsModal = document.querySelector('.news-modal');
+  if (newsModal) {
+    newsModal.remove();
+  }
+  showMain();
 }
 
-// Add investment functions
+window.addEventListener('load', () => {
+  // Restore saved theme
+  const savedTheme = localStorage.getItem('theme') || 'theme-aqua';
+  document.body.classList.add(savedTheme);
+  
+  const lastInvestmentTime = parseInt(localStorage.getItem('lastInvestmentTime'));
+  const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
+    
+  if (lastInvestmentTime && currentInvestment) {
+    const hoursElapsed = (Date.now() - lastInvestmentTime) / (1000 * 60 * 60);
+    const earnings = currentInvestment * 0.01 * hoursElapsed;
+    coins += earnings;
+    updateDisplays();
+  }
+
+  if (localStorage.getItem('hideNews') !== 'true') {
+    showNews();
+  }
+  showMain(); // This will be visible after news is closed
+}); // Add missing closing parenthesis here
+
+// Function to toggle premium boosters
+function togglePremiumBoosters() {
+  const regularBoosters = document.getElementById('regularBoosters');
+  const premiumBoosters = document.getElementById('premiumBoosters');
+  const eliteBoosters = document.getElementById('eliteBoosters');
+  
+  regularBoosters.style.display = 'none';
+  premiumBoosters.style.display = 'block';
+  eliteBoosters.style.display = 'none';
+}
+
+// Function to toggle elite boosters
+function toggleEliteBoosters() {
+  const regularBoosters = document.getElementById('regularBoosters');
+  const premiumBoosters = document.getElementById('premiumBoosters');
+  const eliteBoosters = document.getElementById('eliteBoosters');
+  
+  regularBoosters.style.display = 'none';
+  premiumBoosters.style.display = 'none';
+  eliteBoosters.style.display = 'block';
+}
+
+// Function to handle closing modals
+function closeModal() {
+  document.getElementById('modalOverlay').style.display = 'none';
+  document.getElementById('underConstructionModal').style.display = 'none';
+}
+
+// Add these functions for shop purchases
+function buyItem(type, price, income) {
+  if (coins >= price) {
+    coins -= price;
+    boosters[type]++;
+    localStorage.setItem(type, boosters[type]);
+    calculateHourlyIncome();
+    updateDisplays();
+    document.getElementById('coins').classList.add('money-subtract');
+    setTimeout(() => {
+      document.getElementById('coins').classList.remove('money-subtract');
+    }, 600);
+    showNotification(`Успешно приобретено! ${type} бустер добавлен.`, 'success');
+  } else {
+    showNotification(`Недостаточно монет! Нужно еще ${Math.floor(price - coins)} монет.`, 'error');
+  }
+}
+
+// Add click handlers for shop buttons
+document.getElementById('buy-runner').onclick = () => buyItem('runner', 2750, 2750);
+document.getElementById('buy-bigbaby').onclick = () => buyItem('bigbaby', 1000, 500);
+document.getElementById('buy-miner').onclick = () => buyItem('miner', 5000, 5000);
+document.getElementById('buy-factory').onclick = () => buyItem('factory', 10000, 10000);
+document.getElementById('buy-circus').onclick = () => buyItem('circus', 25000, 25000);
+document.getElementById('buy-golden').onclick = () => buyItem('golden', 50000, 50000);
+document.getElementById('buy-diamond').onclick = () => buyItem('diamond', 100000, 100000);
+
+// Add these functions for task claims
+function claimTask(taskId, reward, requirement, progressVar) {
+  const button = document.getElementById(`task${taskId}-claim`);
+  if (!button.disabled && progressVar >= requirement) {
+    coins += reward;
+    button.disabled = true;
+    updateDisplays();
+    document.getElementById('coins').classList.add('money-add');
+    setTimeout(() => {
+      document.getElementById('coins').classList.remove('money-add');
+    }, 600);
+    showNotification(`Награда получена! +${reward} монет`, 'success');
+  }
+}
+
+// Add click handlers for task claim buttons
+document.getElementById('task1-claim').onclick = () => claimTask(1, 1000, 100, clickCount);
+document.getElementById('task2-claim').onclick = () => claimTask(2, 2000, 10000, coins);
+document.getElementById('task4-claim').onclick = () => claimTask(4, 10000, 1000, clickCount);
+document.getElementById('task5-claim').onclick = () => claimTask(5, 15000, 5000, clickCount);
+document.getElementById('task7-claim').onclick = () => claimTask(7, 25000, 10000, clickCount);
+document.getElementById('task8-claim').onclick = () => claimTask(8, 30000, 50000, coins);
+document.getElementById('task9-claim').onclick = () => claimTask(9, 40000, 100000, coins);
+
+function showNotification(message, type = 'success') {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  
+  // Set color based on type
+  if (type === 'success') {
+    notification.style.background = 'rgba(76, 175, 80, 0.9)';
+  } else if (type === 'error') {
+    notification.style.background = 'rgba(244, 67, 54, 0.9)';
+  }
+  
+  document.body.appendChild(notification);
+  
+  // Remove notification after 2 seconds
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 2000);
+}
+
+// New Investment and Buildings functions
 function showInvestments() {
   document.getElementById('investmentSection').style.display = 'block';
   document.getElementById('buildingsGrid').style.display = 'none';
-  
-  const investmentSection = document.getElementById('investmentSection');
-  const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
-  
-  investmentSection.innerHTML = `
-    <div class="investment-info">
-      <h3>💰 Инвестиции</h3>
-      <div class="investment-details">
-        <p>Текущий вклад: <span class="investment-amount">${formatNumber(currentInvestment)} 💰</span></p>
-        <p class="investment-rate">Доход: 1% в час</p>
-      </div>
-      <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button class="city-button" onclick="invest()">Вложить</button>
-        <button class="city-button" onclick="withdraw()">Снять</button>
-      </div>
-    </div>
-  `;
+  invest(); // This will update the investment section content
 }
 
-function invest() {
-  // Show investment modal
-  const modal = document.getElementById('underConstructionModal');
-  modal.innerHTML = `
-    <h3>💰 Сделать вклад</h3>
-    <input type="number" 
-           id="investmentAmount" 
-           placeholder="Сумма вклада"
-           style="padding: 8px; margin: 10px; width: 80%; border-radius: 5px; border: 1px solid var(--accent);">
-    <div style="margin: 10px; font-size: 14px; color: var(--text);">
-      Доходность: 1% в час
-    </div>
-    <div style="display: flex; gap: 10px; justify-content: center;">
-      <button onclick="makeInvestment()">Вложить</button>
-      <button onclick="closeModal()">Отмена</button>
-    </div>
-  `;
-  
-  modal.style.display = 'block';
-  document.getElementById('modalOverlay').style.display = 'block';
-}
-
-// Add function to process investment
-function makeInvestment() {
-  const amount = parseFloat(document.getElementById('investmentAmount').value);
-  
-  if (isNaN(amount) || amount <= 0) {
-    alert('Пожалуйста, введите корректную сумму');
-    return;
-  }
-  
-  if (amount > coins) {
-    alert('Недостаточно монет');
-    return;
-  }
-  
-  // Process investment
-  coins -= amount;
-  const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
-  const newInvestment = currentInvestment + amount;
-  
-  // Add hourly income (1%)
-  hourlyIncome += amount * 0.01;
-  
-  localStorage.setItem('currentInvestment', newInvestment);
-  
-  updateDisplays();
-  closeModal();
-  showInvestments(); // Refresh investment display
-}
-
-// Add withdraw function
-function withdraw() {
-  const currentInvestment = parseFloat(localStorage.getItem('currentInvestment')) || 0;
-  if (currentInvestment > 0) {
-    coins += currentInvestment;
-    hourlyIncome -= currentInvestment * 0.01; // Remove investment income
-    
-    localStorage.setItem('currentInvestment', '0');
-    updateDisplays();
-    showInvestments(); // Refresh investment display
-  }
-}
-
-// Handle buildings
 function showBuildings() {
   document.getElementById('investmentSection').style.display = 'none';
   document.getElementById('buildingsGrid').style.display = 'block';
-  
-  const buildingsGrid = document.getElementById('buildingsGrid');
-  buildingsGrid.innerHTML = `
-    <div class="investment-info">
-      <h3>🏗️ Постройки</h3>
-      <p>Этот раздел находится в разработке</p>
-      <button class="city-button" onclick="closeModal()">Закрыть</button>
-    </div>
-  `;
+  // Buildings functionality can be added here later
 }
 
-document.getElementById('buy-runner').addEventListener('click', () => buyBooster('runner'));
-document.getElementById('buy-bigbaby').addEventListener('click', () => buyBooster('bigbaby'));
-document.getElementById('buy-miner').addEventListener('click', () => buyBooster('miner'));
-document.getElementById('buy-factory').addEventListener('click', () => buyBooster('factory'));
-document.getElementById('buy-circus').addEventListener('click', () => buyBooster('circus'));
-
-document.getElementById('task1-claim').addEventListener('click', () => claimTask('task1', 1000));
-document.getElementById('task2-claim').addEventListener('click', () => claimTask('task2', 2000));
-document.getElementById('task3-claim').addEventListener('click', () => claimTask('task3', 5000));
-document.getElementById('task4-claim').addEventListener('click', () => claimTask('task4', 10000));
-document.getElementById('task5-claim').addEventListener('click', () => claimTask('task5', 15000));
-document.getElementById('task6-claim').addEventListener('click', () => claimTask('task6', 20000));
-document.getElementById('task7-claim').addEventListener('click', () => claimTask('task7', 25000));
-document.getElementById('task8-claim').addEventListener('click', () => claimTask('task8', 30000));
-document.getElementById('task9-claim').addEventListener('click', () => claimTask('task9', 40000));
-document.getElementById('task10-claim').addEventListener('click', () => claimTask('task10', 50000));
-
-window.addEventListener('beforeunload', () => {
-  localStorage.setItem('lastUpdate', Date.now());
-});
-
-updateDisplays();
-updateTasks(); // Added to ensure tasks are updated on load
-
-function updateTasks() {
-  // Task 1 - Click 100 times
-  const task1Progress = Math.min(clickCount, 100);
-  document.getElementById('task1-progress').style.width = `${task1Progress}%`;
-  document.getElementById('task1-counter').textContent = `${clickCount}/100`;
-  document.getElementById('task1-claim').disabled = task1Progress < 100 || tasksCompleted.task1;
-
-  // Task 2 - Accumulate 10,000 coins
-  const task2Progress = Math.min((coins / 10000) * 100, 100);
-  document.getElementById('task2-progress').style.width = `${task2Progress}%`;
-  document.getElementById('task2-counter').textContent = `${Math.floor(coins)}/10000`;
-  document.getElementById('task2-claim').disabled = coins < 10000 || tasksCompleted.task2;
-
-  // Task 3 - Buy 3 boosters
-  const task3Progress = Math.min((totalBoostersBought / 3) * 100, 100);
-  document.getElementById('task3-progress').style.width = `${task3Progress}%`;
-  document.getElementById('task3-counter').textContent = `${totalBoostersBought}/3`;
-  document.getElementById('task3-claim').disabled = totalBoostersBought < 3 || tasksCompleted.task3;
-
-  // Task 4 - Click 1000 times
-  const task4Progress = Math.min((clickCount / 1000) * 100, 100);
-  document.getElementById('task4-progress').style.width = `${task4Progress}%`;
-  document.getElementById('task4-counter').textContent = `${clickCount}/1000`;
-  document.getElementById('task4-claim').disabled = clickCount < 1000 || tasksCompleted.task4;
-
-  // Task 5 - Click 5000 times
-  const task5Progress = Math.min((clickCount / 5000) * 100, 100);
-  document.getElementById('task5-progress').style.width = `${task5Progress}%`;
-  document.getElementById('task5-counter').textContent = `${clickCount}/5000`;
-  document.getElementById('task5-claim').disabled = clickCount < 5000 || tasksCompleted.task5;
-
-  // Task 6 - Collect all boosters
-  const totalBoosters = Object.values(boosters).reduce((acc, booster) => acc + (booster.owned > 0 ? 1 : 0), 0);
-  const task6Progress = Math.min((totalBoosters / 5) * 100, 100);
-  document.getElementById('task6-progress').style.width = `${task6Progress}%`;
-  document.getElementById('task6-counter').textContent = `${totalBoosters}/5`;
-  document.getElementById('task6-claim').disabled = totalBoosters < 5 || tasksCompleted.task6;
-
-  // Task 7 - Click 10000 times
-  const task7Progress = Math.min((clickCount / 10000) * 100, 100);
-  document.getElementById('task7-progress').style.width = `${task7Progress}%`;
-  document.getElementById('task7-counter').textContent = `${clickCount}/10000`;
-  document.getElementById('task7-claim').disabled = clickCount < 10000 || tasksCompleted.task7;
-
-  // Task 8 - Get 50000 coins
-  const task8Progress = Math.min((coins / 50000) * 100, 100);
-  document.getElementById('task8-progress').style.width = `${task8Progress}%`;
-  document.getElementById('task8-counter').textContent = `${Math.floor(coins)}/50000`;
-  document.getElementById('task8-claim').disabled = coins < 50000 || tasksCompleted.task8;
-
-  // Task 9 - Get 100000 coins
-  const task9Progress = Math.min((coins / 100000) * 100, 100);
-  document.getElementById('task9-progress').style.width = `${task9Progress}%`;
-  document.getElementById('task9-counter').textContent = `${Math.floor(coins)}/100000`;
-  document.getElementById('task9-claim').disabled = coins < 100000 || tasksCompleted.task9;
-
-  // Task 10 - Get 10 friends (placeholder implementation)
-  const friendCount = parseInt(localStorage.getItem('friendCount')) || 0;
-  const task10Progress = Math.min((friendCount / 10) * 100, 100);
-  document.getElementById('task10-progress').style.width = `${task10Progress}%`;
-  document.getElementById('task10-counter').textContent = `${friendCount}/10`;
-  document.getElementById('task10-claim').disabled = friendCount < 10 || tasksCompleted.task10;
-}
-
-function showPrizes() {
-  shopContainer.style.display = 'none';
-  clickCoin.style.display = 'none';
-  tasksContainer.style.display = 'none';
-  document.querySelector('.city-container').style.display = 'none';
-  
-  // Show prizes in the modal
-  const modal = document.getElementById('underConstructionModal');
-  modal.innerHTML = `
-    <h3>🎁 Доступные призы</h3>
-    <div class="prize-item">
-      <div class="prize-icon">🌟</div>
-      <div class="prize-info">
-        <div class="prize-name">VIP Статус</div>
-        <div class="prize-description">Разблокируйте особые возможности</div>
-      </div>
-      <button class="claim-prize-btn" disabled>50,000 💰</button>
-    </div>
-    
-    <div class="prize-item">
-      <div class="prize-icon">💎</div>
-      <div class="prize-info">
-        <div class="prize-name">Премиум бустер</div>
-        <div class="prize-description">Особый бустер с увеличенным доходом</div>
-      </div>
-      <button class="claim-prize-btn" disabled>100,000 💰</button>
-    </div>
-    
-    <div class="prize-item">
-      <div class="prize-icon">👑</div>
-      <div class="prize-info">
-        <div class="prize-name">Королевский статус</div>
-        <div class="prize-description">Эксклюзивные возможности и бонусы</div>
-      </div>
-      <button class="claim-prize-btn" disabled>250,000 💰</button>
-    </div>
-    
-    <button onclick="closeModal()">Закрыть</button>
-  `;
-  
-  modal.style.display = 'block';
-  document.getElementById('modalOverlay').style.display = 'block';
-  setActiveNav(document.querySelector('.nav-item:nth-child(6)'));
-}
 </script>
 </body></html>
