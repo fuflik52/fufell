@@ -2070,5 +2070,28 @@ function buyBuilding(type, cost, income) {
     showNotification(`Недостаточно монет! Нужно еще ${Math.floor(cost - coins)} монет.`, 'error');
   }
 }
+
+// Theme toggle function
+function toggleTheme() {
+  const themes = ['theme-aqua', 'theme-dark', 'theme-forest'];
+  const currentTheme = Array.from(document.body.classList).find(className => className.startsWith('theme-'));
+  const currentIndex = themes.indexOf(currentTheme);
+  const nextIndex = (currentIndex + 1) % themes.length;
+
+  // Remove current theme
+  document.body.classList.remove(currentTheme);
+  // Add next theme
+  document.body.classList.add(themes[nextIndex]);
+  // Save theme preference
+  localStorage.setItem('theme', themes[nextIndex]);
+
+  // Show notification about theme change
+  const themeNames = {
+    'theme-aqua': 'Аква',
+    'theme-dark': 'Тёмная',
+    'theme-forest': 'Лесная'
+  };
+  showNotification(`Тема изменена на: ${themeNames[themes[nextIndex]]}`, 'info');
+}
 </script>
 </body></html>
