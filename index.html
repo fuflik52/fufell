@@ -98,11 +98,11 @@
     }
 
     .multiplier {
-        font-size: 36px;
+        font-size: 28px;
         margin: 10px 0;
         border: 1px solid;
         border-radius: 5px;
-        padding: 10px;
+        padding: 8px;
         display: inline-block;
         transition: color 0.3s, border-color 0.3s;
         background: #333;
@@ -293,6 +293,46 @@
         background: linear-gradient(45deg, #2196F3, #1976D2);
         border: 1px solid #2196F3;
     }
+
+    @media (max-width: 768px) {
+        .game-container {
+            padding: 15px;
+            margin: 10px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+        }
+
+        .controls {
+            padding: 10px;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input, button {
+            width: 100%;
+        }
+
+        .graph {
+            height: 150px;
+        }
+
+        .multiplier {
+            font-size: 24px;
+            padding: 6px;
+        }
+
+        .history-panel {
+            width: calc(100% - 40px);
+            left: 20px;
+            transform: none;
+        }
+
+        .recent-games {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px;
+        }
+    }
 </style></head><body>
     <div class="game-container">
         <button class="history-button">
@@ -324,7 +364,9 @@
         <div class="status"></div>
     </div>
 
-    <script>const multiplierDisplay = document.querySelector('.multiplier');
+    <script>let balance = parseFloat(localStorage.getItem('gameBalance')) || 1000;
+let gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
+const multiplierDisplay = document.querySelector('.multiplier');
 const line = document.querySelector('.line');
 const playBtn = document.getElementById('playBtn');
 const cashoutBtn = document.getElementById('cashoutBtn');
@@ -336,7 +378,7 @@ const historyPanel = document.querySelector('.history-panel');
 const historyList = document.querySelector('.history-list');
 const countdownDisplay = document.querySelector('.countdown');
 const recentGamesList = document.querySelector('.recent-games-list');
-let balance = 1000;
+balanceDisplay.textContent = balance.toFixed(2);
 betInput.max = balance;
 let currentBet = 0;
 let isPlaying = false;
@@ -344,7 +386,6 @@ let hasCashedOut = false;
 let multiplier = 1;
 let crashPoint = 1;
 let gameInterval;
-let gameHistory = [];
 let isGameRunning = false;
 let countdownTimer;
 function updateMultiplierColor() {
@@ -380,6 +421,9 @@ function startAutoGame() {
   multiplierDisplay.textContent = '1.00x';
   updateMultiplierColor();
   gameInterval = setInterval(updateGame, 50);
+  if (!isPlaying) {
+    return;
+  }
 }
 historyButton.addEventListener('click', () => {
   historyPanel.classList.toggle('show');
@@ -394,6 +438,7 @@ function updateHistory(crashMultiplier, won) {
   }
   updateHistoryDisplay();
   updateRecentGames();
+  localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
 }
 function updateHistoryDisplay() {
   historyList.innerHTML = gameHistory.map(game => {
@@ -401,16 +446,17 @@ function updateHistoryDisplay() {
     const multiplierValue = game.multiplier;
     if (multiplierValue < 1.5) color = '#4CAF50';else if (multiplierValue < 3) color = '#FFA500';else if (multiplierValue < 5) color = '#FF6B6B';else color = '#FF00FF';
     return `
-                    <div class="history-item ${game.won ? 'win' : 'lose'}" style="color: ${color}; border-color: ${color}">
-                        ${multiplierValue.toFixed(2)}x
-                    </div>
-                `;
+                                <div class="history-item ${game.won ? 'win' : 'lose'}" style="color: ${color}; border-color: ${color}">
+                                    ${multiplierValue.toFixed(2)}x
+                                </div>
+                            `;
   }).join('');
 }
 function updateBalance(amount) {
   balance += amount;
   balanceDisplay.textContent = balance.toFixed(2);
-  betInput.max = parseFloat(balanceDisplay.textContent);
+  betInput.max = balance;
+  localStorage.setItem('gameBalance', balance);
 }
 function generateCrashPoint() {
   return 1 + Math.pow(Math.random(), 2) * 9;
@@ -443,26 +489,25 @@ function updateGame() {
   multiplierDisplay.textContent = multiplier.toFixed(2) + 'x';
   updateMultiplierColor();
   if (multiplier >= crashPoint) {
-    if (!hasCashedOut && isPlaying) {
-      updateHistory(crashPoint, false);
-      showNotification(`Вы проиграли ${currentBet.toFixed(2)}`, 'lose');
-    } else {
-      showNotification(`Игра завершена! Коэффициент: ${crashPoint.toFixed(2)}x`, 'info');
-    }
-    isGameRunning = false;
     clearInterval(gameInterval);
+    isGameRunning = false;
     multiplierDisplay.style.color = '#ff4444';
     multiplierDisplay.style.borderColor = '#ff4444';
-    cashoutBtn.disabled = true;
-    isPlaying = false;
-    betInput.value = '';
+
+    if (isPlaying && !hasCashedOut) {
+      updateHistory(crashPoint, false);
+      showNotification(`Вы проиграли ${currentBet.toFixed(2)}`, 'lose');
+      cashoutBtn.disabled = true;
+      isPlaying = false;
+      betInput.value = '';
+    } else if (!isPlaying) {
+      updateHistory(crashPoint, false);
+    }
+
     setTimeout(() => {
       multiplier = 1;
       line.style.width = '0px';
       line.style.transform = 'rotate(0deg)';
-      if (isPlaying) {
-        endGame(false);
-      }
       startCountdown();
     }, 2000);
   }
@@ -491,10 +536,10 @@ function updateRecentGames() {
     const multiplierValue = game.multiplier;
     if (multiplierValue < 1.5) color = '#4CAF50';else if (multiplierValue < 3) color = '#FFA500';else if (multiplierValue < 5) color = '#FF6B6B';else color = '#FF00FF';
     return `
-      <div class="recent-game" style="color: ${color}; border-color: ${color}">
-        ${multiplierValue.toFixed(2)}x
-      </div>
-    `;
+                  <div class="recent-game" style="color: ${color}; border-color: ${color}">
+                    ${multiplierValue.toFixed(2)}x
+                  </div>
+                `;
   }).join('');
 }
 function showNotification(message, type) {
@@ -519,5 +564,96 @@ document.addEventListener('click', e => {
     historyPanel.classList.remove('show');
   }
 });
-startCountdown();</script>
+document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+        localStorage.setItem('lastHiddenTime', Date.now());
+        if (isGameRunning) {
+            localStorage.setItem('gameState', JSON.stringify({
+                isPlaying,
+                currentBet,
+                multiplier,
+                crashPoint,
+                hasCashedOut
+            }));
+        }
+    } else {
+        const lastHiddenTime = parseInt(localStorage.getItem('lastHiddenTime') || Date.now());
+        const currentTime = Date.now();
+        const timeDiff = (currentTime - lastHiddenTime) / 1000;
+        
+        const savedGameState = localStorage.getItem('gameState');
+        
+        if (savedGameState) {
+            const gameState = JSON.parse(savedGameState);
+            
+            if (gameState.isPlaying && !gameState.hasCashedOut) {
+                updateHistory(gameState.multiplier, false);
+                showNotification(`Вы проиграли ${gameState.currentBet.toFixed(2)}`, 'lose');
+            }
+            
+            localStorage.removeItem('gameState');
+        }
+
+        clearInterval(gameInterval);
+        clearInterval(countdownTimer);
+        isGameRunning = false;
+        isPlaying = false;
+        hasCashedOut = false;
+        multiplier = 1;
+        currentBet = 0;
+        cashoutBtn.disabled = true;
+        playBtn.disabled = false;
+        betInput.disabled = false;
+        multiplierDisplay.textContent = '1.00x';
+        line.style.width = '0px';
+        line.style.transform = 'rotate(0deg)';
+        startCountdown();
+    }
+});
+
+window.addEventListener('beforeunload', function() {
+    if (isGameRunning && isPlaying && !hasCashedOut) {
+        localStorage.setItem('gameState', JSON.stringify({
+            isPlaying,
+            currentBet,
+            multiplier,
+            crashPoint,
+            hasCashedOut
+        }));
+    }
+});
+
+window.addEventListener('load', function() {
+    const savedGameState = localStorage.getItem('gameState');
+    
+    if (savedGameState) {
+        const gameState = JSON.parse(savedGameState);
+        
+        if (gameState.isPlaying && !gameState.hasCashedOut) {
+            updateHistory(gameState.multiplier, false);
+            showNotification(`Вы проиграли ${gameState.currentBet.toFixed(2)}`, 'lose');
+        }
+        
+        localStorage.removeItem('gameState');
+    }
+    
+    clearInterval(gameInterval);
+    clearInterval(countdownTimer);
+    isGameRunning = false;
+    isPlaying = false;
+    hasCashedOut = false;
+    multiplier = 1;
+    currentBet = 0;
+    cashoutBtn.disabled = true;
+    playBtn.disabled = false;
+    betInput.disabled = false;
+    multiplierDisplay.textContent = '1.00x';
+    line.style.width = '0px';
+    line.style.transform = 'rotate(0deg)';
+    startCountdown();
+});
+updateHistoryDisplay();
+updateRecentGames();
+startCountdown();
+</script>
 </body></html>
