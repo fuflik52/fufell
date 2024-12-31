@@ -1,456 +1,613 @@
-let balance = Number(localStorage.getItem('balance')) || 0;
-let energy = Number(localStorage.getItem('energy')) || 500;
-let maxEnergy = Number(localStorage.getItem('maxEnergy')) || 500;
-let clickEnergyCost = 1;
-let clickReward = 1;
-let autoTapBought = localStorage.getItem('autoTapBought') === 'true';
-let usageCount = Number(localStorage.getItem('usageCount')) || 1;
-let cyberTapLevel = Number(localStorage.getItem('cyberTapLevel')) || 1;
-let energyUpgradeLevel = Number(localStorage.getItem('energyUpgradeLevel')) || 1;
-let skinsBought = JSON.parse(localStorage.getItem('skinsBought')) || [];
-let currentSkin = localStorage.getItem('currentSkin') || 'default';
-let autoTapInterval = null;
-const maxUsage = 4;
+document.addEventListener('DOMContentLoaded', function() {
+    const mainCircle = document.querySelector('.main-circle');
+    const gameArea = document.querySelector('.game-area');
+    const progressBar = document.querySelector('.progress');
+    const progressText = document.querySelector('.progress-text');
+    const balanceElement = document.querySelector('.balance');
+    const rateElement = document.querySelector('.user-info .rate');
+    const container = document.querySelector('.container');
+    let clickCount = 0;
+    let energy = 100;
+    const maxEnergy = 100;
+    const energyPerClick = 1;
+    const energyRegenRate = 1;
+    window.totalHourlyRate = 10;
+    window.purchasedCards = []; // Массив для хранения купленных карт
 
-const corgi = document.getElementById('corgi');
-const balanceDisplay = document.getElementById('balance');
-const energyBar = document.getElementById('energy-bar');
-const energyText = document.getElementById('energy-text');
-
-// Обновление локального хранилища
-function updateLocalStorage() {
-    localStorage.setItem('balance', balance);
-    localStorage.setItem('energy', energy);
-    localStorage.setItem('maxEnergy', maxEnergy);
-    localStorage.setItem('autoTapBought', autoTapBought);
-    localStorage.setItem('usageCount', usageCount);
-    localStorage.setItem('cyberTapLevel', cyberTapLevel);
-    localStorage.setItem('energyUpgradeLevel', energyUpgradeLevel);
-    localStorage.setItem('skinsBought', JSON.stringify(skinsBought));
-    localStorage.setItem('currentSkin', currentSkin);
-}
-
-// Установка текущего скина при загрузке
-document.getElementById('corgi').src = getSkinImage(currentSkin);
-
-// Обновление энергии и баланса при нажатии на корги
-corgi.addEventListener('click', () => {
-    if (energy >= clickEnergyCost) {
-        balance += clickReward * cyberTapLevel;
-        energy -= clickEnergyCost;
-        updateEnergyBar();
-        balanceDisplay.textContent = balance;
-        const animation = document.createElement('div');
-        animation.className = 'animation';
-        animation.textContent = `+${clickReward * cyberTapLevel}`;
-        animation.style.left = `${Math.random() * window.innerWidth}px`;
-        animation.style.top = `${Math.random() * window.innerHeight}px`;
-        document.body.appendChild(animation);
-        setTimeout(() => animation.remove(), 1000);
-        updateLocalStorage();
+    // Функция для сохранения данных
+    function saveGameData() {
+        localStorage.setItem('balance', clickCount);
+        localStorage.setItem('purchasedCards', JSON.stringify(window.purchasedCards));
+        localStorage.setItem('energy', energy);
     }
-});
 
-// Обновление полосы энергии
-function updateEnergyBar() {
-    const energyPercentage = (energy / maxEnergy) * 100;
-    energyBar.style.width = `${energyPercentage}%`;
-    energyText.textContent = `${energy}/${maxEnergy}`;
-}
+    // Функция для загрузки сохраненных данных
+    function loadGameData() {
+        const savedBalance = localStorage.getItem('balance');
+        const savedPurchasedCards = localStorage.getItem('purchasedCards');
+        const savedEnergy = localStorage.getItem('energy');
 
-// Восстановление энергии каждую секунду
-setInterval(() => {
-    if (energy < maxEnergy) {
-        energy += clickEnergyCost;
-        updateEnergyBar();
-        updateLocalStorage();
-    }
-}, 1000);
-
-// Сброс энергии
-function resetEnergy() {
-    energy = 0;
-    const rechargeInterval = setInterval(() => {
-        if (energy < maxEnergy) {
-            energy++;
-            updateEnergyBar();
-            updateLocalStorage();
-        } else {
-            clearInterval(rechargeInterval);
+        if (savedBalance) {
+            clickCount = parseInt(savedBalance);
+            balanceElement.textContent = Math.floor(clickCount);
         }
-    }, 50);
-}
 
-// Открытие магазина с улучшениями и скинами
-function openShop() {
-    document.body.classList.add('shop');
-    document.body.innerHTML = `
-        <h2 class="section-title">Прокачайся</h2>
-        <div class="upgrade-menu">
-            <div class="upgrade-card">
-                <img src="https://i.postimg.cc/w33kDKWs/energy.png" alt="Запас энергии" class="upgrade-image">
-                <p class="upgrade-name">Запас энергии (Уровень: ${energyUpgradeLevel})</p>
-                <div class="upgrade-price" id="price-1" onclick="buyEnergyUpgrade()">
-                    <img src="https://i.postimg.cc/K3zdFKfc/coin.png" alt="Монета">
-                    <span id="price-text-1">${500 * Math.pow(2, energyUpgradeLevel - 1)}</span>
-                </div>
-            </div>
-            <div class="upgrade-card">
-                <img src="https://i.postimg.cc/DmDPgCDp/multiclick.png" alt="Кибертап" class="upgrade-image">
-                <p class="upgrade-name">Кибертап (Уровень: ${cyberTapLevel})</p>
-                <div class="upgrade-price" id="price-2" onclick="buyCyberTap()">
-                    <img src="https://i.postimg.cc/K3zdFKfc/coin.png" alt="Монета">
-                    <span id="price-text-2">${500 * Math.pow(2, cyberTapLevel - 1)}</span>
-                </div>
-            </div>
-            <div class="upgrade-card">
-                <img src="https://i.postimg.cc/LYQBGvsX/reload.png" alt="Скины" class="upgrade-image">
-                <p class="upgrade-name">Скины</p>
-                <span class="usage-indicator">${usageCount}/4</span>
-                <div class="upgrade-price" id="price-3" onclick="useFreeItem(3)">Бесплатно</div>
-            </div>
-        </div>
-        <div class="menu">
-            <div class="item" id="item-4">
-                <img src="https://i.postimg.cc/Wtc4ws3D/prizes-button.png" alt="Фото" class="item-image">
-                <div class="item-info">
-                    <div class="coin">
-                        <img src="https://i.postimg.cc/K3zdFKfc/coin.png" alt="Монета">
-                        <p class="name">Автотап</p>
-                    </div>
-                    <p class="level">Ур. 1</p>
-                </div>
-                <p class="price" id="price-4" onclick="buyAutoTap()">500</p>
-            </div>
-        </div>
-        <button class="back-button" onclick="goBack()">Назад</button>
-    `;
-}
+        if (savedPurchasedCards) {
+            window.purchasedCards = JSON.parse(savedPurchasedCards);
+        }
 
-// Покупка улучшений для энергии
-function buyEnergyUpgrade() {
-    let price = 500 * Math.pow(2, energyUpgradeLevel - 1);
-    if (balance >= price) {
-        balance -= price;
-        energyUpgradeLevel++;
-        maxEnergy *= 2;
-        updateEnergyBar();
-        displayMessage(`Запас Энергии улучшен! Уровень: ${energyUpgradeLevel}.`);
-        updateLocalStorage();
-    } else {
-        displayMessage("Недостаточно монет для улучшения.");
+        if (savedEnergy) {
+            energy = parseInt(savedEnergy);
+            updateEnergy();
+        }
     }
-}
 
-// Покупка улучшения кибертапа
-function buyCyberTap() {
-    let price = 500 * Math.pow(2, cyberTapLevel - 1);
-    if (balance >= price) {
-        balance -= price;
-        cyberTapLevel++;
-        clickReward++;
-        updateLocalStorage();
-        displayMessage(`Кибертап улучшен до уровня ${cyberTapLevel}!`);
-    } else {
-        displayMessage("Недостаточно монет для улучшения кибертапа.");
+    // Загружаем данные при старте
+    loadGameData();
+
+    // Сохраняем данные перед закрытием страницы
+    window.addEventListener('beforeunload', () => {
+        saveGameData();
+    });
+
+    // Загружаем сохраненные данные при старте
+    if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+        const userData = window.telegramAuth.loadUserData();
+        if (userData) {
+            clickCount = Number(userData.balance) || 0;
+            energy = Number(userData.energy) || 100;
+            window.purchasedCards = userData.purchasedItems || [];
+            // Обновляем все значения на странице
+            updateTotalHourlyRate();
+            updateEnergy();
+            balanceElement.textContent = Math.floor(clickCount);
+            window.clickCount = clickCount; // Сохраняем в глобальную переменную
+        }
     }
-}
 
-// Покупка Автотапа
-function buyAutoTap() {
-    if (!autoTapBought && balance >= 500) {
-        balance -= 500;
-        autoTapBought = true;
-        startAutoTap();
-        document.getElementById('price-4').style.display = 'none';
-        updateLocalStorage();
-        displayMessage("Автотап активирован!");
-    } else {
-        displayMessage("Недостаточно средств для покупки автотапа.");
+    // Функция для обновления общей почасовой прибыли
+    function updateTotalHourlyRate() {
+        window.totalHourlyRate = 10; // Базовая прибыль
+        if (window.purchasedCards && window.purchasedCards.length > 0) {
+            window.purchasedCards.forEach(card => {
+                window.totalHourlyRate += Number(card.perHour);
+            });
+        }
+        const rateElement = document.querySelector('.user-info .rate');
+        if (rateElement) {
+            rateElement.textContent = `${window.totalHourlyRate}/hour`;
+        }
+        // Сохраняем данные
+        if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+            window.telegramAuth.saveUserData();
+        }
     }
-}
 
-// Запуск автотапа
-function startAutoTap() {
-    autoTapInterval = setInterval(() => {
-        balance += 1;
-        updateLocalStorage();
-        balanceDisplay.textContent = balance;
+    // Обновление баланса каждую секунду
+    setInterval(() => {
+        const increment = Number(window.totalHourlyRate || 0) / 3600;
+        clickCount = Number(clickCount) + Number(increment);
+        balanceElement.textContent = Math.floor(clickCount);
+        // Сохраняем текущий баланс
+        if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+            window.telegramAuth.saveBalance(clickCount);
+        }
+        saveGameData();
     }, 1000);
-}
 
-// Функция для отображения сообщений
-function displayMessage(message) {
-    const messageBox = document.createElement('div');
-    messageBox.classList.add('message-box');
-    messageBox.textContent = message;
-    document.body.appendChild(messageBox);
-    setTimeout(() => messageBox.remove(), 3000);
-}
+    // Восстановление энергии каждую секунду
+    setInterval(() => {
+        if (energy < maxEnergy) {
+            energy = Math.min(maxEnergy, energy + energyRegenRate);
+            updateEnergy();
 
-// Функция использования перезагрузки
-function useFreeItem(itemId) {
-    if (usageCount < maxUsage) {
-        usageCount++;
-        document.querySelector('.usage-indicator').textContent = `${usageCount}/4`;
-        updateLocalStorage();
-    } else {
-        alert('Максимальное количество использований достигнуто.');
+            // Сохраняем текущую энергию
+            if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+                window.telegramAuth.saveEnergy(energy);
+            }
+            saveGameData();
+        }
+    }, 1000);
+
+    function updateEnergy() {
+        progressText.textContent = `${Math.floor(energy)}/${maxEnergy}`;
+        progressBar.style.width = `${(energy / maxEnergy) * 100}%`;
+        
+        if (energy <= 0) {
+            mainCircle.classList.add('disabled');
+        } else {
+            mainCircle.classList.remove('disabled');
+        }
     }
-}
 
-// Функция возврата
-function goBack() {
-    window.location.reload();
-}
+    // Функция для создания и показа всплывающего окна с заработком
+    function showEarningsPopup(amount) {
+        const bottomNav = document.querySelector('.bottom-nav');
+        const popupDiv = document.createElement('div');
+        popupDiv.className = 'flex flex-col items-center bg-[#262626] rounded-lg w-full mb-2 earnings-popup';
+        popupDiv.style.position = 'fixed';
+        popupDiv.style.bottom = '70px';
+        popupDiv.style.left = '0';
+        popupDiv.style.right = '0';
+        popupDiv.style.margin = '0 15px';
+        popupDiv.style.zIndex = '1000';
+        
+        popupDiv.innerHTML = `
+            <div class="flex items-center gap-2 p-3">
+                <img alt="Token" src="images/leaf-popup.png" width="24" height="24">
+                <span class="text-white text-2xl font-semibold">${amount.toFixed(2)}</span>
+            </div>
+            <p class="text-gray-300 mb-2 text-lg">Received for time away</p>
+            <button class="collect-btn bg-[#2BBE56] text-white w-full py-2 rounded-lg mb-2">Collect</button>
+        `;
 
-// Открытие экрана призов
-function openPrizes() {
-    document.body.innerHTML = ` 
-    <div class="container"> 
-      <div class="day" data-coins="500" data-day="1">1<br>День<br><span class="coins">500 монет</span></div> 
-      <div class="day" data-coins="1000" data-day="2">2<br>День<br><span class="coins">1,000 монет</span></div> 
-      <div class="day" data-coins="2500" data-day="3">3<br>День<br><span class="coins">2,500 монет</span></div> 
-      <div class="day" data-coins="5000" data-day="4">4<br>День<br><span class="coins">5,000 монет</span></div> 
-      <div class="day" data-coins="15000" data-day="5">5<br>День<br><span class="coins">15,000 монет</span></div> 
-      <div class="day" data-coins="25000" data-day="6">6<br>День<br><span class="coins">25,000 монет</span></div> 
-      <div class="day" data-coins="100000" data-day="7">7<br>День<br><span class="coins">100,000 монет</span></div> 
-      <div class="day" data-coins="500000" data-day="8">8<br>День<br><span class="coins">500,000 монет</span></div> 
-      <div class="day" data-coins="1000000" data-day="9">9<br>День<br><span class="coins">1,000,000 монет</span></div> 
-      <div class="day" data-coins="5000000" data-day="10">10<br>День<br><span class="coins">5,000,000 монет</span></div> 
-    </div> 
-    <button class="reward-button" disabled>Получить награду</button> 
-    <div class="message"></div> 
-    <button class="back-button" onclick="goBack()">Назад</button> 
-  `;
+        document.body.insertBefore(popupDiv, bottomNav);
 
-    let lastClaimedTime = localStorage.getItem('lastClaimedTime') || 0;
-    const claimInterval = 86400000;
-    const currentTime = Date.now();
-    const passedTime = currentTime - lastClaimedTime;
+        // Обработчик для кнопки Collect
+        const collectBtn = popupDiv.querySelector('.collect-btn');
+        collectBtn.addEventListener('click', () => {
+            clickCount += amount;
+            balanceElement.textContent = Math.floor(clickCount);
+            window.telegramAuth.updateLastCollectTime();
+            popupDiv.remove();
+        });
+    }
 
-    document.querySelectorAll('.day').forEach((day, index) => {
-        const dayStatus = localStorage.getItem(`day${index + 1}Claimed`);
-        if (dayStatus === 'true') {
-            day.classList.add('claimed');
-            day.querySelector('.coins').textContent = 'Возвращайся завтра';
+    // Проверяем заработок при загрузке страницы
+    if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+        // const earnings = window.telegramAuth.getTimeAwayEarnings();
+        // if (earnings > 0) {
+        //     showEarningsPopup(earnings);
+        // }
+    }
+
+    // Обработчик видимости страницы
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && window.telegramAuth && window.telegramAuth.isAuthenticated) {
+            // const earnings = window.telegramAuth.getTimeAwayEarnings();
+            // if (earnings > 0) {
+            //     showEarningsPopup(earnings);
+            // }
         }
     });
 
-    if (passedTime < claimInterval) {
-        startCountdown(claimInterval - passedTime);
-    } else {
-        enableNextDay();
-    }
-
-    function enableNextDay() {
-        const claimedDays = document.querySelectorAll('.day.claimed').length;
-        const nextDay = document.querySelector(`.day[data-day="${claimedDays + 1}"]`);
-        if (nextDay) {
-            nextDay.classList.add('active');
-            document.querySelector('.reward-button').disabled = false;
-            document.querySelector('.reward-button').addEventListener('click', () => {
-                handleDayClick(nextDay);
-            });
+    // Добавляем обработку покупки карточки
+    function handleCardPurchase(card) {
+        if (window.telegramAuth) {
+            window.telegramAuth.addPurchasedItem(card);
+            window.purchasedCards = window.telegramAuth.purchasedItems;
+            updateTotalHourlyRate();
         }
     }
 
-    function handleDayClick(day) {
-        const coins = parseInt(day.dataset.coins);
-        balance += coins;
-        localStorage.setItem('balance', balance);
-        document.getElementById('balance').textContent = balance;
-        const currentTime = Date.now();
-        localStorage.setItem(`day${day.dataset.day}Claimed`, 'true');
-        localStorage.setItem('lastClaimedTime', currentTime);
-        alert(`Вы получили ${coins.toLocaleString()} монет.`);
-        day.classList.add('claimed');
-        day.classList.remove('active');
-        day.querySelector('.coins').textContent = 'Возвращайся завтра';
-        document.querySelector('.reward-button').disabled = true;
-        enableNextDay();
+    // Функция для создания конфетти
+    function createConfetti() {
+        const container = document.querySelector('.container');
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        container.appendChild(confetti);
+
+        // Создаем 80 конфетти (примерно 70% зеленых и 30% белых)
+        for (let i = 0; i < 80; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            
+            // 30% конфетти будут белыми
+            if (i % 3 === 0) {
+                piece.classList.add('white');
+            }
+            
+            // Случайная начальная позиция
+            piece.style.left = (Math.random() * 100) + '%';
+            
+            // Случайные движения по X для каждой точки анимации
+            const moveX1 = (Math.random() - 0.5) * 40;
+            const moveX2 = (Math.random() - 0.5) * 60;
+            const moveX3 = (Math.random() - 0.5) * 80;
+            const moveX4 = (Math.random() - 0.5) * 100;
+            
+            // Случайные отклонения по Y
+            const randomY1 = (Math.random() - 0.5) * 20;
+            const randomY2 = (Math.random() - 0.5) * 30;
+            const randomY3 = (Math.random() - 0.5) * 40;
+            const randomY4 = (Math.random() - 0.5) * 50;
+            
+            // Устанавливаем CSS переменные для анимации
+            piece.style.setProperty('--moveX1', moveX1 + '%');
+            piece.style.setProperty('--moveX2', moveX2 + '%');
+            piece.style.setProperty('--moveX3', moveX3 + '%');
+            piece.style.setProperty('--moveX4', moveX4 + '%');
+            
+            piece.style.setProperty('--randomY1', randomY1 + 'px');
+            piece.style.setProperty('--randomY2', randomY2 + 'px');
+            piece.style.setProperty('--randomY3', randomY3 + 'px');
+            piece.style.setProperty('--randomY4', randomY4 + 'px');
+            
+            // Случайное вращение
+            const rotation = Math.random() * 360 * 3;
+            piece.style.setProperty('--rotation', rotation + 'deg');
+            
+            // Замедленная анимация падения (увеличили время в 2 раза)
+            piece.style.animationDuration = (1 + Math.random() * 1) + 's';
+            piece.style.animationDelay = (Math.random() * 0.4) + 's';
+            
+            confetti.appendChild(piece);
+        }
+
+        // Удаляем конфетти после анимации (увеличили время в 2 раза)
+        setTimeout(() => {
+            confetti.remove();
+        }, 3000);
     }
 
-    function startCountdown(timeLeft) {
-        const countdownInterval = setInterval(() => {
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-                document.querySelector('.message').textContent = 'Награда доступна!';
-                enableNextDay();
-                return;
+    // Создаем контейнеры для разделов
+    const homeSection = document.createElement('div');
+    homeSection.className = 'home-section';
+    homeSection.appendChild(gameArea);
+    homeSection.appendChild(document.querySelector('.progress-container'));
+    container.insertBefore(homeSection, document.querySelector('.bottom-nav'));
+
+    const cardsSection = createCardsSection();
+    const frensSection = createFrensSection();
+    const miningSection = createMiningSection();
+    const rewardSection = createRewardSection();
+
+    // Показываем только домашнюю страницу изначально
+    cardsSection.style.display = 'none';
+    frensSection.style.display = 'none';
+    miningSection.style.display = 'none';
+    rewardSection.style.display = 'none';
+
+    const sections = {
+        'home': homeSection,
+        'cards': cardsSection,
+        'frens': frensSection,
+        'mining': miningSection,
+        'reward': rewardSection
+    };
+
+    // Обработка клика по навигации
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = item.getAttribute('data-section');
+            
+            // Убираем активный класс со всех пунктов меню
+            document.querySelectorAll('.nav-item').forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            
+            // Добавляем активный класс выбранному пункту
+            item.classList.add('active');
+            
+            // Скрываем все секции
+            Object.values(sections).forEach(section => {
+                if (section) section.style.display = 'none';
+            });
+            
+            // Показываем выбранную секцию
+            if (sections[section]) {
+                sections[section].style.display = 'block';
+            }
+        });
+    });
+
+    mainCircle.addEventListener('click', function(e) {
+        if (energy <= 0) return;
+
+        energy = Math.max(0, energy - energyPerClick);
+        updateEnergy();
+
+        const clickInfo = document.createElement('div');
+        clickInfo.className = 'click-info';
+        
+        const icon = document.createElement('img');
+        icon.src = 'https://i.postimg.cc/FFx7T4Bh/image.png';
+        icon.className = 'click-icon';
+        clickInfo.appendChild(icon);
+        
+        const value = document.createElement('span');
+        value.className = 'click-value';
+        value.textContent = '+1';
+        clickInfo.appendChild(value);
+
+        clickInfo.style.position = 'absolute';
+        clickInfo.style.left = '50%';
+        clickInfo.style.top = '40%';
+        clickInfo.style.transform = 'translateX(-50%)';
+
+        gameArea.appendChild(clickInfo);
+
+        requestAnimationFrame(() => {
+            clickInfo.classList.add('show');
+        });
+
+        setTimeout(() => {
+            gameArea.removeChild(clickInfo);
+        }, 800);
+
+        clickCount++;
+        balanceElement.textContent = Math.floor(clickCount);
+        // Сохраняем баланс после клика
+        if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+            window.telegramAuth.saveBalance(clickCount);
+        }
+        saveGameData();
+    });
+
+    // Функция для показа уведомления
+    function showNotification(message) {
+        // Удаляем предыдущее уведомление, если оно есть
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Создаем новое уведомление
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerHTML = `
+            <img src="https://i.postimg.cc/FFx7T4Bh/image.png" alt="Token">
+            <span class="notification-text">${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Показываем уведомление
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+
+        // Скрываем и удаляем уведомление через 3 секунды
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    function createCardsSection() {
+        const section = document.createElement('div');
+        section.className = 'cards-section';
+        
+        // Создаем переключатель подразделов
+        const tabsContainer = document.createElement('div');
+        tabsContainer.className = 'tabs-container';
+        tabsContainer.innerHTML = `
+            <div class="bg-[#1A1B1A] p-1 rounded-xl flex gap-2 mb-3">
+                <button class="tab-btn active flex-1 py-3 rounded-lg text-center transition-all duration-300 bg-[#262626] text-white" data-tab="new">New Cards</button>
+                <button class="tab-btn flex-1 py-3 rounded-lg text-center transition-all duration-300 text-white/50" data-tab="owned">Your Cards</button>
+            </div>
+        `;
+
+        // Создаем контейнеры для карточек
+        const newCardsContainer = document.createElement('div');
+        newCardsContainer.className = 'cards-container';
+
+        const ownedCardsContainer = document.createElement('div');
+        ownedCardsContainer.className = 'cards-container';
+        ownedCardsContainer.style.display = 'none';
+
+        const cardsData = [
+            {
+                id: 1,
+                image: "https://res.cloudinary.com/dib4woqge/image/upload/v1735300135/1000000472_wu48p4.png",
+                title: "Начало пути",
+                description: "Коала только начинает своё путешествие. Даёт 120 эвкалипта в час",
+                price: "10000",
+                perHour: 120
+            },
+            {
+                id: 2,
+                image: "https://i.postimg.cc/sxpJmh0S/image.png",
+                title: "Первые деньги",
+                description: "Коала заработала свои первые деньги. Продолжаем в том же духе. Добавляет 350 эвкалипта в час",
+                price: "25000",
+                perHour: 350
+            },
+
+            {
+                id: 3,
+                image: "https://i.postimg.cc/pVwWnFHC/image.png",
+                title: "Коала на отдыхе",
+                description: "После первых заработанных денег можно хорошенько отдохнуть. Добавляет 800 эвкалипта в час",
+                price: "35000",
+                perHour: 800
+            },
+            {
+                id: 4,
+                image: "https://i.postimg.cc/nLCgk3KD/image.png",
+                title: "Снежные забавы",
+                description: "Наступила зима, а значит можно хорошо порезвиться в снежки. Но не забываем про прибыль в 1800 эвкалипта в час",
+                price: "50000",
+                perHour: 1800
+            },
+            {
+                id: 5,
+                image: "https://i.postimg.cc/wTxjfh3V/Leonardo-Phoenix-10-A-vibrant-whimsical-illustration-of-Koala-2.jpg",
+                title: "Коала-путешественник",
+                description: "Наша коала отправляется в кругосветное путешествие, собирая эвкалипт по всему миру. Приносит 3500 эвкалипта в час",
+                price: "75000",
+                perHour: 3500,
+                isNew: true
+            },
+            {
+                id: 6,
+                image: "https://i.postimg.cc/3JnrGd8c/Leonardo-Phoenix-10-A-whimsical-digital-illustration-of-a-koal-0.jpg",
+                title: "Бизнес-коала",
+                description: "Пора открывать свой бизнес! Коала в деловом костюме управляет сетью эвкалиптовых плантаций. Добавляет 7000 эвкалипта в час",
+                price: "100000",
+                perHour: 7000,
+                isNew: true
+            },
+            {
+                id: 7,
+                image: "https://i.postimg.cc/zvqbJ67b/Leonardo-Phoenix-10-A-vibrant-whimsical-illustration-of-Space-0.jpg",
+                title: "Космический исследователь",
+                description: "Коала покоряет космос в поисках редких видов эвкалипта на других планетах. Приносит 12000 эвкалипта в час",
+                price: "150000",
+                perHour: 12000,
+                isNew: true
+            },
+            {
+                id: 8,
+                image: "https://i.postimg.cc/bv23bSh0/Leonardo-Phoenix-10-In-a-whimsical-vibrant-illustration-depict-0.jpg",
+                title: "Коала-волшебник",
+                description: "Магия и эвкалипт - отличное сочетание! Коала освоила древние заклинания приумножения эвкалипта. Добавляет 20000 эвкалипта в час",
+                price: "200000",
+                perHour: 20000,
+                isNew: true
+            }
+        ];
+
+        // Функция создания карточки
+        function createCardElement(card, isOwned = false) {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card-item';
+
+            // Проверяем, была ли карточка куплена ранее
+            const isPurchased = window.purchasedCards.some(pc => pc.id === card.id);
+            
+            cardElement.innerHTML = `
+                <div class="card-image">
+                    <img src="${card.image}" alt="${card.title}" class="card-img">
+                </div>
+                <div class="card-title">${card.title}</div>
+                <div class="card-description">${card.description}</div>
+                <div class="card-footer">
+                    <button class="card-price${isPurchased ? ' purchased' : ''}" data-id="${card.id}" data-rate="${card.perHour}"${isPurchased ? ' disabled' : ''}>
+                        ${isPurchased ? 
+                            '<span>Куплено</span>' :
+                            `<img src="https://i.postimg.cc/FFx7T4Bh/image.png" alt="leaf" class="leaf-icon">
+                            <span>${card.price}</span>`
+                        }
+                    </button>
+                    <div class="per-hour">
+                        <div class="rate">
+                            <img src="https://i.postimg.cc/FFx7T4Bh/image.png" alt="leaf" class="leaf-icon">
+                            <span>${card.perHour}</span>
+                        </div>
+                        <span class="rate-label">per hour</span>
+                    </div>
+                </div>
+            `;
+
+            if (!isPurchased && !isOwned) {
+                const buyButton = cardElement.querySelector('.card-price');
+                buyButton.addEventListener('click', function() {
+                    const cardId = parseInt(this.dataset.id);
+                    const price = parseInt(this.querySelector('span').textContent);
+                    
+                    if (!this.classList.contains('purchased') && clickCount >= price) {
+                        clickCount = Number(clickCount) - Number(price);
+                        balanceElement.textContent = Math.floor(clickCount);
+                        
+                        // Запускаем анимацию конфетти
+                        createConfetti();
+                        
+                        this.classList.add('purchased');
+                        this.disabled = true;
+                        this.innerHTML = '<span>Куплено</span>';
+
+                        // Добавляем карту в купленные
+                        const cardData = cardsData.find(c => c.id === cardId);
+                        if (cardData && !window.purchasedCards.some(pc => pc.id === cardId)) {
+                            window.purchasedCards.push(cardData);
+                            updateOwnedCards();
+                            handleCardPurchase(cardData);
+                            // Обновляем общую прибыль в час
+                            updateTotalHourlyRate();
+                        }
+                    } else if (clickCount < price) {
+                        showNotification('Недостаточно средств для покупки!');
+                    }
+                });
             }
 
-            const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
-            const seconds = Math.floor((timeLeft / 1000) % 60);
+            if (card.isNew) {
+                const newLabel = document.createElement('div');
+                newLabel.className = 'new-label';
+                newLabel.textContent = 'New';
+                cardElement.appendChild(newLabel);
+            }
 
-            document.querySelector('.message').textContent = `До следующей награды: ${hours}ч ${minutes}м ${seconds}с`;
-
-            timeLeft -= 1000;
-        }, 1000);
-    }
-}
-
-// Админ панель
-let isAdmin = false;
-let adminPassword = "admin123";
-
-function toggleAdminMenu() {
-    const menu = document.getElementById('adminMenu');
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-}
-
-function handleLogin(event) {
-    event.preventDefault();
-    const inputPassword = document.getElementById('adminPassword').value;
-    if (inputPassword === adminPassword) {
-        isAdmin = true;
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('adminActions').style.display = 'block';
-        alert('Успешная авторизация!');
-    } else {
-        alert('Неверный пароль!');
-    }
-}
-
-function addBalance() {
-    if (isAdmin) {
-        const amount = prompt("Введите сумму для пополнения баланса:");
-        if (amount && !isNaN(amount)) {
-            balance += parseInt(amount);
-            updateLocalStorage();
-            alert(`Ваш баланс пополнен на ${amount} монет.`);
-            document.getElementById('balance').textContent = balance;
-        } else {
-            alert('Неверное значение.');
+            return cardElement;
         }
-    } else {
-        alert('Вы не авторизованы как администратор.');
+
+        // Функция обновления списка купленных карт
+        function updateOwnedCards() {
+            ownedCardsContainer.innerHTML = '';
+            if (!window.purchasedCards || window.purchasedCards.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-message';
+                emptyMessage.textContent = 'У вас пока нет купленных карт';
+                ownedCardsContainer.appendChild(emptyMessage);
+            } else {
+                window.purchasedCards.forEach(card => {
+                    ownedCardsContainer.appendChild(createCardElement(card, true));
+                });
+            }
+        }
+
+        // Добавляем карточки в контейнер новых карт
+        cardsData.forEach(card => {
+            newCardsContainer.appendChild(createCardElement(card));
+        });
+
+        // Инициализируем список купленных карт
+        updateOwnedCards();
+
+        // Обработчики переключения табов
+        tabsContainer.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabsContainer.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-[#262626]');
+                    b.classList.add('text-white/50');
+                });
+                this.classList.add('active', 'bg-[#262626]');
+                this.classList.remove('text-white/50');
+
+                const tabName = this.dataset.tab;
+                if (tabName === 'new') {
+                    newCardsContainer.style.display = 'grid';
+                    ownedCardsContainer.style.display = 'none';
+                } else {
+                    newCardsContainer.style.display = 'none';
+                    ownedCardsContainer.style.display = 'grid';
+                    updateOwnedCards();
+                }
+            });
+        });
+
+        section.appendChild(tabsContainer);
+        section.appendChild(newCardsContainer);
+        section.appendChild(ownedCardsContainer);
+        document.querySelector('.container').insertBefore(section, document.querySelector('.bottom-nav'));
+        return section;
     }
-}
 
-// Магазин скинов
-function openSkinsShop() {
-    document.body.classList.add('shop');
-    document.body.innerHTML = `
-    <h2 class="section-title">Магазин Скинов</h2>
-    <div class="menu">
-        <div class="item" id="item-default">
-            <img src="https://i.postimg.cc/ns1FhD4q/corgi-image.jpg" alt="Стандартный" class="item-image">
-            <div class="item-info">
-                <div class="coin">
-                    <p class="name">Стандартный</p>
-                </div>
-                <p class="level">Бесплатно</p>
-            </div>
-            <button class="wear-button" onclick="wearSkin('default')">Одеть</button>
-        </div>
-
-        <div class="item" id="item-skin1">
-            <img src="https://i.postimg.cc/YCP0Xn7N/skin1.png" alt="Скин 1" class="item-image">
-            <div class="item-info">
-                <div class="coin">
-                    <p class="name">Скин 1</p>
-                </div>
-                <p class="level">Цена: 500 монет</p>
-            </div>
-            ${skinsBought.includes('skin1') ? 
-                '<button class="wear-button" onclick="wearSkin(\'skin1\')">Одеть</button>' : 
-                '<p class="price" id="price-1" onclick="buySkin(\'skin1\', 500)">500</p>'}
-        </div>
-
-        <div class="item" id="item-skin2">
-            <img src="https://i.postimg.cc/YCP0Xn7N/skin2.png" alt="Скин 2" class="item-image">
-            <div class="item-info">
-                <div class="coin">
-                    <p class="name">Скин 2</p>
-                </div>
-                <p class="level">Цена: 1000 монет</p>
-            </div>
-            ${skinsBought.includes('skin2') ? 
-                '<button class="wear-button" onclick="wearSkin(\'skin2\')">Одеть</button>' : 
-                '<p class="price" id="price-2" onclick="buySkin(\'skin2\', 1000)">1000</p>'}
-        </div>
-
-        <div class="item" id="item-skin3">
-            <img src="https://i.postimg.cc/YCP0Xn7N/skin3.png" alt="Скин 3" class="item-image">
-            <div class="item-info">
-                <div class="coin">
-                    <p class="name">Скин 3</p>
-                </div>
-                <p class="level">Цена: 1500 монет</p>
-            </div>
-            ${skinsBought.includes('skin3') ? 
-                '<button class="wear-button" onclick="wearSkin(\'skin3\')">Одеть</button>' : 
-                '<p class="price" id="price-3" onclick="buySkin(\'skin3\', 1500)">1500</p>'}
-        </div>
-
-        <div class="item" id="item-skin4">
-            <img src="https://i.postimg.cc/YCP0Xn7N/skin4.png" alt="Скин 4" class="item-image">
-            <div class="item-info">
-                <div class="coin">
-                    <p class="name">Скин 4</p>
-                </div>
-                <p class="level">Цена: 2000 монет</p>
-            </div>
-            ${skinsBought.includes('skin4') ? 
-                '<button class="wear-button" onclick="wearSkin(\'skin4\')">Одеть</button>' : 
-                '<p class="price" id="price-4" onclick="buySkin(\'skin4\', 2000)">2000</p>'}
-        </div>
-
-        <div class="item" id="item-skin5">
-            <img src="https://i.postimg.cc/YCP0Xn7N/skin5.png" alt="Скин 5" class="item-image">
-            <div class="item-info">
-                <div class="coin">
-                    <p class="name">Скин 5</p>
-                </div>
-                <p class="level">Цена: 2500 монет</p>
-            </div>
-            ${skinsBought.includes('skin5') ? 
-                '<button class="wear-button" onclick="wearSkin(\'skin5\')">Одеть</button>' : 
-                '<p class="price" id="price-5" onclick="buySkin(\'skin5\', 2500)">2500</p>'}
-        </div>
-    </div>
-    <button class="back-button" onclick="goBack()">Назад</button>
-    `;
-}
-
-// Покупка скина
-function buySkin(skinName, price) {
-    if (balance >= price && !skinsBought.includes(skinName)) {
-        balance -= price;
-        skinsBought.push(skinName);
-        updateLocalStorage();
-        displayMessage(`${skinName} куплен!`);
-        openSkinsShop(); // Обновляем магазин для отображения статуса покупки
-    } else {
-        displayMessage("Недостаточно монет или скин уже куплен.");
+    function createFrensSection() {
+        const section = document.createElement('div');
+        section.className = 'frens-section';
+        section.innerHTML = '<div class="section-title">Frens Section</div>';
+        document.querySelector('.container').insertBefore(section, document.querySelector('.bottom-nav'));
+        return section;
     }
-}
 
-// Ношение скина
-function wearSkin(skinName) {
-    currentSkin = skinName;
-    document.getElementById('corgi').src = getSkinImage(currentSkin); // Меняем изображение корги
-    localStorage.setItem('currentSkin', skinName); // Сохраняем текущий скин
-    displayMessage(`${skinName} одет!`);
-}
-
-// Получение URL для изображения скина
-function getSkinImage(skinName) {
-    switch(skinName) {
-        case 'skin1': return 'https://i.postimg.cc/ns1FhD4q/corgi-image.jpg';
-        case 'skin2': return 'https://i.postimg.cc/YCP0Xn7N/skin2-corgi.png';
-        case 'skin3': return 'https://i.postimg.cc/YCP0Xn7N/skin3-corgi.png';
-        case 'skin4': return 'https://i.postimg.cc/YCP0Xn7N/skin4-corgi.png';
-        case 'skin5': return 'https://i.postimg.cc/YCP0Xn7N/skin5-corgi.png';
-        default: return 'https://i.postimg.cc/ns1FhD4q/corgi-image.jpg';
+    function createMiningSection() {
+        const section = document.createElement('div');
+        section.className = 'mining-section';
+        section.innerHTML = '<div class="section-title">Mining Section</div>';
+        document.querySelector('.container').insertBefore(section, document.querySelector('.bottom-nav'));
+        return section;
     }
-}
 
-// Инициализация отображения значений из localStorage
-balanceDisplay.textContent = balance;
-updateEnergyBar();
-if (autoTapBought) {
-    startAutoTap();
-}
+    function createRewardSection() {
+        const section = document.createElement('div');
+        section.className = 'reward-section';
+        section.innerHTML = '<div class="section-title">Reward Section</div>';
+        document.querySelector('.container').insertBefore(section, document.querySelector('.bottom-nav'));
+        return section;
+    }
+});

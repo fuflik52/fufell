@@ -1,659 +1,106 @@
-<html><head><base href="."><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Crash Game</title><style>
-    body {
-        margin: 0;
-        padding: 20px;
-        font-family: Arial, sans-serif;
-        background: #1a1a1a;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koala Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="sections.css">
+    <link rel="stylesheet" href="reward.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="mobile-frame">
+        <div class="container">
+            <div class="header">
+                <div class="user-info">
+                    <img src="https://i.postimg.cc/vBBWGZjL/image.png" alt="User" class="user-icon">
+                    <div class="user-details">
+                        <div class="username">Guest</div>
+                        <div class="rate">10/hour</div>
+                    </div>
+                </div>
+                <div class="balance-container">
+                    <img src="https://i.postimg.cc/FFx7T4Bh/image.png" alt="Token" class="balance-icon">
+                    <div class="balance">0</div>
+                </div>
+            </div>
 
-    .game-container {
-        background: #2a2a2a;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        max-width: 500px;
-        width: 100%;
-        position: relative;
-        border: 2px solid #444;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
+            <div class="game-area">
+                <div class="main-circle">
+                    <div class="circle-gradient"></div>
+                    <div class="circle-gradient-inner"></div>
+                    <img src="https://i.postimg.cc/ZnggtH7v/image.png" alt="Koala" class="koala-img">
+                </div>
+            </div>
 
-    .history-button {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        background: #333;
-        border: 1px solid #444;
-        color: white;
-        padding: 8px;
-        border-radius: 5px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-    }
+            <div class="progress-container">
+                <div class="energy-info">
+                    <img src="https://i.postimg.cc/FsZCF7Cw/image.png" alt="Energy" class="energy-icon">
+                    <span class="progress-text">100/100</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                    <div class="progress-stripes">
+                        <div class="stripe" style="left: -44px"></div>
+                        <div class="stripe" style="left: -26px"></div>
+                        <div class="stripe" style="left: -8px"></div>
+                        <div class="stripe" style="left: 10px"></div>
+                        <div class="stripe" style="left: 28px"></div>
+                        <div class="stripe" style="left: 46px"></div>
+                        <div class="stripe" style="left: 64px"></div>
+                        <div class="stripe" style="left: 82px"></div>
+                        <div class="stripe" style="left: 100px"></div>
+                    </div>
+                </div>
+            </div>
 
-    .history-button img {
-        width: 20px;
-        height: 20px;
-    }
+            <div class="reward-section" style="display: none;">
+                <div class="bg-[#1A1B1A] p-1 rounded-xl flex gap-2 mb-4 shrink-0">
+                    <button class="flex-1 py-3 rounded-lg text-center transition-all duration-300 bg-[#262626] text-white">In-game</button>
+                    <button class="flex-1 py-3 rounded-lg text-center transition-all duration-300 text-white/50">Partner</button>
+                </div>
+                <div class="space-y-3 pb-24 overflow-y-auto flex-1">
+                    <!-- Reward items will be added here by JavaScript -->
+                </div>
+            </div>
 
-    .history-panel {
-        display: none;
-        position: absolute;
-        top: 70px;
-        left: 20px;
-        background: #333;
-        padding: 15px;
-        border-radius: 5px;
-        z-index: 100;
-        min-width: 150px;
-        border: 1px solid #444;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        max-height: 200px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #444 #333;
-    }
-
-    .history-panel::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .history-panel::-webkit-scrollbar-track {
-        background: #333;
-    }
-
-    .history-panel::-webkit-scrollbar-thumb {
-        background: #444;
-        border-radius: 4px;
-    }
-
-    .history-panel.show {
-        display: block;
-    }
-
-    .history-item {
-        margin: 8px 0;
-        padding: 8px;
-        border-radius: 5px;
-        border: 1px solid;
-        background: rgba(0,0,0,0.2);
-    }
-
-    .history-item.win {
-        color: #4CAF50;
-        border-color: #4CAF50;
-    }
-
-    .history-item.lose {
-        color: #ff4444;
-        border-color: #ff4444;
-    }
-
-    .multiplier {
-        font-size: 28px;
-        margin: 10px 0;
-        border: 1px solid;
-        border-radius: 5px;
-        padding: 8px;
-        display: inline-block;
-        transition: color 0.3s, border-color 0.3s;
-        background: #333;
-    }
-
-    .graph {
-        width: 100%;
-        height: 200px;
-        background: #333;
-        border-radius: 5px;
-        margin: 15px 0;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #444;
-    }
-
-    .line {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        height: 12px;
-        background: #4CAF50;
-        transform-origin: bottom left;
-        border-radius: 6px;
-        will-change: transform, width;
-        transition: background-color 0.3s;
-    }
-
-    .controls {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin: 15px 0;
-        padding: 15px;
-        background: #333;
-        border-radius: 10px;
-        border: 1px solid #444;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    input {
-        padding: 12px 15px;
-        border-radius: 8px;
-        border: 1px solid #444;
-        width: 120px;
-        background: #2a2a2a;
-        color: white;
-        font-size: 16px;
-        transition: all 0.3s;
-    }
-
-    input:focus {
-        outline: none;
-        border-color: #4CAF50;
-        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-    }
-
-    button {
-        padding: 12px 24px;
-        border-radius: 8px;
-        border: none;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    button#playBtn {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
-        color: white;
-    }
-
-    button#playBtn:hover {
-        background: linear-gradient(45deg, #45a049, #3d8b40);
-        transform: translateY(-1px);
-    }
-
-    button#cashoutBtn {
-        background: linear-gradient(45deg, #ff9800, #f57c00);
-        color: white;
-    }
-
-    button#cashoutBtn:hover {
-        background: linear-gradient(45deg, #f57c00, #ef6c00);
-        transform: translateY(-1px);
-    }
-
-    button:disabled {
-        background: linear-gradient(45deg, #666, #555);
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .status {
-        display: none;
-    }
-
-    .balance {
-        font-size: 18px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        background: #333;
-        padding: 10px 15px;
-        border-radius: 5px;
-        border: 1px solid #444;
-        width: fit-content;
-        margin: 10px auto;
-    }
-
-    .balance img {
-        width: 24px;
-        height: 24px;
-    }
-
-    .countdown {
-        position: absolute; 
-        top: 20px;
-        right: 20px;
-        font-size: 18px;
-        color: #ff4444;
-        padding: 8px 12px;
-        background: #333;
-        border-radius: 5px;
-        border: 1px solid #444;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .countdown img {
-        width: 20px;
-        height: 20px;
-    }
-
-    .recent-games {
-        margin-top: 15px;
-        padding: 15px;
-        background: #333;
-        border-radius: 10px;
-        border: 1px solid #444;
-    }
-
-    .recent-game {
-        display: inline-block;
-        padding: 8px 12px;
-        margin: 4px;
-        border-radius: 5px;
-        border: 1px solid;
-        background: rgba(0,0,0,0.2);
-    }
-
-    .notification {
-        position: absolute; 
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) translateX(100%); 
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-size: 16px;
-        opacity: 0;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        text-align: center;
-        min-width: 200px;
-    }
-
-    .notification.show {
-        transform: translate(-50%, -50%) translateX(0); 
-    }
-
-    .notification.win {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
-        border: 1px solid #4CAF50;
-    }
-
-    .notification.lose {
-        background: linear-gradient(45deg, #ff4444, #ff0000);
-        border: 1px solid #ff4444;
-    }
-
-    .notification.info {
-        background: linear-gradient(45deg, #2196F3, #1976D2);
-        border: 1px solid #2196F3;
-    }
-
-    @media (max-width: 768px) {
-        .game-container {
-            padding: 15px;
-            margin: 10px;
-            width: calc(100% - 30px);
-            box-sizing: border-box;
-        }
-
-        .controls {
-            padding: 10px;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        input, button {
-            width: 100%;
-        }
-
-        .graph {
-            height: 150px;
-        }
-
-        .multiplier {
-            font-size: 24px;
-            padding: 6px;
-        }
-
-        .history-panel {
-            width: calc(100% - 40px);
-            left: 20px;
-            transform: none;
-        }
-
-        .recent-games {
-            overflow-x: auto;
-            white-space: nowrap;
-            padding: 10px;
-        }
-    }
-</style></head><body>
-    <div class="game-container">
-        <button class="history-button">
-            <img src="https://i.postimg.cc/nz2LVj5r/image.png" alt="History">
-        </button>
-        <div class="history-panel">
-            <div class="history-list"></div>
+            <nav class="bottom-nav">
+                <a href="#" class="nav-item active" data-section="home">
+                    <img src="https://i.postimg.cc/Y986QWcW/image.png" alt="Home" class="nav-icon">
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item" data-section="frens">
+                    <img src="https://i.postimg.cc/bYHMFCPx/image.png" alt="Frens" class="nav-icon">
+                    <span>Frens</span>
+                </a>
+                <a href="#" class="nav-item" data-section="cards">
+                    <img src="https://i.postimg.cc/T2C0DZG4/image.png" alt="Cards" class="nav-icon">
+                    <span>Cards</span>
+                </a>
+                <a href="#" class="nav-item" data-section="mining">
+                    <img src="https://i.postimg.cc/jd48ZLzZ/image.png" alt="Mining" class="nav-icon">
+                    <span>Mining</span>
+                </a>
+                <a href="#" class="nav-item" data-section="reward">
+                    <img src="https://i.postimg.cc/XY2s6m15/image.png" alt="Reward" class="nav-icon">
+                    <span>Reward</span>
+                </a>
+            </nav>
         </div>
-        <div class="balance">
-            <img src="https://i.postimg.cc/1tspYFw3/image.png" alt="Balance">
-            <span id="balance">1000</span>
-        </div>
-        <div class="multiplier">1.00x</div>
-        <div class="countdown">
-            <img src="https://i.postimg.cc/SQCNZPVV/image.png" alt="Timer">
-            <span></span>
-        </div>
-        <div class="graph">
-            <div class="line"></div>
-        </div>
-        <div class="controls">
-            <input type="number" id="bet" placeholder="&#x411;&#x430;&#x43b;&#x430;&#x43d;&#x441;" min="1" max="1000">
-            <button id="playBtn">&#x418;&#x433;&#x440;&#x430;&#x442;&#x44c; &#x441;&#x435;&#x439;&#x447;&#x430;&#x441;</button>
-            <button id="cashoutBtn" disabled>&#x412;&#x44b;&#x432;&#x435;&#x441;&#x442;&#x438;</button>
-        </div>
-        <div class="recent-games">
-            <div class="recent-games-list"></div>
-        </div>
-        <div class="status"></div>
     </div>
-
-    <script>let balance = parseFloat(localStorage.getItem('gameBalance')) || 1000;
-let gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
-const multiplierDisplay = document.querySelector('.multiplier');
-const line = document.querySelector('.line');
-const playBtn = document.getElementById('playBtn');
-const cashoutBtn = document.getElementById('cashoutBtn');
-const betInput = document.getElementById('bet');
-const statusDisplay = document.querySelector('.status');
-const balanceDisplay = document.getElementById('balance');
-const historyButton = document.querySelector('.history-button');
-const historyPanel = document.querySelector('.history-panel');
-const historyList = document.querySelector('.history-list');
-const countdownDisplay = document.querySelector('.countdown');
-const recentGamesList = document.querySelector('.recent-games-list');
-balanceDisplay.textContent = balance.toFixed(2);
-betInput.max = balance;
-let currentBet = 0;
-let isPlaying = false;
-let hasCashedOut = false;
-let multiplier = 1;
-let crashPoint = 1;
-let gameInterval;
-let isGameRunning = false;
-let countdownTimer;
-function updateMultiplierColor() {
-  let color;
-  if (multiplier < 1.5) color = '#4CAF50';else if (multiplier < 3) color = '#FFA500';else if (multiplier < 5) color = '#FF6B6B';else color = '#FF00FF';
-  multiplierDisplay.style.color = color;
-  multiplierDisplay.style.borderColor = color;
-  line.style.backgroundColor = color;
-}
-function startCountdown() {
-  let timeLeft = 10;
-  countdownDisplay.querySelector('span').textContent = `${timeLeft}с`;
-  playBtn.disabled = false;
-  betInput.disabled = false;
-  countdownTimer = setInterval(() => {
-    timeLeft--;
-    countdownDisplay.querySelector('span').textContent = `${timeLeft}с`;
-    if (timeLeft <= 0) {
-      clearInterval(countdownTimer);
-      countdownDisplay.querySelector('span').textContent = '';
-      playBtn.disabled = true;
-      betInput.disabled = true;
-      startAutoGame();
-    }
-  }, 1000);
-}
-function startAutoGame() {
-  isGameRunning = true;
-  multiplier = 1;
-  crashPoint = generateCrashPoint();
-  line.style.width = '0px';
-  line.style.transform = 'rotate(0deg)';
-  multiplierDisplay.textContent = '1.00x';
-  updateMultiplierColor();
-  gameInterval = setInterval(updateGame, 50);
-  if (!isPlaying) {
-    return;
-  }
-}
-historyButton.addEventListener('click', () => {
-  historyPanel.classList.toggle('show');
-});
-function updateHistory(crashMultiplier, won) {
-  gameHistory.unshift({
-    multiplier: crashMultiplier,
-    won: won
-  });
-  if (gameHistory.length > 10) {
-    gameHistory.pop();
-  }
-  updateHistoryDisplay();
-  updateRecentGames();
-  localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
-}
-function updateHistoryDisplay() {
-  historyList.innerHTML = gameHistory.map(game => {
-    let color;
-    const multiplierValue = game.multiplier;
-    if (multiplierValue < 1.5) color = '#4CAF50';else if (multiplierValue < 3) color = '#FFA500';else if (multiplierValue < 5) color = '#FF6B6B';else color = '#FF00FF';
-    return `
-                                <div class="history-item ${game.won ? 'win' : 'lose'}" style="color: ${color}; border-color: ${color}">
-                                    ${multiplierValue.toFixed(2)}x
-                                </div>
-                            `;
-  }).join('');
-}
-function updateBalance(amount) {
-  balance += amount;
-  balanceDisplay.textContent = balance.toFixed(2);
-  betInput.max = balance;
-  localStorage.setItem('gameBalance', balance);
-}
-function generateCrashPoint() {
-  return 1 + Math.pow(Math.random(), 2) * 9;
-}
-function startGame() {
-  currentBet = parseFloat(betInput.value);
-  if (isNaN(currentBet) || currentBet <= 0 || currentBet > parseFloat(balanceDisplay.textContent)) {
-    alert('Неверная сумма ставки!');
-    return;
-  }
-  updateBalance(-currentBet);
-  showNotification(`Ставка ${currentBet.toFixed(2)} размещена`, 'info');
-  isPlaying = true;
-  hasCashedOut = false;
-  playBtn.disabled = true;
-  cashoutBtn.disabled = false;
-  betInput.disabled = true;
-  statusDisplay.textContent = '';
-  isGameRunning = true;
-}
-function updateGame() {
-  multiplier += 0.01;
-  const progress = (multiplier - 1) / 9;
-  const width = Math.min(progress * 500, 500);
-  const maxAngle = 35;
-  const curveProgress = Math.sin(progress * Math.PI / 2);
-  const angle = -maxAngle * curveProgress;
-  line.style.width = width + 'px';
-  line.style.transform = `rotate(${angle}deg)`;
-  multiplierDisplay.textContent = multiplier.toFixed(2) + 'x';
-  updateMultiplierColor();
-  if (multiplier >= crashPoint) {
-    clearInterval(gameInterval);
-    isGameRunning = false;
-    multiplierDisplay.style.color = '#ff4444';
-    multiplierDisplay.style.borderColor = '#ff4444';
-
-    if (isPlaying && !hasCashedOut) {
-      updateHistory(crashPoint, false);
-      showNotification(`Вы проиграли ${currentBet.toFixed(2)}`, 'lose');
-      cashoutBtn.disabled = true;
-      isPlaying = false;
-      betInput.value = '';
-    } else if (!isPlaying) {
-      updateHistory(crashPoint, false);
-    }
-
-    setTimeout(() => {
-      multiplier = 1;
-      line.style.width = '0px';
-      line.style.transform = 'rotate(0deg)';
-      startCountdown();
-    }, 2000);
-  }
-}
-function cashout() {
-  if (isPlaying && !hasCashedOut && isGameRunning) {
-    const winnings = currentBet * multiplier;
-    const profit = winnings - currentBet;
-    updateBalance(winnings);
-    hasCashedOut = true;
-    cashoutBtn.disabled = true;
-    isPlaying = false;
-    updateHistory(multiplier, true);
-    showNotification(`Ставка забрана! Выигрыш: ${profit.toFixed(2)}`, 'win');
-    betInput.value = '';
-  }
-}
-function endGame(cashoutSuccess) {
-  isPlaying = false;
-  cashoutBtn.disabled = true;
-}
-function updateRecentGames() {
-  const recentGames = gameHistory.slice(0, 5);
-  recentGamesList.innerHTML = recentGames.map(game => {
-    let color;
-    const multiplierValue = game.multiplier;
-    if (multiplierValue < 1.5) color = '#4CAF50';else if (multiplierValue < 3) color = '#FFA500';else if (multiplierValue < 5) color = '#FF6B6B';else color = '#FF00FF';
-    return `
-                  <div class="recent-game" style="color: ${color}; border-color: ${color}">
-                    ${multiplierValue.toFixed(2)}x
-                  </div>
-                `;
-  }).join('');
-}
-function showNotification(message, type) {
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.textContent = message;
-  document.querySelector('.game-container').appendChild(notification);
-  setTimeout(() => {
-    notification.classList.add('show');
-  }, 100);
-  setTimeout(() => {
-    notification.classList.remove('show');
-    setTimeout(() => {
-      notification.remove();
-    }, 300);
-  }, 3000);
-}
-playBtn.addEventListener('click', startGame);
-cashoutBtn.addEventListener('click', cashout);
-document.addEventListener('click', e => {
-  if (!historyButton.contains(e.target) && !historyPanel.contains(e.target)) {
-    historyPanel.classList.remove('show');
-  }
-});
-document.addEventListener('visibilitychange', function () {
-    if (document.hidden) {
-        localStorage.setItem('lastHiddenTime', Date.now());
-        if (isGameRunning) {
-            localStorage.setItem('gameState', JSON.stringify({
-                isPlaying,
-                currentBet,
-                multiplier,
-                crashPoint,
-                hasCashedOut
-            }));
+    <script src="github-db.js"></script>
+    <script src="telegram.js"></script>
+    <script src="background.js"></script>
+    <script src="script.js"></script>
+    <script src="snow.js"></script>
+    <script>
+        // Проверяем, пришли ли мы с loading.html
+        if (!sessionStorage.getItem('loaded')) {
+            window.location.href = 'loading.html';
+        } else {
+            sessionStorage.removeItem('loaded');
         }
-    } else {
-        const lastHiddenTime = parseInt(localStorage.getItem('lastHiddenTime') || Date.now());
-        const currentTime = Date.now();
-        const timeDiff = (currentTime - lastHiddenTime) / 1000;
-        
-        const savedGameState = localStorage.getItem('gameState');
-        
-        if (savedGameState) {
-            const gameState = JSON.parse(savedGameState);
-            
-            if (gameState.isPlaying && !gameState.hasCashedOut) {
-                updateHistory(gameState.multiplier, false);
-                showNotification(`Вы проиграли ${gameState.currentBet.toFixed(2)}`, 'lose');
-            }
-            
-            localStorage.removeItem('gameState');
-        }
-
-        clearInterval(gameInterval);
-        clearInterval(countdownTimer);
-        isGameRunning = false;
-        isPlaying = false;
-        hasCashedOut = false;
-        multiplier = 1;
-        currentBet = 0;
-        cashoutBtn.disabled = true;
-        playBtn.disabled = false;
-        betInput.disabled = false;
-        multiplierDisplay.textContent = '1.00x';
-        line.style.width = '0px';
-        line.style.transform = 'rotate(0deg)';
-        startCountdown();
-    }
-});
-
-window.addEventListener('beforeunload', function() {
-    if (isGameRunning && isPlaying && !hasCashedOut) {
-        localStorage.setItem('gameState', JSON.stringify({
-            isPlaying,
-            currentBet,
-            multiplier,
-            crashPoint,
-            hasCashedOut
-        }));
-    }
-});
-
-window.addEventListener('load', function() {
-    const savedGameState = localStorage.getItem('gameState');
-    
-    if (savedGameState) {
-        const gameState = JSON.parse(savedGameState);
-        
-        if (gameState.isPlaying && !gameState.hasCashedOut) {
-            updateHistory(gameState.multiplier, false);
-            showNotification(`Вы проиграли ${gameState.currentBet.toFixed(2)}`, 'lose');
-        }
-        
-        localStorage.removeItem('gameState');
-    }
-    
-    clearInterval(gameInterval);
-    clearInterval(countdownTimer);
-    isGameRunning = false;
-    isPlaying = false;
-    hasCashedOut = false;
-    multiplier = 1;
-    currentBet = 0;
-    cashoutBtn.disabled = true;
-    playBtn.disabled = false;
-    betInput.disabled = false;
-    multiplierDisplay.textContent = '1.00x';
-    line.style.width = '0px';
-    line.style.transform = 'rotate(0deg)';
-    startCountdown();
-});
-updateHistoryDisplay();
-updateRecentGames();
-startCountdown();
-</script>
-</body></html>
+    </script>
+</body>
+</html>
