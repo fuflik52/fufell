@@ -1,3 +1,30 @@
+// Тестовый код для проверки работы с базой данных
+console.log('Тестируем подключение к Supabase...');
+
+// Пробуем получить тестового пользователя
+supabase.from('users').select('*').eq('username', 'test_user')
+    .then(response => {
+        console.log('Тестовый пользователь:', response.data);
+        if (response.error) {
+            console.error('Ошибка при получении данных:', response.error);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка подключения:', error);
+    });
+
+// Пробуем обновить счет тестового пользователя
+supabase.from('users')
+    .upsert({ username: 'test_user', score: Math.floor(Math.random() * 1000) })
+    .then(response => {
+        console.log('Обновление счета:', response.data);
+        if (response.error) {
+            console.error('Ошибка при обновлении:', response.error);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при обновлении:', error);
+    });
 document.addEventListener('DOMContentLoaded', function() {
     const mainCircle = document.querySelector('.main-circle');
     const gameArea = document.querySelector('.game-area');
